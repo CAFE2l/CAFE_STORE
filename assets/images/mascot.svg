@@ -1,0 +1,16 @@
+<svg width="320" height="320" viewBox="0 0 320 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="320" height="320" rx="80" fill="#120b0b"/>
+  <path d="M167 35c26 40 75 65 75 137 0 68-48 111-83 111-52 0-91-37-91-91 0-44 30-71 45-93 4 29 22 43 43 50-12-43-2-82 11-114z" fill="url(#flame)"/>
+  <path d="M140 213c-8 28 9 48 28 48 22 0 40-18 40-46 0-25-17-44-31-61-2 27-18 39-37 59z" fill="#fff2a7" opacity=".72"/>
+  <rect x="83" y="125" width="65" height="35" rx="13" fill="#050505"/>
+  <rect x="170" y="125" width="65" height="35" rx="13" fill="#050505"/>
+  <path d="M148 142h22" stroke="#050505" stroke-width="10" stroke-linecap="round"/>
+  <path d="M107 177c21 21 76 23 101 0" stroke="#1d1010" stroke-width="10" stroke-linecap="round"/>
+  <defs>
+    <linearGradient id="flame" x1="85" y1="53" x2="240" y2="279" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff35a"/>
+      <stop offset=".46" stop-color="#ff9f1c"/>
+      <stop offset="1" stop-color="#e50914"/>
+    </linearGradient>
+  </defs>
+</svg>
