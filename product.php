@@ -18,13 +18,42 @@ $relatedStmt = db()->prepare("SELECT * FROM products WHERE status = 'active' AND
 $relatedStmt->execute([(int) $product['id']]);
 $related = $relatedStmt->fetchAll();
 
+$imagesStmt = db()->prepare('SELECT * FROM product_images WHERE product_id = ? ORDER BY sort_order, id');
+$imagesStmt->execute([(int) $product['id']]);
+$productImages = $imagesStmt->fetchAll();
+
+$statsStmt = db()->prepare("SELECT COUNT(*) AS total, COALESCE(AVG(rating), 0) AS average_rating FROM product_reviews WHERE product_id = ? AND status = 'approved'");
+$statsStmt->execute([(int) $product['id']]);
+$reviewStats = $statsStmt->fetch();
+$reviewCount = (int) ($reviewStats['total'] ?? 0);
+$reviewAverage = (float) ($reviewStats['average_rating'] ?? 0);
+
+$reviewsStmt = db()->prepare("SELECT r.*, u.name AS user_name FROM product_reviews r JOIN users u ON u.id = r.user_id WHERE r.product_id = ? AND r.status = 'approved' ORDER BY r.created_at DESC");
+$reviewsStmt->execute([(int) $product['id']]);
+$reviews = $reviewsStmt->fetchAll();
+foreach ($reviews as &$review) {
+    $imgStmt = db()->prepare('SELECT image_url FROM review_images WHERE review_id = ? ORDER BY id');
+    $imgStmt->execute([(int) $review['id']]);
+    $review['images'] = $imgStmt->fetchAll();
+}
+unset($review);
+
+$myReview = null;
+if (current_user()) {
+    $myReviewStmt = db()->prepare('SELECT * FROM product_reviews WHERE product_id = ? AND user_id = ? LIMIT 1');
+    $myReviewStmt->execute([(int) $product['id'], (int) $_SESSION['user_id']]);
+    $myReview = $myReviewStmt->fetch() ?: null;
+}
+
 include __DIR__ . '/includes/header.php';
 ?>
 <section class="product-detail">
     <div class="detail-media">
-        <img src="<?= e(product_image($product['image_url'])) ?>" alt="<?= e($product['name']) ?>">
-        <div class="thumb-strip" aria-hidden="true">
-            <span></span><span></span><span></span><span></span>
+        <img src="<?= e(product_main_image($product)) ?>" alt="<?= e($product['name']) ?>">
+        <div class="thumb-strip">
+            <?php foreach ($productImages as $image): ?>
+                <img src="<?= e(product_image($image['image_url'])) ?>" alt="<?= e($product['name']) ?>">
+            <?php endforeach; ?>
         </div>
     </div>
     <div class="detail-copy">
@@ -35,6 +64,8 @@ include __DIR__ . '/includes/header.php';
             <span class="status-badge red">CAFÉ STORE</span>
         </div>
         <h1><?= e($product['name']) ?></h1>
+        <div class="star-rating"><span><?= str_repeat('★', (int) round($reviewAverage)) ?><?= str_repeat('☆', 5 - (int) round($reviewAverage)) ?></span> <small class="muted"><?= (int) $reviewCount ?> avaliações</small></div>
+        <?php if (!empty($product['short_description'])): ?><p class="muted text-lg"><?= e($product['short_description']) ?></p><?php endif; ?>
         <p class="muted text-lg"><?= nl2br(e($product['description'])) ?></p>
         <div class="price"><?= money((float) $product['price']) ?></div>
         <p class="stock">Estoque digital: <?= (int) $product['stock'] ?> unidades disponíveis</p>
@@ -45,6 +76,8 @@ include __DIR__ . '/includes/header.php';
         </form>
     </div>
 </section>
+
+<?php include __DIR__ . '/includes/reviews/product-reviews.php'; ?>
 
 <?php if ($related): ?>
     <section class="section-head">
@@ -57,12 +90,12 @@ include __DIR__ . '/includes/header.php';
         <?php foreach ($related as $item): ?>
             <article class="product-card">
                 <a href="<?= url('product.php?slug=' . urlencode($item['slug'])) ?>">
-                    <img src="<?= e(product_image($item['image_url'])) ?>" alt="<?= e($item['name']) ?>">
+                    <img src="<?= e(product_main_image($item)) ?>" alt="<?= e($item['name']) ?>">
                 </a>
                 <div>
                     <span class="pill"><?= e($item['type']) ?></span>
                     <h3><?= e($item['name']) ?></h3>
-                    <p><?= e(excerpt($item['description'], 84)) ?></p>
+                    <p><?= e(excerpt(($item['short_description'] ?? '') ?: $item['description'], 84)) ?></p>
                     <strong class="product-price text-2xl"><?= money((float) $item['price']) ?></strong>
                 </div>
                 <a class="btn ghost full" href="<?= url('product.php?slug=' . urlencode($item['slug'])) ?>">Ver produto</a>

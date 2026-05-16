@@ -4,6 +4,10 @@ require_admin();
 $id = (int) ($_GET['id'] ?? 0);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
+        flash('error', 'Sessão expirada.');
+        redirect('admin/products.php');
+    }
     $stmt = db()->prepare('DELETE FROM products WHERE id = ?');
     $stmt->execute([$id]);
     flash('success', 'Produto excluído.');
@@ -21,6 +25,7 @@ include __DIR__ . '/../includes/header.php';
         <h1>Excluir produto</h1>
         <p>Confirma excluir <strong><?= e($product['name'] ?? 'produto') ?></strong>?</p>
         <form method="post">
+            <input type="hidden" name="csrf_token" value="<?= e(generate_csrf_token()) ?>">
             <button class="btn danger" type="submit">Excluir</button>
             <a class="btn ghost" href="<?= url('admin/products.php') ?>">Cancelar</a>
         </form>

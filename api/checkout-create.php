@@ -6,33 +6,59 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     redirect('checkout.php');
 }
 
+if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
+    flash('error', 'Sessão expirada. Tente novamente.');
+    redirect('checkout.php');
+}
+
 $items = cart_products();
 if (!$items) {
     flash('error', 'Carrinho vazio.');
     redirect('products.php');
 }
 
-$method = in_array($_POST['payment_method'] ?? 'pix', ['pix', 'card'], true) ? $_POST['payment_method'] : 'pix';
+$method = normalize_payment_method($_POST['payment_method'] ?? '');
+if ($method === '') {
+    flash('error', 'Escolha um método de pagamento.');
+    redirect('checkout.php');
+}
+
 $pdo = db();
+$user = current_user();
+$total = cart_total();
 
 try {
     $pdo->beginTransaction();
 
-    $stmt = $pdo->prepare('INSERT INTO orders (user_id, total, status, payment_status, payment_method) VALUES (?, ?, ?, ?, ?)');
-    $stmt->execute([$_SESSION['user_id'], cart_total(), 'created', 'pending', $method]);
+    $stmt = $pdo->prepare('INSERT INTO orders (user_id, total, total_amount, status, payment_status, payment_method, customer_name, customer_email) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+    $stmt->execute([$_SESSION['user_id'], $total, $total, 'pending', 'pending', $method, $user['name'] ?? '', $user['email'] ?? '']);
     $orderId = (int) $pdo->lastInsertId();
 
-    $itemStmt = $pdo->prepare('INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)');
+    $itemStmt = $pdo->prepare('INSERT INTO order_items (order_id, product_id, product_name, quantity, price, unit_price, total_price) VALUES (?, ?, ?, ?, ?, ?, ?)');
     foreach ($items as $item) {
-        $itemStmt->execute([$orderId, $item['id'], $item['quantity'], $item['price']]);
+        $lineTotal = (float) $item['price'] * (int) $item['quantity'];
+        $itemStmt->execute([$orderId, $item['id'], $item['name'], $item['quantity'], $item['price'], $item['price'], $lineTotal]);
     }
 
-    $payStmt = $pdo->prepare('INSERT INTO payments (order_id, provider, provider_payment_id, status, amount) VALUES (?, ?, ?, ?, ?)');
-    $payStmt->execute([$orderId, 'mercado_pago_mock', 'mock-' . $orderId, 'pending', cart_total()]);
+    $provider = $method === 'pix' ? 'pix_mock' : $method;
+    $payStmt = $pdo->prepare('INSERT INTO payments (order_id, user_id, payment_method, payment_provider, provider, provider_payment_id, status, amount, currency, pix_copy_paste, paypal_order_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+    $payStmt->execute([
+        $orderId,
+        $_SESSION['user_id'],
+        $method,
+        $provider,
+        $provider,
+        'mock-' . $orderId,
+        'pending',
+        $total,
+        'BRL',
+        $method === 'pix' ? 'PIX-MOCK-ORDER-' . $orderId : null,
+        $method === 'paypal' ? 'PAYPAL-MOCK-' . $orderId : null,
+    ]);
 
     $pdo->commit();
     unset($_SESSION['cart']);
-    flash('success', 'Pedido #' . $orderId . ' criado em modo mock. Integração Mercado Pago pronta para evoluir.');
+    flash('success', 'Pedido #' . $orderId . ' criado. Método: ' . strtoupper($method) . '.');
     redirect('profile.php');
 } catch (Throwable $e) {
     $pdo->rollBack();

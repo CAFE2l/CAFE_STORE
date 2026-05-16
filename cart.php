@@ -21,7 +21,7 @@ include __DIR__ . '/includes/header.php';
         <div class="cart-list">
             <?php foreach ($items as $item): ?>
                 <article class="cart-item">
-                    <img src="<?= e(product_image($item['image_url'])) ?>" alt="<?= e($item['name']) ?>">
+                    <img src="<?= e(product_main_image($item)) ?>" alt="<?= e($item['name']) ?>">
                     <div>
                         <h3 class="font-black"><?= e($item['name']) ?></h3>
                         <span class="muted"><?= money((float) $item['price']) ?> cada</span>

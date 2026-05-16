@@ -29,7 +29,7 @@ include __DIR__ . '/includes/header.php';
             <?php foreach ($orders as $order): ?>
                 <div class="table-row">
                     <span>#<?= (int) $order['id'] ?> <small><?= e($order['status']) ?> / <?= e($order['payment_status']) ?></small></span>
-                    <strong class="product-price"><?= money((float) $order['total']) ?></strong>
+                    <strong class="product-price"><?= money((float) ($order['total_amount'] ?? $order['total'])) ?></strong>
                 </div>
             <?php endforeach; ?>
         </div>

@@ -47,7 +47,7 @@ include __DIR__ . '/includes/header.php';
     <?php foreach ($products as $product): ?>
         <article class="product-card">
             <a href="<?= url('product.php?slug=' . urlencode($product['slug'])) ?>">
-                <img src="<?= e(product_image($product['image_url'])) ?>" alt="<?= e($product['name']) ?>">
+                <img src="<?= e(product_main_image($product)) ?>" alt="<?= e($product['name']) ?>">
             </a>
             <div>
                 <div class="flex flex-wrap items-center justify-between gap-2">
@@ -55,7 +55,7 @@ include __DIR__ . '/includes/header.php';
                     <span class="status-badge orange"><?= e($product['type']) ?></span>
                 </div>
                 <h3><?= e($product['name']) ?></h3>
-                <p><?= e(excerpt($product['description'], 100)) ?></p>
+                <p><?= e(excerpt($product['short_description'] ?: $product['description'], 100)) ?></p>
                 <strong class="product-price text-2xl"><?= money((float) $product['price']) ?></strong>
             </div>
             <div class="grid grid-cols-2 gap-2">

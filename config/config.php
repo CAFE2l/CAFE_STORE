@@ -1,38 +1,40 @@
 <?php
-declare(strict_types=1);
-
-$sessionPath = dirname(__DIR__) . '/storage/sessions';
-if (!is_dir($sessionPath)) {
-    mkdir($sessionPath, 0775, true);
-}
-session_save_path($sessionPath);
-
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+if (!defined('APP_NAME')) {
+    define('APP_NAME', getenv('APP_NAME') ?: 'CAFÉ STORE');
 }
 
-date_default_timezone_set('America/Sao_Paulo');
+if (!defined('BASE_URL')) {
+    define('BASE_URL', getenv('BASE_URL') ?: '/');
+}
 
-define('APP_NAME', 'CAFÉ STORE');
-define('BASE_URL', '/cafe-store');
+if (!defined('GOOGLE_CLIENT_ID')) {
+    define('GOOGLE_CLIENT_ID', getenv('GOOGLE_CLIENT_ID') ?: '');
+}
 
-// Google OAuth: crie credenciais no Google Cloud Console e configure o callback:
-// http://localhost/cafe-store/google-callback.php
-define('GOOGLE_CLIENT_ID', '');
-define('GOOGLE_CLIENT_SECRET', '');
+if (!defined('GOOGLE_CLIENT_SECRET')) {
+    define('GOOGLE_CLIENT_SECRET', getenv('GOOGLE_CLIENT_SECRET') ?: '');
+}
 
-// Configure estes dados no InfinityFree/MySQL.
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'cafe_store');
-define('DB_USER', 'root');
-define('DB_PASS', 'mysql');
-define('DB_CHARSET', 'utf8mb4');
+if (!defined('CLOUDINARY_CLOUD_NAME')) {
+    define('CLOUDINARY_CLOUD_NAME', getenv('CLOUDINARY_CLOUD_NAME') ?: '');
+}
 
-// Mercado Pago: troque pelo token real quando sair do modo mock.
-define('MERCADO_PAGO_ACCESS_TOKEN', 'COLOQUE_SEU_ACCESS_TOKEN_AQUI');
-define('MERCADO_PAGO_MOCK', true);
+if (!defined('CLOUDINARY_API_KEY')) {
+    define('CLOUDINARY_API_KEY', getenv('CLOUDINARY_API_KEY') ?: '');
+}
 
-// Cloudinary: usado futuramente no upload real.
-define('CLOUDINARY_CLOUD_NAME', 'COLOQUE_SEU_CLOUD_NAME');
-define('CLOUDINARY_API_KEY', 'COLOQUE_SUA_API_KEY');
-define('CLOUDINARY_API_SECRET', 'COLOQUE_SEU_API_SECRET');
+if (!defined('CLOUDINARY_API_SECRET')) {
+    define('CLOUDINARY_API_SECRET', getenv('CLOUDINARY_API_SECRET') ?: '');
+}
+
+if (!defined('MERCADOPAGO_ACCESS_TOKEN')) {
+    define('MERCADOPAGO_ACCESS_TOKEN', getenv('MERCADOPAGO_ACCESS_TOKEN') ?: '');
+}
+
+if (!defined('PAYPAL_CLIENT_ID')) {
+    define('PAYPAL_CLIENT_ID', getenv('PAYPAL_CLIENT_ID') ?: '');
+}
+
+if (!defined('PAYPAL_CLIENT_SECRET')) {
+    define('PAYPAL_CLIENT_SECRET', getenv('PAYPAL_CLIENT_SECRET') ?: '');
+}

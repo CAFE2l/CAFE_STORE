@@ -4,6 +4,8 @@
     <a href="<?= url('admin/products.php') ?>">Produtos <span>→</span></a>
     <a href="<?= url('admin/product-create.php') ?>">Novo produto <span>+</span></a>
     <a href="<?= url('admin/orders.php') ?>">Pedidos <span>→</span></a>
+    <a href="<?= url('admin/reviews.php') ?>">Avaliações <span>→</span></a>
+    <a href="<?= url('admin/categories.php') ?>">Categorias <span>→</span></a>
     <a href="<?= url('admin/users.php') ?>">Usuários <span>→</span></a>
     <a href="<?= url('index.php') ?>">Ver loja <span>↗</span></a>
 </aside>

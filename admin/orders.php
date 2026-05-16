@@ -17,7 +17,7 @@ include __DIR__ . '/../includes/header.php';
             <?php foreach ($orders as $order): ?>
                 <div class="table-row orders-row">
                     <span class="font-bold">#<?= (int) $order['id'] ?> - <?= e($order['user_name'] ?? 'Cliente') ?><small><?= e($order['created_at']) ?></small></span>
-                    <strong class="product-price"><?= money((float) $order['total']) ?></strong>
+                    <strong class="product-price"><?= money((float) ($order['total_amount'] ?? $order['total'])) ?></strong>
                     <span class="status-badge orange"><?= e($order['status']) ?></span>
                     <span class="status-badge <?= $order['payment_status'] === 'paid' ? '' : 'red' ?>"><?= e($order['payment_status']) ?> / <?= e($order['payment_method']) ?></span>
                 </div>

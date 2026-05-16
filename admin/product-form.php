@@ -1,5 +1,6 @@
 <?php $editing = isset($product); ?>
 <form class="admin-form panel" method="post">
+    <input type="hidden" name="csrf_token" value="<?= e(generate_csrf_token()) ?>">
     <div class="grid gap-4 md:grid-cols-2">
         <label>Categoria
             <select name="category_id">
@@ -19,9 +20,11 @@
     </div>
     <label>Nome <input name="name" value="<?= e($product['name'] ?? '') ?>" required></label>
     <label>Slug <input name="slug" value="<?= e($product['slug'] ?? '') ?>" placeholder="gerado pelo nome se vazio"></label>
+    <label>Descrição curta <input name="short_description" value="<?= e($product['short_description'] ?? '') ?>" maxlength="255"></label>
     <label>Descrição <textarea name="description" rows="6"><?= e($product['description'] ?? '') ?></textarea></label>
     <div class="grid gap-4 md:grid-cols-3">
         <label>Preço <input type="number" step="0.01" name="price" value="<?= e((string) ($product['price'] ?? '')) ?>" required></label>
+        <label>Preço antigo <input type="number" step="0.01" name="old_price" value="<?= e((string) ($product['old_price'] ?? '')) ?>"></label>
         <label>Estoque <input type="number" name="stock" value="<?= e((string) ($product['stock'] ?? 0)) ?>"></label>
         <label>Status
             <select name="status">
@@ -30,6 +33,8 @@
             </select>
         </label>
     </div>
-    <label>URL da imagem <input name="image_url" value="<?= e($product['image_url'] ?? '') ?>" placeholder="https://res.cloudinary.com/..."></label>
+    <label class="inline-flex items-center gap-2"><input type="checkbox" name="is_digital" value="1" <?= (int) ($product['is_digital'] ?? 1) === 1 ? 'checked' : '' ?>> Produto digital</label>
+    <label>Imagem principal <input name="main_image_url" value="<?= e($product['main_image_url'] ?? $product['image_url'] ?? '') ?>" placeholder="https://res.cloudinary.com/..."></label>
+    <label>Imagens adicionais <textarea name="gallery_images" rows="3" placeholder="Uma URL por linha"><?= e($galleryImagesText ?? '') ?></textarea></label>
     <button class="btn primary" type="submit">Salvar produto</button>
 </form>

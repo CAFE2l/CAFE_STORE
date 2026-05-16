@@ -8,6 +8,8 @@
         <span class="pill">Digital marketplace</span>
     </div>
 </footer>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="<?= url('assets/js/firebase.js') ?>"></script>
 <script src="<?= url('assets/js/app.js') ?>"></script>
 </body>
 </html>

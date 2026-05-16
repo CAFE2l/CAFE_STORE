@@ -17,6 +17,7 @@ include __DIR__ . '/includes/header.php';
 </section>
 
 <form class="checkout-grid" action="<?= url('api/checkout-create.php') ?>" method="post">
+    <input type="hidden" name="csrf_token" value="<?= e(generate_csrf_token()) ?>">
     <section class="panel">
         <p class="eyebrow">dados do cliente</p>
         <div class="grid gap-3 md:grid-cols-2">
@@ -32,13 +33,22 @@ include __DIR__ . '/includes/header.php';
 
         <div class="mt-8">
             <p class="eyebrow">pagamento</p>
-            <div class="grid gap-3">
-                <label class="radio-card"><input type="radio" name="payment_method" value="pix" checked> <span><strong>Pix</strong><small class="block muted">Confirmação rápida no ambiente real</small></span></label>
-                <label class="radio-card"><input type="radio" name="payment_method" value="card"> <span><strong>Cartão</strong><small class="block muted">Crédito ou débito via provedor</small></span></label>
-                <div class="payment-card"><strong>Mercado Pago</strong><small class="block muted">Provider preparado para a integração de pagamentos.</small></div>
+            <div class="grid gap-3 payment-methods">
+                <label class="payment-card">
+                    <input type="radio" name="payment_method" value="pix" required checked>
+                    <span><strong>Pix</strong><small class="block muted">Pedido criado com pagamento Pix pendente.</small></span>
+                </label>
+                <label class="payment-card">
+                    <input type="radio" name="payment_method" value="mercadopago" required>
+                    <span><strong>Mercado Pago</strong><small class="block muted">Estrutura pronta para criar pagamento no provedor.</small></span>
+                </label>
+                <label class="payment-card">
+                    <input type="radio" name="payment_method" value="paypal" required>
+                    <span><strong>PayPal</strong><small class="block muted">Estrutura pronta para criar ordem PayPal.</small></span>
+                </label>
             </div>
             <p class="muted mt-4">Modo mock ativo. O pedido será criado com status de pagamento pendente.</p>
-            <button class="btn primary mt-5" type="submit" data-checkout-submit>Criar pedido</button>
+            <button class="btn primary mt-5" type="submit" data-checkout-submit>Continuar para pagamento</button>
         </div>
     </section>
     <aside class="summary">
