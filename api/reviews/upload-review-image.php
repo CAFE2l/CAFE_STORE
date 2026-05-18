@@ -3,9 +3,13 @@ require_once __DIR__ . '/../../config/helpers.php';
 
 function handle_review_image_uploads($reviewId, array $files) {
     $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
-    $baseDir = __DIR__ . '/../../uploads/reviews';
+    $baseDir = __DIR__ . '/../../assets/uploads/reviews';
     if (!is_dir($baseDir)) {
-        mkdir($baseDir, 0775, true);
+        mkdir($baseDir, 0777, true);
+    }
+
+    if (!is_writable($baseDir)) {
+        @chmod($baseDir, 0777);
     }
 
     foreach ($files['name'] as $index => $name) {
@@ -25,10 +29,17 @@ function handle_review_image_uploads($reviewId, array $files) {
 
         $filename = 'review-' . (int) $reviewId . '-' . bin2hex(random_bytes(8)) . '.' . $allowed[$mime];
         $target = $baseDir . '/' . $filename;
-        if (move_uploaded_file($tmp, $target)) {
-            $url = 'uploads/reviews/' . $filename;
+        if (!is_writable($baseDir)) {
+            flash('error', 'A pasta de imagens das avaliações não tem permissão de escrita.');
+            return;
+        }
+
+        if (@move_uploaded_file($tmp, $target)) {
+            $url = 'assets/uploads/reviews/' . $filename;
             $stmt = db()->prepare('INSERT INTO review_images (review_id, image_url, public_id) VALUES (?, ?, ?)');
             $stmt->execute([$reviewId, $url, null]);
+        } else {
+            flash('error', 'Não foi possível salvar uma das imagens da avaliação.');
         }
     }
 }

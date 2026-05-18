@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAFÉ STORE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cafe: { 50: '#fdf2e9', 100: '#fadcc4', 200: '#f5c59e', 300: '#f0af78', 400: '#eb984e', 500: '#e67e22', 600: '#cf6a17', 700: '#b85a12', 800: '#a04a0e', 900: '#883a0a', 950: '#6a2c08' },
+                        ember: { 50: '#fff7ed', 100: '#ffedd5', 200: '#fed7aa', 300: '#fdba74', 400: '#fb923c', 500: '#f97316', 600: '#ea580c', 700: '#c2410c', 800: '#9a3412', 900: '#7c2d12', 950: '#5c1e0a' },
+                        glow: { 50: '#fffbeb', 100: '#fef3c7', 200: '#fde68a', 300: '#fcd34d', 400: '#fbbf24', 500: '#f59e0b', 600: '#d97706', 700: '#b45309', 800: '#92400e', 900: '#78350f', 950: '#542b0a' },
+                        midnight: { 50: '#f6f6f6', 100: '#e7e7e7', 200: '#d1d1d1', 300: '#b0b0b0', 400: '#888888', 500: '#6d6d6d', 600: '#5d5d5d', 700: '#4f4f4f', 800: '#383838', 900: '#1a1a1a', 950: '#0a0a0a' },
+                        cream: { 50: '#fefcf8', 100: '#fcf8f0', 200: '#f9f1e0', 300: '#f2e6cd', 400: '#e8d9b8', 500: '#dcc9a0', 600: '#c9b48a', 700: '#b09b72', 800: '#927d5a', 900: '#756246' },
+                    },
+                    fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            background: #0a0a0a;
+            color: #f6f6f6;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .site-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .site-header .inner {
+            width: 100%;
+            max-width: 1280px;
+            padding: 0 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .site-header .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            font-weight: 900;
+            text-decoration: none;
+            color: #fff;
+        }
+        .site-header .logo span {
+            font-size: 1.25rem;
+            line-height: 1;
+        }
+        .site-header .logo .gradient {
+            background: linear-gradient(to right, #ff3c38, #f97316, #fbbf24);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .site-header nav {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        .site-header nav a {
+            color: #b0b0b0;
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+        .site-header nav a:hover { color: #fff; }
+        .site-header .cart-count {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 24px;
+            border-radius: 9999px;
+            border: 1px solid #fbbf24;
+            background: #fbbf24;
+            padding: 0 9px;
+            font-size: 0.76rem;
+            font-weight: 900;
+            line-height: 1;
+            color: #0a0a0a;
+            margin-left: 0.375rem;
+        }
+
+        .hero-banner {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            margin-top: -200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            opacity: 1;
+        }
+        .hero-banner .hero-bg {
+            position: absolute;
+            inset: 0;
+            background-image: url('assets/images/banners/Produtos.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        .hero-banner .hero-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(10,10,10,0.15) 0%, rgba(10,10,10,0.85) 100%);
+        }
+        .hero-banner .hero-content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 2rem;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .hero-content .tagline {
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.2em;
+            color: #fbbf24;
+            margin-bottom: 1rem;
+        }
+        .hero-content h1 {
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 900;
+            line-height: 1;
+            color: #fff;
+            margin-bottom: 0.75rem;
+        }
+        .hero-content h1 .highlight {
+            background: linear-gradient(to right, #f97316, #fbbf24);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero-content .subtitle {
+            font-size: 1.125rem;
+            color: #b0b0b0;
+            max-width: 42rem;
+            margin: 1rem auto 1.5rem;
+            line-height: 1.6;
+        }
+        .hero-content .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 44px;
+            padding: 0 18px;
+            border-radius: 10px;
+            font-weight: 900;
+            text-decoration: none;
+            background: linear-gradient(to right, #f97316, #fbbf24);
+            color: #0a0a0a;
+            border: 1px solid #fbbf24;
+            box-shadow: 0 0 15px rgba(255,107,0,0.3);
+            transition: all 0.3s;
+        }
+        .hero-content .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255,107,0,0.6), 0 0 40px rgba(255,107,0,0.3);
+        }
+        .hero-content .hero-footer {
+            margin-top: 2.5rem;
+            font-size: 0.9rem;
+            color: #888;
+        }
+
+        .content-area {
+            position: relative;
+            z-index: 5;
+            background: #0a0a0a;
+        }
+        .content-area .inner {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 3rem 1rem;
+        }
+
+        .section-label {
+            font-size: 0.75rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: #fbbf24;
+            margin-bottom: 0.625rem;
+        }
+        .section-title {
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+            font-weight: 900;
+            color: #fb923c;
+            margin-bottom: 2rem;
+        }
+
+        .product-grid {
+            display: grid;
+            gap: 1.25rem;
+            grid-template-columns: repeat(4, 1fr);
+        }
+        @media (max-width: 1024px) { .product-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 640px) { .product-grid { grid-template-columns: 1fr; } }
+
+        .product-card {
+            display: flex;
+            flex-direction: column;
+            gap: 0.875rem;
+            border-radius: 1rem;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05);
+            padding: 0.875rem;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            transition: all 0.3s;
+        }
+        .product-card:hover {
+            transform: translateY(-0.5rem) scale(1.02);
+            box-shadow: 0 16px 48px rgba(0,0,0,0.2), 0 0 30px rgba(255,107,0,0.15);
+            border-color: rgba(249,115,22,0.3);
+        }
+        .product-card .thumb {
+            aspect-ratio: 4/3;
+            width: 100%;
+            border-radius: 10px;
+            background: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            overflow: hidden;
+        }
+        .product-card .thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .product-card .badge-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .product-card .badge {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 9999px;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 4px 9px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            line-height: 1;
+            color: #fbbf24;
+        }
+        .product-card .badge.type {
+            border-color: rgba(249,115,22,0.4);
+            color: #fdba74;
+        }
+        .product-card h3 {
+            font-weight: 900;
+            font-size: 1.02rem;
+            min-height: 2.7em;
+            line-height: 1.3;
+        }
+        .product-card p {
+            font-size: 0.94rem;
+            color: #888;
+            line-height: 1.6;
+            min-height: 4.7em;
+        }
+        .product-card .price {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: #fbbf24;
+        }
+
+        .btn-outline {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 44px;
+            padding: 0 18px;
+            border-radius: 10px;
+            font-weight: 900;
+            text-decoration: none;
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.05);
+            transition: all 0.3s;
+        }
+        .btn-outline:hover {
+            transform: scale(1.05);
+            border-color: #fbbf24;
+            box-shadow: 0 0 15px rgba(255,215,0,0.2);
+        }
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 44px;
+            padding: 0 18px;
+            border-radius: 10px;
+            font-weight: 900;
+            text-decoration: none;
+            background: linear-gradient(to right, #f97316, #fbbf24);
+            color: #0a0a0a;
+            border: 1px solid #fbbf24;
+            box-shadow: 0 0 15px rgba(255,107,0,0.3);
+            transition: all 0.3s;
+        }
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255,107,0,0.6), 0 0 40px rgba(255,107,0,0.3);
+        }
+        .cta-section {
+            border-radius: 1rem;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05);
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+        .cta-section h2 {
+            font-size: 1.5rem;
+            font-weight: 900;
+            background: linear-gradient(to right, #f97316, #fbbf24);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .cta-section .actions { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; margin-top: 1.5rem; }
+
+        @media (max-width: 768px) {
+            .site-header nav { display: none; }
+            .site-header .mobile-menu-btn { display: flex; }
+        }
+        @media (min-width: 769px) {
+            .site-header .mobile-menu-btn { display: none; }
+        }
+        .mobile-menu-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<header class="site-header">
+    <div class="inner">
+        <a href="#" class="logo">
+            <span>CAFÉ <span class="gradient">STORE</span></span>
+        </a>
+        <nav>
+            <a href="#">Início</a>
+            <a href="#">Serviços</a>
+            <a href="#">Produtos</a>
+            <a href="#">Feedbacks</a>
+            <a href="#">Carrinho <span class="cart-count">0</span></a>
+            <a href="#">Perfil</a>
+            <a href="#">Sair</a>
+        </nav>
+        <button class="mobile-menu-btn" aria-label="Abrir menu">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <line x1="2" y1="5" x2="16" y2="5"/><line x1="2" y1="9" x2="16" y2="9"/><line x1="2" y1="13" x2="16" y2="13"/>
+            </svg>
+        </button>
+    </div>
+</header>
+
+<section class="hero-banner" id="heroBanner">
+    <div class="hero-bg"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+        <p class="tagline">LIFESTYLE • TECH • PRODUCTS</p>
+        <h1>CAFÉ <span class="highlight">STORE</span></h1>
+        <p class="tagline" style="margin-top:0.5rem; font-size:0.7rem;">APOIO AO PROJETO</p>
+        <p class="subtitle">Camisetas, acessórios, chaveiros, canecas e moletons para quem quer apoiar a CAFÉ STORE.</p>
+        <a href="#produtos" class="btn">Ver Produtos</a>
+        <p class="hero-footer">Está aqui! Feito para quem vive o digital</p>
+    </div>
+</section>
+
+<main class="content-area">
+    <div class="inner" id="produtos">
+
+        <div style="margin-bottom:2rem;">
+            <p class="section-label">destaques</p>
+            <h2 class="section-title">Produtos em alta</h2>
+        </div>
+
+        <div class="product-grid">
+            <article class="product-card">
+                <div class="thumb"><img src="https://placehold.co/400x300/1a1a1a/fbbf24?text=Caneca" alt="Caneca CAFÉ"></div>
+                <div class="badge-row">
+                    <span class="badge">Caneca</span>
+                    <span class="badge type">físico</span>
+                </div>
+                <h3>Caneca CAFÉ STORE</h3>
+                <p>Caneca cerâmica 300ml com logo da CAFÉ STORE.</p>
+                <strong class="price">R$ 49,90</strong>
+            </article>
+            <article class="product-card">
+                <div class="thumb"><img src="https://placehold.co/400x300/1a1a1a/fbbf24?text=Camiseta" alt="Camiseta CAFÉ"></div>
+                <div class="badge-row">
+                    <span class="badge">Camiseta</span>
+                    <span class="badge type">físico</span>
+                </div>
+                <h3>Camiseta CAFÉ STORE</h3>
+                <p>Camiseta 100% algodão com frase marcante.</p>
+                <strong class="price">R$ 79,90</strong>
+            </article>
+            <article class="product-card">
+                <div class="thumb"><img src="https://placehold.co/400x300/1a1a1a/fbbf24?text=Moletom" alt="Moletom CAFÉ"></div>
+                <div class="badge-row">
+                    <span class="badge">Moletom</span>
+                    <span class="badge type">físico</span>
+                </div>
+                <h3>Moletom CAFÉ STORE</h3>
+                <p>Moletom fleece com capuz e bolso canguru.</p>
+                <strong class="price">R$ 149,90</strong>
+            </article>
+            <article class="product-card">
+                <div class="thumb"><img src="https://placehold.co/400x300/1a1a1a/fbbf24?text=Chaveiro" alt="Chaveiro CAFÉ"></div>
+                <div class="badge-row">
+                    <span class="badge">Chaveiro</span>
+                    <span class="badge type">físico</span>
+                </div>
+                <h3>Chaveiro CAFÉ STORE</h3>
+                <p>Chaveiro em metal escovado com gravação laser.</p>
+                <strong class="price">R$ 29,90</strong>
+            </article>
+            <article class="product-card">
+                <div class="thumb"><img src="https://placehold.co/400x300/1a1a1a/fbbf24?text=Adesivo" alt="Adesivo CAFÉ"></div>
+                <div class="badge-row">
+                    <span class="badge">Adesivo</span>
+                    <span class="badge type">físico</span>
+                </div>
+                <h3>Kit Adesivos CAFÉ</h3>
+                <p>Kit com 5 adesivos vinil resistentes à água.</p>
+                <strong class="price">R$ 19,90</strong>
+            </article>
+            <article class="product-card">
+                <div class="thumb"><img src="https://placehold.co/400x300/1a1a1a/fbbf24?text=Bon%C3%A9" alt="Boné CAFÉ"></div>
+                <div class="badge-row">
+                    <span class="badge">Boné</span>
+                    <span class="badge type">físico</span>
+                </div>
+                <h3>Boné CAFÉ STORE</h3>
+                <p>Boné aba reta com bordado frontal.</p>
+                <strong class="price">R$ 69,90</strong>
+            </article>
+        </div>
+
+        <div style="margin-top:4rem;">
+            <p class="section-label">categorias</p>
+            <h2 class="section-title">Escolha seu produto de apoio</h2>
+            <div style="display:grid; gap:1.25rem; grid-template-columns:repeat(3,1fr);">
+                <a href="#" style="display:block; border-radius:1rem; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.05); padding:1.25rem; backdrop-filter:blur(12px); text-decoration:none; transition:all 0.3s; color:inherit;" onmouseover="this.style.transform='translateY(-0.5rem) scale(1.02)'" onmouseout="this.style.transform=''">
+                    <span style="display:inline-flex; align-items:center; border-radius:9999px; border:1px solid rgba(255,255,255,0.2); padding:4px 9px; font-size:0.76rem; font-weight:700; color:#fbbf24;">6 produtos</span>
+                    <h3 style="margin-top:1rem; font-weight:900; color:#fb923c;">Canecas</h3>
+                    <p style="margin-top:0.75rem; color:#888;">Canecas personalizadas para o dia a dia.</p>
+                </a>
+                <a href="#" style="display:block; border-radius:1rem; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.05); padding:1.25rem; backdrop-filter:blur(12px); text-decoration:none; transition:all 0.3s; color:inherit;" onmouseover="this.style.transform='translateY(-0.5rem) scale(1.02)'" onmouseout="this.style.transform=''">
+                    <span style="display:inline-flex; align-items:center; border-radius:9999px; border:1px solid rgba(255,255,255,0.2); padding:4px 9px; font-size:0.76rem; font-weight:700; color:#fbbf24;">8 produtos</span>
+                    <h3 style="margin-top:1rem; font-weight:900; color:#fb923c;">Camisetas</h3>
+                    <p style="margin-top:0.75rem; color:#888;">Camisetas de algodão com estampas exclusivas.</p>
+                </a>
+                <a href="#" style="display:block; border-radius:1rem; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.05); padding:1.25rem; backdrop-filter:blur(12px); text-decoration:none; transition:all 0.3s; color:inherit;" onmouseover="this.style.transform='translateY(-0.5rem) scale(1.02)'" onmouseout="this.style.transform=''">
+                    <span style="display:inline-flex; align-items:center; border-radius:9999px; border:1px solid rgba(255,255,255,0.2); padding:4px 9px; font-size:0.76rem; font-weight:700; color:#fbbf24;">4 produtos</span>
+                    <h3 style="margin-top:1rem; font-weight:900; color:#fb923c;">Acessórios</h3>
+                    <p style="margin-top:0.75rem; color:#888;">Chaveiros, bonés e adesivos para completar o look.</p>
+                </a>
+            </div>
+        </div>
+
+        <section class="cta-section" style="margin-top:4rem;">
+            <p style="font-size:0.75rem; font-weight:900; text-transform:uppercase; letter-spacing:0.12em; color:#fbbf24; margin-bottom:0.625rem;">pronto para elevar sua presença?</p>
+            <h2>Apoie a CAFÉ STORE</h2>
+            <p style="max-width:42rem; margin:1rem auto 0; color:#888; line-height:1.6;">Produtos simbólicos para fortalecer a marca enquanto os serviços ficam organizados na página própria.</p>
+            <div class="actions">
+                <a href="#" class="btn-primary">Ver catálogo</a>
+                <a href="#" class="btn-outline">Criar conta</a>
+            </div>
+        </section>
+
+    </div>
+</main>
+
+<footer style="border-top:1px solid rgba(255,255,255,0.05); padding:3rem 1rem; text-align:center; color:#6d6d6d; font-size:0.875rem;">
+    <p>&copy; 2026 CAFÉ STORE. Todos os direitos reservados.</p>
+</footer>
+</body>
+</html>

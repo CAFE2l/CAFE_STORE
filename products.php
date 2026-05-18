@@ -36,15 +36,66 @@ if (current_user()) {
 
 include __DIR__ . '/includes/header.php';
 ?>
-<div class="flex items-end justify-between gap-6 mb-6">
-    <div>
+</main>
+
+<style>
+.hero-banner {
+    position: relative;
+    width: 100%;
+    height: 90vh;
+    min-height: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    will-change: opacity;
+    /* puxar o banner para o topo, sobrepondo o header sticky */
+    margin-top: calc(-72px);
+    z-index: 50;
+}
+.hero-banner .hero-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+}
+.hero-banner .hero-overlay {
+    position: absolute;
+    inset: 0;
+    /* reduzir a escuridão para deixar a imagem mais visível */
+    background: linear-gradient(180deg, rgba(10,10,10,0.12) 0%, rgba(10,10,10,0.45) 100%);
+}
+.hero-banner .hero-content {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    padding: 2rem;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+}
+@media (max-width: 640px) {
+    .hero-banner {
+        height: 70vh;
+        min-height: 400px;
+    }
+}
+</style>
+
+<div class="hero-banner" id="heroBanner">
+    <div class="hero-bg" style="background-image: url('<?= url('assets/images/banners/Produtos.png') ?>');"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
         <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-glow-400">apoio ao projeto</p>
-        <h1 class="m-0 text-[clamp(2rem,4vw,3.4rem)] font-black leading-tight tracking-tight">Produtos <span class="bg-gradient-to-r from-ember-500 to-glow-400 bg-clip-text text-transparent drop-shadow-[0_0_10px_rgba(255,107,0,0.8)]">CAFÉ</span></h1>
-        <p class="mt-4 max-w-[42rem] text-midnight-400">Camisetas, acessórios, chaveiros, canecas e moletons para quem quer apoiar a CAFÉ STORE.</p>
+        <h1 class="m-0 text-[clamp(2.5rem,6vw,5rem)] font-black leading-tight tracking-tight text-white">Produtos <span class="bg-gradient-to-r from-ember-500 to-glow-400 bg-clip-text text-transparent drop-shadow-[0_0_10px_rgba(255,107,0,0.8)]">CAFÉ</span></h1>
+        <p class="mt-4 mx-auto max-w-[42rem] text-lg text-midnight-300">Camisetas, acessórios, chaveiros, canecas e moletons para quem quer apoiar a CAFÉ STORE.</p>
+        <a href="#produtos" class="mt-8 inline-flex min-h-[44px] items-center justify-center gap-2 rounded-[10px] border border-glow-400 bg-gradient-to-r from-ember-500 to-glow-400 bg-[length:200%_100%] bg-[0%_0%] px-[18px] font-black leading-none text-midnight-950 shadow-[0_0_15px_rgba(255,107,0,0.3)] transition-all duration-300 hover:bg-[100%_0] hover:scale-105 hover:shadow-[0_0_20px_rgba(255,107,0,0.6),0_0_40px_rgba(255,107,0,0.3)]">Ver Produtos</a>
     </div>
 </div>
 
-<section class="mb-6 rounded-2xl border border-glow-400/40 bg-glow-400/10 p-5 text-midnight-100 backdrop-blur-lg">
+<main class="relative z-10 mx-auto max-w-[1280px] px-4 py-8 md:px-6 md:py-10 lg:px-8">
+
+<section id="produtos" class="mb-6 rounded-2xl border border-glow-400/40 bg-glow-400/10 p-5 text-midnight-100 backdrop-blur-lg">
     <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-glow-400">aviso importante</p>
     <h2 class="m-0 text-xl font-black text-glow-400">Produtos desta aba são apoio/doação</h2>
     <p class="mt-3 max-w-[56rem] leading-relaxed text-midnight-300">Os itens desta página existem para apoiar o projeto e fortalecer a marca CAFÉ. Quando houver produção oficial com entrega física, isso será informado com prazo, disponibilidade e condições separadas.</p>
@@ -94,4 +145,20 @@ include __DIR__ . '/includes/header.php';
     <?php endforeach; ?>
     <?php if (!$products): ?><p class="col-span-full rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-lg text-midnight-400">Nenhum produto encontrado.</p><?php endif; ?>
 </div>
+<script>
+(function() {
+    var hero = document.getElementById('heroBanner');
+    function updateOpacity() {
+        if (!hero) return;
+        var scrollY = window.scrollY;
+        var heroHeight = hero.offsetHeight || 1;
+        var distance = Math.min(heroHeight, scrollY);
+        var progress = distance / heroHeight;
+        // começar mais visível (0.6) e tornar totalmente opaco ao rolar
+        hero.style.opacity = 0.6 + (progress * 0.4);
+    }
+    window.addEventListener('scroll', updateOpacity, { passive: true });
+    updateOpacity();
+})();
+</script>
 <?php include __DIR__ . '/includes/footer.php'; ?>
