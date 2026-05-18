@@ -39,8 +39,10 @@ try {
 
     session_regenerate_id(true);
     $_SESSION['user_id'] = (int) $user['id'];
+    unset($_SESSION['user_cache']);
     flash('success', 'Login com Google realizado com sucesso.');
-    redirect(($user['role'] ?? 'customer') === 'admin' ? 'admin/dashboard.php' : 'profile.php');
+    $target = redirect_after_login_path();
+    redirect(($user['role'] ?? 'customer') === 'admin' && $target === 'profile.php' ? 'admin/dashboard.php' : $target);
 } catch (Throwable $e) {
     flash('error', 'Falha no login com Google. Tente novamente.');
     redirect('login.php');

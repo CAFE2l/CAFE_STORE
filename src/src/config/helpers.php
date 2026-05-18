@@ -135,7 +135,25 @@ function cart_total(): float
 
 function product_image(?string $url): string
 {
-    return $url ?: 'assets/images/mascot.svg';
+    return $url ?: 'assets/images/mascote.png';
+}
+
+function product_type_label($type): string
+{
+    $labels = [
+        'site' => 'Site',
+        'landing_page' => 'Landing page',
+        'video_curto' => 'Vídeo curto',
+        'video_longo' => 'Vídeo longo',
+        'web_app' => 'Web aplicação',
+        'camiseta' => 'Camiseta',
+        'acessorio' => 'Acessório',
+        'chaveiro' => 'Chaveiro',
+        'caneca' => 'Caneca',
+        'moletom' => 'Moletom',
+    ];
+
+    return $labels[$type] ?? ucfirst(str_replace('_', ' ', (string) $type));
 }
 
 function google_oauth_configured(): bool

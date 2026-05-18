@@ -13,6 +13,9 @@ CREATE TABLE users (
   auth_provider ENUM('password', 'google') NOT NULL DEFAULT 'password',
   role ENUM('customer', 'admin') NOT NULL DEFAULT 'customer',
   avatar_url VARCHAR(500) NULL,
+  bio TEXT NULL,
+  last_seen_at TIMESTAMP NULL DEFAULT NULL,
+  password_updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -150,6 +153,28 @@ CREATE TABLE review_images (
   CONSTRAINT fk_review_images_review FOREIGN KEY (review_id) REFERENCES product_reviews(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE client_feedbacks (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id INT UNSIGNED NULL,
+  rating TINYINT UNSIGNED NOT NULL DEFAULT 5,
+  client_name VARCHAR(120) NOT NULL,
+  role_company VARCHAR(180) NULL,
+  project_name VARCHAR(160) NOT NULL,
+  category VARCHAR(80) NOT NULL,
+  project_summary TEXT NULL,
+  results TEXT NULL,
+  feedback_text TEXT NOT NULL,
+  story_steps TEXT NULL,
+  stack_used VARCHAR(255) NULL,
+  media_json JSON NULL,
+  status ENUM('pending','approved','rejected') NOT NULL DEFAULT 'approved',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  KEY idx_client_feedbacks_status (status),
+  KEY idx_client_feedbacks_user (user_id),
+  CONSTRAINT fk_client_feedbacks_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE favorites (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   user_id INT UNSIGNED NOT NULL,
@@ -176,23 +201,56 @@ CREATE TABLE addresses (
   CONSTRAINT fk_addresses_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE coupons (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  code VARCHAR(40) NOT NULL UNIQUE,
+  title VARCHAR(120) NOT NULL,
+  description VARCHAR(255) NULL,
+  discount_type ENUM('percent','fixed') NOT NULL DEFAULT 'percent',
+  discount_value DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  status ENUM('active','inactive') NOT NULL DEFAULT 'active',
+  starts_at TIMESTAMP NULL DEFAULT NULL,
+  expires_at TIMESTAMP NULL DEFAULT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE user_coupons (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id INT UNSIGNED NOT NULL,
+  coupon_id INT UNSIGNED NOT NULL,
+  status ENUM('active','used','expired') NOT NULL DEFAULT 'active',
+  redeemed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  used_at TIMESTAMP NULL DEFAULT NULL,
+  UNIQUE KEY unique_user_coupon (user_id, coupon_id),
+  CONSTRAINT fk_user_coupons_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  CONSTRAINT fk_user_coupons_coupon FOREIGN KEY (coupon_id) REFERENCES coupons(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE INDEX idx_products_status ON products(status);
 CREATE INDEX idx_products_category ON products(category_id);
 CREATE INDEX idx_orders_user ON orders(user_id);
 CREATE INDEX idx_reviews_product_status ON product_reviews(product_id, status);
 
 INSERT INTO categories (name, slug) VALUES
-('Overlays OBS', 'overlays-obs'),
-('Templates', 'templates'),
-('Wallpapers', 'wallpapers'),
-('Packs gráficos', 'packs-graficos');
+('Camisetas', 'camisetas'),
+('Acessórios', 'acessorios'),
+('Chaveiros', 'chaveiros'),
+('Canecas', 'canecas'),
+('Moletons', 'moletons');
 
 -- Senha inicial do admin: password
-INSERT INTO users (name, email, password_hash, role) VALUES
-('Admin CAFÉ', 'admin@cafestore.local', '$2y$10$Mm16PR/2mCkMRBAqoc09ROGiam4ffgLuMIAK2L7tJsQFGhPbUnNte', 'admin');
+INSERT INTO users (name, email, password_hash, role, password_updated_at) VALUES
+('Admin CAFÉ', 'admin@cafestore.local', '$2y$10$Mm16PR/2mCkMRBAqoc09ROGiam4ffgLuMIAK2L7tJsQFGhPbUnNte', 'admin', NOW());
 
 INSERT INTO products (category_id, name, slug, description, short_description, price, old_price, image_url, main_image_url, stock, type, is_digital, status) VALUES
-(1, 'Overlay Flame Stream Pack', 'overlay-flame-stream-pack', 'Pacote visual para lives com telas de inicio, pausa, encerramento e molduras de webcam.', 'Pack visual para lives e streams.', 49.90, 69.90, '', '', 50, 'overlay', 1, 'active'),
-(2, 'Template Social CAFÉ Drop', 'template-social-cafe-drop', 'Templates editáveis para posts de lançamento, anúncios e banners rápidos.', 'Templates editáveis para lançamentos.', 34.90, NULL, '', '', 80, 'template', 1, 'active'),
-(3, 'Wallpaper Mascote Fire 4K', 'wallpaper-mascote-fire-4k', 'Wallpaper em alta resolução com a chama CAFÉ em composição gamer.', 'Wallpaper 4K da marca CAFÉ.', 14.90, NULL, '', '', 120, 'wallpaper', 1, 'active'),
-(4, 'Pack Ícones Tech Yellow', 'pack-icones-tech-yellow', 'Conjunto de ícones para canais, servidores e lojas digitais.', 'Ícones digitais em pacote.', 24.90, 39.90, '', '', 100, 'pack', 1, 'active');
+(1, 'Camiseta CAFÉ STORE Support', 'camiseta-cafe-store-support', 'Camiseta simbólica da CAFÉ STORE para quem quer apoiar o projeto e representar a marca. Este item funciona como apoio/donate; produção e entrega física dependem de campanha confirmada.', 'Camiseta simbólica para apoiar a CAFÉ STORE.', 59.90, NULL, '', '', 50, 'camiseta', 1, 'active'),
+(2, 'Kit de acessórios CAFÉ', 'kit-de-acessorios-cafe', 'Kit simbólico de acessórios da marca CAFÉ para apoiadores: adesivos, bottons e itens de comunidade. O valor representa apoio ao projeto.', 'Acessórios simbólicos para apoiadores.', 39.90, NULL, '', '', 80, 'acessorio', 1, 'active'),
+(3, 'Chaveiro Flame CAFÉ', 'chaveiro-flame-cafe', 'Chaveiro simbólico com identidade da CAFÉ STORE para quem quer apoiar o projeto. Campanhas físicas serão comunicadas separadamente.', 'Chaveiro simbólico da marca CAFÉ.', 19.90, NULL, '', '', 120, 'chaveiro', 1, 'active'),
+(4, 'Caneca CAFÉ STORE', 'caneca-cafe-store', 'Caneca simbólica da CAFÉ STORE para apoiadores da marca. Este item representa apoio/donate enquanto a produção oficial não estiver ativa.', 'Caneca simbólica para apoiar a marca.', 44.90, NULL, '', '', 60, 'caneca', 1, 'active'),
+(5, 'Moletom CAFÉ STORE Support', 'moletom-cafe-store-support', 'Moletom simbólico da CAFÉ STORE para apoiadores. Compra registrada como apoio ao projeto, com entrega física apenas quando houver campanha oficial.', 'Moletom simbólico para apoiadores.', 119.90, NULL, '', '', 30, 'moletom', 1, 'active');
+
+INSERT INTO coupons (code, title, description, discount_type, discount_value, status) VALUES
+('CAFE10', '10% no próximo apoio', 'Cupom ativo para apoiar produtos CAFÉ STORE.', 'percent', 10.00, 'active'),
+('STARTUP15', '15% para comunidade', 'Benefício para devs, startups e networking.', 'percent', 15.00, 'active'),
+('FRETECAFE', 'Ajuda na entrega', 'Cupom reservado para quando a entrega física estiver ativa.', 'fixed', 12.00, 'active');

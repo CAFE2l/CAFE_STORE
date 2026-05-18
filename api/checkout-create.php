@@ -23,9 +23,15 @@ if ($method === '') {
     redirect('checkout.php');
 }
 
+if ($method !== 'pix') {
+    flash('error', 'No momento, finalize este apoio usando Pix.');
+    redirect('checkout.php');
+}
+
 $pdo = db();
 $user = current_user();
 $total = cart_total();
+$pixPayload = pix_br_code($total, 'CAFESTORE' . (int) $_SESSION['user_id']);
 
 try {
     $pdo->beginTransaction();
@@ -40,7 +46,7 @@ try {
         $itemStmt->execute([$orderId, $item['id'], $item['name'], $item['quantity'], $item['price'], $item['price'], $lineTotal]);
     }
 
-    $provider = $method === 'pix' ? 'pix_mock' : $method;
+    $provider = $method === 'pix' ? 'pix_static_br_code' : $method;
     $payStmt = $pdo->prepare('INSERT INTO payments (order_id, user_id, payment_method, payment_provider, provider, provider_payment_id, status, amount, currency, pix_copy_paste, paypal_order_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
     $payStmt->execute([
         $orderId,
@@ -48,11 +54,11 @@ try {
         $method,
         $provider,
         $provider,
-        'mock-' . $orderId,
+        $method === 'pix' ? 'pix-' . $orderId : 'mock-' . $orderId,
         'pending',
         $total,
         'BRL',
-        $method === 'pix' ? 'PIX-MOCK-ORDER-' . $orderId : null,
+        $method === 'pix' ? $pixPayload : null,
         $method === 'paypal' ? 'PAYPAL-MOCK-' . $orderId : null,
     ]);
 

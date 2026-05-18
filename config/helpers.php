@@ -41,6 +41,30 @@ if (!defined('PAYPAL_CLIENT_SECRET')) {
     define('PAYPAL_CLIENT_SECRET', getenv('PAYPAL_CLIENT_SECRET') ?: '');
 }
 
+if (!defined('WHATSAPP_CONTACT_NUMBER')) {
+    define('WHATSAPP_CONTACT_NUMBER', getenv('WHATSAPP_CONTACT_NUMBER') ?: '5541996713782');
+}
+
+if (!defined('TELEGRAM_CLIENT_CHANNEL_URL')) {
+    define('TELEGRAM_CLIENT_CHANNEL_URL', getenv('TELEGRAM_CLIENT_CHANNEL_URL') ?: 'https://t.me/+5541996713782');
+}
+
+if (!defined('DISCORD_COMMUNITY_URL')) {
+    define('DISCORD_COMMUNITY_URL', getenv('DISCORD_COMMUNITY_URL') ?: 'https://discord.com/invite/gW2tShPFxf');
+}
+
+if (!defined('PIX_KEY')) {
+    define('PIX_KEY', getenv('PIX_KEY') ?: 'e34f126a-f9ed-43ef-a330-24e44a59b6b4');
+}
+
+if (!defined('PIX_MERCHANT_NAME')) {
+    define('PIX_MERCHANT_NAME', getenv('PIX_MERCHANT_NAME') ?: 'CAFE STORE');
+}
+
+if (!defined('PIX_MERCHANT_CITY')) {
+    define('PIX_MERCHANT_CITY', getenv('PIX_MERCHANT_CITY') ?: 'CURITIBA');
+}
+
 /**
  * Conexão com banco de dados
  */
@@ -92,6 +116,78 @@ function absolute_url($path = '') {
     return $scheme . '://' . $host . url($path);
 }
 
+function current_request_path() {
+    $uri = $_SERVER['REQUEST_URI'] ?? '';
+    return $uri !== '' ? ltrim($uri, '/') : 'profile.php';
+}
+
+function redirect_after_login_path() {
+    $path = $_SESSION['intended_url'] ?? 'profile.php';
+    unset($_SESSION['intended_url']);
+    return is_string($path) && $path !== '' ? $path : 'profile.php';
+}
+
+function whatsapp_url($message = '') {
+    return 'https://wa.me/' . preg_replace('/\D+/', '', WHATSAPP_CONTACT_NUMBER) . '?' . http_build_query([
+        'text' => (string) $message,
+    ]);
+}
+
+function emv_field($id, $value) {
+    $value = (string) $value;
+    return str_pad((string) $id, 2, '0', STR_PAD_LEFT)
+        . str_pad((string) strlen($value), 2, '0', STR_PAD_LEFT)
+        . $value;
+}
+
+function pix_crc16($payload) {
+    $crc = 0xFFFF;
+    $length = strlen($payload);
+
+    for ($i = 0; $i < $length; $i++) {
+        $crc ^= ord($payload[$i]) << 8;
+        for ($bit = 0; $bit < 8; $bit++) {
+            $crc = ($crc & 0x8000) ? (($crc << 1) ^ 0x1021) : ($crc << 1);
+            $crc &= 0xFFFF;
+        }
+    }
+
+    return strtoupper(str_pad(dechex($crc), 4, '0', STR_PAD_LEFT));
+}
+
+function pix_br_code($amount, $txid = 'CAFESTORE') {
+    $nameSource = function_exists('iconv') ? (iconv('UTF-8', 'ASCII//TRANSLIT', PIX_MERCHANT_NAME) ?: PIX_MERCHANT_NAME) : PIX_MERCHANT_NAME;
+    $citySource = function_exists('iconv') ? (iconv('UTF-8', 'ASCII//TRANSLIT', PIX_MERCHANT_CITY) ?: PIX_MERCHANT_CITY) : PIX_MERCHANT_CITY;
+    $merchantName = substr(preg_replace('/[^A-Z0-9 ]/', '', strtoupper($nameSource)), 0, 25);
+    $merchantCity = substr(preg_replace('/[^A-Z0-9 ]/', '', strtoupper($citySource)), 0, 15);
+    $txid = substr(preg_replace('/[^A-Za-z0-9]/', '', (string) $txid), 0, 25) ?: 'CAFESTORE';
+
+    $merchantAccount = emv_field('00', 'br.gov.bcb.pix')
+        . emv_field('01', PIX_KEY)
+        . emv_field('02', 'Apoio Cafe Store');
+
+    $payload = emv_field('00', '01')
+        . emv_field('26', $merchantAccount)
+        . emv_field('52', '0000')
+        . emv_field('53', '986')
+        . emv_field('54', number_format((float) $amount, 2, '.', ''))
+        . emv_field('58', 'BR')
+        . emv_field('59', $merchantName)
+        . emv_field('60', $merchantCity)
+        . emv_field('62', emv_field('05', $txid));
+
+    $payloadForCrc = $payload . '6304';
+    return $payloadForCrc . pix_crc16($payloadForCrc);
+}
+
+function qr_code_image_url($payload, $size = 240) {
+    $size = max(160, min(420, (int) $size));
+    return 'https://api.qrserver.com/v1/create-qr-code/?' . http_build_query([
+        'size' => $size . 'x' . $size,
+        'data' => (string) $payload,
+    ]);
+}
+
 /**
  * Escapar HTML para segurança (XSS protection)
  */
@@ -128,16 +224,21 @@ function slugify($text) {
  */
 function product_image($image_url) {
     if (empty($image_url)) {
-        return url('assets/images/mascot.svg');
+        return url('assets/images/mascote.png');
     }
 
     if (basename((string) $image_url) === 'placeholder.png') {
-        return url('assets/images/mascot.svg');
+        return url('assets/images/mascote.png');
     }
     
     // Se já é URL completa (Cloudinary)
     if (strpos($image_url, 'http') === 0) {
         return $image_url;
+    }
+    
+    // Se é caminho relativo sem diretório, assume que está em assets/images/produtos/
+    if (strpos($image_url, '/') === false) {
+        return url('assets/images/produtos/' . ltrim($image_url, '/'));
     }
     
     // Se é caminho relativo
@@ -148,9 +249,49 @@ function product_main_image(array $product) {
     return product_image($product['main_image_url'] ?? $product['image_url'] ?? '');
 }
 
+function product_type_label($type) {
+    $labels = [
+        'site' => 'Site',
+        'landing_page' => 'Landing page',
+        'video_curto' => 'Vídeo curto',
+        'video_longo' => 'Vídeo longo',
+        'web_app' => 'Web aplicação',
+        'camiseta' => 'Camiseta',
+        'acessorio' => 'Acessório',
+        'chaveiro' => 'Chaveiro',
+        'caneca' => 'Caneca',
+        'moletom' => 'Moletom',
+    ];
+
+    return $labels[$type] ?? ucfirst(str_replace('_', ' ', (string) $type));
+}
+
 function normalize_payment_method($method) {
     $method = (string) $method;
     return in_array($method, ['pix', 'mercadopago', 'paypal'], true) ? $method : '';
+}
+
+function relative_days_label($dateTime, $prefix = 'Atualizada') {
+    if (!$dateTime) {
+        return 'Data indisponível';
+    }
+
+    try {
+        $date = new DateTime((string) $dateTime);
+        $now = new DateTime('now');
+    } catch (Throwable $e) {
+        return 'Data indisponível';
+    }
+
+    $days = (int) $date->diff($now)->format('%a');
+    if ($days === 0) {
+        return $prefix . ' hoje';
+    }
+    if ($days === 1) {
+        return $prefix . ' há 1 dia';
+    }
+
+    return $prefix . ' há ' . $days . ' dias';
 }
 
 /**
@@ -165,6 +306,9 @@ function is_logged_in() {
  */
 function require_login() {
     if (!current_user()) {
+        if (in_array($_SERVER['REQUEST_METHOD'] ?? 'GET', ['GET', 'HEAD'], true)) {
+            $_SESSION['intended_url'] = current_request_path();
+        }
         flash('error', 'Faça login para continuar.');
         redirect('login.php');
     }
@@ -233,14 +377,21 @@ function current_user() {
         return null;
     }
 
-    // Cache em sessão para evitar queries repetidas na mesma requisição
-    if (isset($_SESSION['user_cache'])) {
-        return $_SESSION['user_cache'];
-    }
-
     try {
         $pdo = db();
-        $stmt = $pdo->prepare("SELECT id, name, email, role, created_at FROM users WHERE id = ?");
+        if (empty($_SESSION['last_seen_touch']) || time() - (int) $_SESSION['last_seen_touch'] > 60) {
+            $touch = $pdo->prepare("UPDATE users SET last_seen_at = NOW() WHERE id = ?");
+            $touch->execute([(int) $_SESSION['user_id']]);
+            $_SESSION['last_seen_touch'] = time();
+            unset($_SESSION['user_cache']);
+        }
+
+        // Cache em sessão para evitar queries repetidas na mesma requisição
+        if (isset($_SESSION['user_cache'])) {
+            return $_SESSION['user_cache'];
+        }
+
+        $stmt = $pdo->prepare("SELECT id, name, email, role, auth_provider, avatar_url, bio, last_seen_at, password_updated_at, created_at FROM users WHERE id = ?");
         $stmt->execute([$_SESSION['user_id']]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -356,6 +507,28 @@ function set_flash($type, $message) {
     flash($type, $message);
 }
 
+function user_is_online(array $user) {
+    if (empty($user['last_seen_at'])) {
+        return false;
+    }
+
+    return strtotime((string) $user['last_seen_at']) >= time() - 300;
+}
+
+function user_has_client_history($userId) {
+    $stmt = db()->prepare("
+        SELECT COUNT(*)
+        FROM orders
+        WHERE user_id = ?
+          AND (
+            payment_status IN ('approved', 'paid')
+            OR status IN ('paid', 'completed', 'processing')
+          )
+    ");
+    $stmt->execute([(int) $userId]);
+    return (int) $stmt->fetchColumn() > 0;
+}
+
 function google_oauth_configured() {
     return GOOGLE_CLIENT_ID !== '' && GOOGLE_CLIENT_SECRET !== '';
 }
@@ -468,7 +641,7 @@ function login_with_google_user(array $profile) {
     }
 
     $passwordHash = password_hash(bin2hex(random_bytes(32)), PASSWORD_DEFAULT);
-    $stmt = db()->prepare("INSERT INTO users (name, email, password_hash, google_id, auth_provider, role) VALUES (?, ?, ?, ?, 'google', 'customer')");
+    $stmt = db()->prepare("INSERT INTO users (name, email, password_hash, google_id, auth_provider, role, password_updated_at) VALUES (?, ?, ?, ?, 'google', 'customer', NULL)");
     $stmt->execute([$name ?: 'Cliente CAFÉ', $email, $passwordHash, $googleId]);
 
     $stmt = db()->prepare('SELECT * FROM users WHERE id = ?');
@@ -494,6 +667,122 @@ function add_column_if_missing(PDO $pdo, $table, $column, $definition) {
     }
 }
 
+function seed_support_products_catalog(PDO $pdo) {
+    $categories = [
+        ['Camisetas', 'camisetas'],
+        ['Acessórios', 'acessorios'],
+        ['Chaveiros', 'chaveiros'],
+        ['Canecas', 'canecas'],
+        ['Moletons', 'moletons'],
+    ];
+
+    $categoryIds = [];
+    $categoryStmt = $pdo->prepare("
+        INSERT INTO categories (name, slug)
+        VALUES (?, ?)
+        ON DUPLICATE KEY UPDATE name = VALUES(name)
+    ");
+    $categorySelect = $pdo->prepare("SELECT id FROM categories WHERE slug = ? LIMIT 1");
+    foreach ($categories as [$name, $slug]) {
+        $categoryStmt->execute([$name, $slug]);
+        $categorySelect->execute([$slug]);
+        $categoryIds[$slug] = (int) $categorySelect->fetchColumn();
+    }
+
+    $serviceSlugs = [
+        'site-institucional-para-negocios',
+        'landing-page-de-alta-conversao',
+        'video-curto-para-redes-sociais',
+        'video-longo-profissional',
+        'web-aplicacao-para-empresas',
+    ];
+    $serviceStmt = $pdo->prepare("UPDATE products SET status = 'draft' WHERE slug = ?");
+    foreach ($serviceSlugs as $slug) {
+        $serviceStmt->execute([$slug]);
+    }
+
+    $products = [
+        [
+            'camisetas',
+            'Camiseta CAFÉ STORE Support',
+            'camiseta-cafe-store-support',
+            'Camiseta simbólica da CAFÉ STORE para quem quer apoiar o projeto e representar a marca. Este item funciona como apoio/donate; produção e entrega física dependem de campanha confirmada.',
+            'Camiseta simbólica para apoiar a CAFÉ STORE.',
+            59.90,
+            50,
+            'camiseta',
+        ],
+        [
+            'acessorios',
+            'Kit de acessórios CAFÉ',
+            'kit-de-acessorios-cafe',
+            'Kit simbólico de acessórios da marca CAFÉ para apoiadores: adesivos, bottons e itens de comunidade. O valor representa apoio ao projeto.',
+            'Acessórios simbólicos para apoiadores.',
+            39.90,
+            80,
+            'acessorio',
+        ],
+        [
+            'chaveiros',
+            'Chaveiro Flame CAFÉ',
+            'chaveiro-flame-cafe',
+            'Chaveiro simbólico com identidade da CAFÉ STORE para quem quer apoiar o projeto. Campanhas físicas serão comunicadas separadamente.',
+            'Chaveiro simbólico da marca CAFÉ.',
+            19.90,
+            120,
+            'chaveiro',
+        ],
+        [
+            'canecas',
+            'Caneca CAFÉ STORE',
+            'caneca-cafe-store',
+            'Caneca simbólica da CAFÉ STORE para apoiadores da marca. Este item representa apoio/donate enquanto a produção oficial não estiver ativa.',
+            'Caneca simbólica para apoiar a marca.',
+            44.90,
+            60,
+            'caneca',
+        ],
+        [
+            'moletons',
+            'Moletom CAFÉ STORE Support',
+            'moletom-cafe-store-support',
+            'Moletom simbólico da CAFÉ STORE para apoiadores. Compra registrada como apoio ao projeto, com entrega física apenas quando houver campanha oficial.',
+            'Moletom simbólico para apoiadores.',
+            119.90,
+            30,
+            'moletom',
+        ],
+    ];
+
+    $productStmt = $pdo->prepare("
+        INSERT INTO products (category_id, name, slug, description, short_description, price, old_price, image_url, main_image_url, stock, type, is_digital, status)
+        VALUES (?, ?, ?, ?, ?, ?, NULL, '', '', ?, ?, 1, 'active')
+        ON DUPLICATE KEY UPDATE
+            category_id = VALUES(category_id),
+            name = VALUES(name),
+            description = VALUES(description),
+            short_description = VALUES(short_description),
+            price = VALUES(price),
+            stock = VALUES(stock),
+            type = VALUES(type),
+            is_digital = 1,
+            status = 'active'
+    ");
+
+    foreach ($products as [$categorySlug, $name, $slug, $description, $shortDescription, $price, $stock, $type]) {
+        $productStmt->execute([
+            $categoryIds[$categorySlug] ?? null,
+            $name,
+            $slug,
+            $description,
+            $shortDescription,
+            $price,
+            $stock,
+            $type,
+        ]);
+    }
+}
+
 function ensure_app_schema(PDO $pdo) {
     static $done = false;
     if ($done) {
@@ -508,6 +797,9 @@ function ensure_app_schema(PDO $pdo) {
         password_hash VARCHAR(255) NOT NULL,
         role ENUM('customer', 'admin') NOT NULL DEFAULT 'customer',
         avatar_url VARCHAR(500) NULL,
+        bio TEXT NULL,
+        last_seen_at TIMESTAMP NULL DEFAULT NULL,
+        password_updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
@@ -515,6 +807,9 @@ function ensure_app_schema(PDO $pdo) {
     add_column_if_missing($pdo, 'users', 'google_id', "google_id VARCHAR(191) NULL UNIQUE AFTER password_hash");
     add_column_if_missing($pdo, 'users', 'auth_provider', "auth_provider ENUM('password', 'google') NOT NULL DEFAULT 'password' AFTER google_id");
     add_column_if_missing($pdo, 'users', 'avatar_url', "avatar_url VARCHAR(500) NULL AFTER role");
+    add_column_if_missing($pdo, 'users', 'bio', "bio TEXT NULL AFTER avatar_url");
+    add_column_if_missing($pdo, 'users', 'last_seen_at', "last_seen_at TIMESTAMP NULL DEFAULT NULL AFTER bio");
+    add_column_if_missing($pdo, 'users', 'password_updated_at', "password_updated_at TIMESTAMP NULL DEFAULT NULL AFTER last_seen_at");
     add_column_if_missing($pdo, 'users', 'updated_at', "updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP");
 
     $pdo->exec("CREATE TABLE IF NOT EXISTS admins (
@@ -556,6 +851,12 @@ function ensure_app_schema(PDO $pdo) {
     add_column_if_missing($pdo, 'products', 'main_image_url', "main_image_url VARCHAR(500) NULL AFTER image_url");
     add_column_if_missing($pdo, 'products', 'is_digital', "is_digital TINYINT(1) NOT NULL DEFAULT 1 AFTER type");
     add_column_if_missing($pdo, 'products', 'updated_at', "updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP");
+    try {
+        $pdo->exec("ALTER TABLE products MODIFY type VARCHAR(40) NOT NULL DEFAULT 'digital'");
+    } catch (Throwable $e) {
+        error_log('Schema products type migration skipped: ' . $e->getMessage());
+    }
+    seed_support_products_catalog($pdo);
 
     $pdo->exec("CREATE TABLE IF NOT EXISTS product_images (
         id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -677,6 +978,28 @@ function ensure_app_schema(PDO $pdo) {
         CONSTRAINT fk_review_images_review FOREIGN KEY (review_id) REFERENCES product_reviews(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
+    $pdo->exec("CREATE TABLE IF NOT EXISTS client_feedbacks (
+        id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        user_id INT UNSIGNED NULL,
+        rating TINYINT UNSIGNED NOT NULL DEFAULT 5,
+        client_name VARCHAR(120) NOT NULL,
+        role_company VARCHAR(180) NULL,
+        project_name VARCHAR(160) NOT NULL,
+        category VARCHAR(80) NOT NULL,
+        project_summary TEXT NULL,
+        results TEXT NULL,
+        feedback_text TEXT NOT NULL,
+        story_steps TEXT NULL,
+        stack_used VARCHAR(255) NULL,
+        media_json JSON NULL,
+        status ENUM('pending','approved','rejected') NOT NULL DEFAULT 'approved',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+        KEY idx_client_feedbacks_status (status),
+        KEY idx_client_feedbacks_user (user_id),
+        CONSTRAINT fk_client_feedbacks_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
     $pdo->exec("CREATE TABLE IF NOT EXISTS favorites (
         id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
         user_id INT UNSIGNED NOT NULL,
@@ -702,4 +1025,48 @@ function ensure_app_schema(PDO $pdo) {
         updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
         CONSTRAINT fk_addresses_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS coupons (
+        id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        code VARCHAR(40) NOT NULL UNIQUE,
+        title VARCHAR(120) NOT NULL,
+        description VARCHAR(255) NULL,
+        discount_type ENUM('percent','fixed') NOT NULL DEFAULT 'percent',
+        discount_value DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+        status ENUM('active','inactive') NOT NULL DEFAULT 'active',
+        starts_at TIMESTAMP NULL DEFAULT NULL,
+        expires_at TIMESTAMP NULL DEFAULT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS user_coupons (
+        id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        user_id INT UNSIGNED NOT NULL,
+        coupon_id INT UNSIGNED NOT NULL,
+        status ENUM('active','used','expired') NOT NULL DEFAULT 'active',
+        redeemed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        used_at TIMESTAMP NULL DEFAULT NULL,
+        UNIQUE KEY unique_user_coupon (user_id, coupon_id),
+        CONSTRAINT fk_user_coupons_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        CONSTRAINT fk_user_coupons_coupon FOREIGN KEY (coupon_id) REFERENCES coupons(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+    $couponStmt = $pdo->prepare("
+        INSERT INTO coupons (code, title, description, discount_type, discount_value, status)
+        VALUES (?, ?, ?, ?, ?, 'active')
+        ON DUPLICATE KEY UPDATE
+            title = VALUES(title),
+            description = VALUES(description),
+            discount_type = VALUES(discount_type),
+            discount_value = VALUES(discount_value),
+            status = 'active'
+    ");
+    foreach ([
+        ['CAFE10', '10% no próximo apoio', 'Cupom ativo para apoiar produtos CAFÉ STORE.', 'percent', 10.00],
+        ['STARTUP15', '15% para comunidade', 'Benefício para devs, startups e networking.', 'percent', 15.00],
+        ['FRETECAFE', 'Ajuda na entrega', 'Cupom reservado para quando a entrega física estiver ativa.', 'fixed', 12.00],
+    ] as $coupon) {
+        $couponStmt->execute($coupon);
+    }
 }

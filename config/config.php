@@ -38,3 +38,27 @@ if (!defined('PAYPAL_CLIENT_ID')) {
 if (!defined('PAYPAL_CLIENT_SECRET')) {
     define('PAYPAL_CLIENT_SECRET', getenv('PAYPAL_CLIENT_SECRET') ?: '');
 }
+
+if (!defined('WHATSAPP_CONTACT_NUMBER')) {
+    define('WHATSAPP_CONTACT_NUMBER', getenv('WHATSAPP_CONTACT_NUMBER') ?: '5541996713782');
+}
+
+if (!defined('TELEGRAM_CLIENT_CHANNEL_URL')) {
+    define('TELEGRAM_CLIENT_CHANNEL_URL', getenv('TELEGRAM_CLIENT_CHANNEL_URL') ?: 'https://t.me/+5541996713782');
+}
+
+if (!defined('DISCORD_COMMUNITY_URL')) {
+    define('DISCORD_COMMUNITY_URL', getenv('DISCORD_COMMUNITY_URL') ?: 'https://discord.com/invite/gW2tShPFxf');
+}
+
+if (!defined('PIX_KEY')) {
+    define('PIX_KEY', getenv('PIX_KEY') ?: 'e34f126a-f9ed-43ef-a330-24e44a59b6b4');
+}
+
+if (!defined('PIX_MERCHANT_NAME')) {
+    define('PIX_MERCHANT_NAME', getenv('PIX_MERCHANT_NAME') ?: 'CAFE STORE');
+}
+
+if (!defined('PIX_MERCHANT_CITY')) {
+    define('PIX_MERCHANT_CITY', getenv('PIX_MERCHANT_CITY') ?: 'CURITIBA');
+}

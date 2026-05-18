@@ -1,11 +1,11 @@
-<aside class="admin-sidebar">
-    <span class="pill">Admin</span>
-    <a href="<?= url('admin/dashboard.php') ?>">Dashboard <span>↗</span></a>
-    <a href="<?= url('admin/products.php') ?>">Produtos <span>→</span></a>
-    <a href="<?= url('admin/product-create.php') ?>">Novo produto <span>+</span></a>
-    <a href="<?= url('admin/orders.php') ?>">Pedidos <span>→</span></a>
-    <a href="<?= url('admin/reviews.php') ?>">Avaliações <span>→</span></a>
-    <a href="<?= url('admin/categories.php') ?>">Categorias <span>→</span></a>
-    <a href="<?= url('admin/users.php') ?>">Usuários <span>→</span></a>
-    <a href="<?= url('index.php') ?>">Ver loja <span>↗</span></a>
+<aside class="sticky rounded-2xl border border-white/10 bg-white/5 p-3.5 backdrop-blur-lg grid gap-2" style="top:calc(72px + 24px);">
+    <span class="inline-flex w-fit items-center justify-center rounded-full border border-white/20 px-[9px] py-[4px] text-[0.76rem] font-bold leading-none text-glow-400">Admin</span>
+    <a class="flex items-center justify-between min-h-[42px] rounded-[10px] px-3 font-black text-midnight-400 transition-all duration-300 hover:bg-white/5 hover:text-white" href="<?= url('admin/dashboard.php') ?>">Dashboard <span class="text-glow-400">↗</span></a>
+    <a class="flex items-center justify-between min-h-[42px] rounded-[10px] px-3 font-black text-midnight-400 transition-all duration-300 hover:bg-white/5 hover:text-white" href="<?= url('admin/products.php') ?>">Produtos <span class="text-midnight-400">→</span></a>
+    <a class="flex items-center justify-between min-h-[42px] rounded-[10px] px-3 font-black text-midnight-400 transition-all duration-300 hover:bg-white/5 hover:text-white" href="<?= url('admin/product-create.php') ?>">Novo produto <span class="text-glow-400">+</span></a>
+    <a class="flex items-center justify-between min-h-[42px] rounded-[10px] px-3 font-black text-midnight-400 transition-all duration-300 hover:bg-white/5 hover:text-white" href="<?= url('admin/orders.php') ?>">Pedidos <span class="text-midnight-400">→</span></a>
+    <a class="flex items-center justify-between min-h-[42px] rounded-[10px] px-3 font-black text-midnight-400 transition-all duration-300 hover:bg-white/5 hover:text-white" href="<?= url('admin/reviews.php') ?>">Avaliações <span class="text-midnight-400">→</span></a>
+    <a class="flex items-center justify-between min-h-[42px] rounded-[10px] px-3 font-black text-midnight-400 transition-all duration-300 hover:bg-white/5 hover:text-white" href="<?= url('admin/categories.php') ?>">Categorias <span class="text-midnight-400">→</span></a>
+    <a class="flex items-center justify-between min-h-[42px] rounded-[10px] px-3 font-black text-midnight-400 transition-all duration-300 hover:bg-white/5 hover:text-white" href="<?= url('admin/users.php') ?>">Usuarios <span class="text-midnight-400">→</span></a>
+    <a class="flex items-center justify-between min-h-[42px] rounded-[10px] px-3 font-black text-midnight-400 transition-all duration-300 hover:bg-white/5 hover:text-white" href="<?= url('index.php') ?>">Ver loja <span class="text-glow-400">↗</span></a>
 </aside>
