@@ -695,6 +695,7 @@ function seed_support_products_catalog(PDO $pdo) {
         'video-curto-para-redes-sociais',
         'video-longo-profissional',
         'web-aplicacao-para-empresas',
+        'kit-de-acessorios-cafe',
     ];
     $serviceStmt = $pdo->prepare("UPDATE products SET status = 'draft' WHERE slug = ?");
     foreach ($serviceSlugs as $slug) {
@@ -702,6 +703,16 @@ function seed_support_products_catalog(PDO $pdo) {
     }
 
     $products = [
+        [
+            'camisetas',
+            'Camiseta CAFÉ STORE Limited Edition',
+            'camiseta-cafe-store-limited-edition',
+            'Camiseta preta limited edition da CAFÉ STORE com estampa premium do mascote flame na frente, ícone na manga, tag personalizada e arte traseira com a frase CREATE BUILD INSPIRE. Malha 100% algodão, toque macio, alta durabilidade e cores vibrantes. Este item funciona como apoio/donate; produção e entrega física dependem de campanha confirmada.',
+            'Camiseta preta limited edition com mascote frontal, arte traseira CREATE BUILD INSPIRE, tag personalizada e malha 100% algodão.',
+            79.90,
+            50,
+            'camiseta',
+        ],
         [
             'camisetas',
             'Camiseta CAFÉ STORE Support',
@@ -713,14 +724,14 @@ function seed_support_products_catalog(PDO $pdo) {
             'camiseta',
         ],
         [
-            'acessorios',
-            'Kit de acessórios CAFÉ',
-            'kit-de-acessorios-cafe',
-            'Kit simbólico de acessórios da marca CAFÉ para apoiadores: adesivos, bottons e itens de comunidade. O valor representa apoio ao projeto.',
-            'Acessórios simbólicos para apoiadores.',
-            39.90,
-            80,
-            'acessorio',
+            'camisetas',
+            'Camiseta CAFÉ STORE Dry Pro Poliéster',
+            'camiseta-cafe-store-dry-pro-poliester',
+            'Camiseta performance tech tee em poliéster dry pro com visual preto e laranja, mascote frontal, identidade CAFÉ STORE nas mangas e arte traseira CREATE BUILD INSPIRE. Tecido respirável, secagem rápida, proteção UV, leveza e flexibilidade para quem vive o digital. Este item funciona como apoio/donate; produção e entrega física dependem de campanha confirmada.',
+            'Camiseta de poliéster dry pro com visual tech, respirável, secagem rápida, proteção UV e arte CAFÉ STORE.',
+            89.90,
+            50,
+            'camiseta',
         ],
         [
             'chaveiros',
@@ -780,6 +791,52 @@ function seed_support_products_catalog(PDO $pdo) {
             $stock,
             $type,
         ]);
+    }
+
+    if (table_exists($pdo, 'product_images')) {
+        $seededImages = [
+            'camiseta-cafe-store-limited-edition' => [
+                'main' => 'assets/images/produtos/camisa_normal/design.jpeg',
+                'gallery' => [
+                    'assets/images/produtos/camisa_normal/camisaVtirine.png',
+                    'assets/images/produtos/camisa_normal/camisaAlgodão.png',
+                    'assets/images/produtos/camisa_normal/camisa_tras.png',
+                ],
+            ],
+            'camiseta-cafe-store-dry-pro-poliester' => [
+                'main' => 'assets/images/produtos/poliester/design.png',
+                'gallery' => [
+                    'assets/images/produtos/poliester/camisa_poliester.png',
+                    'assets/images/produtos/poliester/frente.jpeg',
+                    'assets/images/produtos/poliester/tras.png',
+                ],
+            ],
+            'moletom-cafe-store-support' => [
+                'main' => 'assets/images/produtos/moletons/design.png',
+                'gallery' => [
+                    'assets/images/produtos/moletons/design.png',
+                ],
+            ],
+        ];
+
+        $selectProduct = $pdo->prepare("SELECT id FROM products WHERE slug = ? LIMIT 1");
+        $updateProductImage = $pdo->prepare("UPDATE products SET image_url = ?, main_image_url = ? WHERE id = ?");
+        $deleteImages = $pdo->prepare("DELETE FROM product_images WHERE product_id = ?");
+        $insertImage = $pdo->prepare("INSERT INTO product_images (product_id, image_url, sort_order) VALUES (?, ?, ?)");
+
+        foreach ($seededImages as $slug => $imageSet) {
+            $selectProduct->execute([$slug]);
+            $productId = (int) $selectProduct->fetchColumn();
+            if ($productId <= 0) {
+                continue;
+            }
+
+            $updateProductImage->execute([$imageSet['main'], $imageSet['main'], $productId]);
+            $deleteImages->execute([$productId]);
+            foreach ($imageSet['gallery'] as $sortOrder => $imageUrl) {
+                $insertImage->execute([$productId, $imageUrl, $sortOrder]);
+            }
+        }
     }
 }
 
@@ -856,8 +913,6 @@ function ensure_app_schema(PDO $pdo) {
     } catch (Throwable $e) {
         error_log('Schema products type migration skipped: ' . $e->getMessage());
     }
-    seed_support_products_catalog($pdo);
-
     $pdo->exec("CREATE TABLE IF NOT EXISTS product_images (
         id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
         product_id INT UNSIGNED NOT NULL,
@@ -867,6 +922,8 @@ function ensure_app_schema(PDO $pdo) {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         CONSTRAINT fk_product_images_product FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+    seed_support_products_catalog($pdo);
 
     $pdo->exec("CREATE TABLE IF NOT EXISTS cart_items (
         id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
