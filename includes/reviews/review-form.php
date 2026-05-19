@@ -1,5 +1,9 @@
 <?php if (current_user()): ?>
     <form class="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-lg grid gap-3" action="<?= url('api/reviews/create-review.php') ?>" method="post" enctype="multipart/form-data">
+        <div>
+            <strong class="text-lg text-white"><?= $myReview ? 'Atualizar avaliação' : 'Escrever avaliação' ?></strong>
+            <p class="mt-1 text-sm text-midnight-400">Disponível para clientes logados. Avaliações ficam pendentes até a moderação.</p>
+        </div>
         <input type="hidden" name="csrf_token" value="<?= e(generate_csrf_token()) ?>">
         <input type="hidden" name="product_id" value="<?= (int) $product['id'] ?>">
         <label class="grid gap-1.5 text-[0.9rem] font-black text-midnight-400">Nota
@@ -9,7 +13,7 @@
                 <?php endfor; ?>
             </select>
         </label>
-        <label class="grid gap-1.5 text-[0.9rem] font-black text-midnight-400">Comentario
+        <label class="grid gap-1.5 text-[0.9rem] font-black text-midnight-400">Comentário
             <textarea class="w-full min-h-[132px] rounded-[10px] border border-white/10 bg-midnight-950/80 p-2.5 text-white outline-none backdrop-blur transition-all duration-300 focus:border-glow-400 resize-y" name="comment" rows="4" maxlength="2000" required><?= e($myReview['comment'] ?? '') ?></textarea>
         </label>
         <label class="grid gap-1.5 text-[0.9rem] font-black text-midnight-400">Fotos da avaliação
@@ -21,5 +25,5 @@
         <?php endif; ?>
     </form>
 <?php else: ?>
-    <p class="text-midnight-400">Faca login para avaliar este produto.</p>
+    <p class="text-midnight-400">Faça login para avaliar este produto.</p>
 <?php endif; ?>

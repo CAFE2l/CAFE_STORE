@@ -39,46 +39,140 @@ include __DIR__ . '/includes/header.php';
 </main>
 
 <style>
+/* smooth animations, glass and shadow effects */
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(18px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
 .hero-banner {
+    /* ficar no topo da página, atrás do header sticky, mais para cima */
     position: relative;
     width: 100%;
-    height: 90vh;
-    min-height: 500px;
+    /* reduzir a altura final para remover 100-150px na parte inferior */
+    height: calc(90vh - 130px);
+    min-height: 320px;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    will-change: opacity;
-    /* puxar o banner para o topo, sobrepondo o header sticky */
-    margin-top: calc(-72px);
-    z-index: 50;
+    will-change: opacity, transform;
+    /* empurrar ainda mais para cima */
+    margin-top: calc(-140px);
+    z-index: 10; /* abaixo do header (z-40) */
+    opacity: 1; /* iniciar 100% opaco */
+    /* arredondar laterais e parte de baixo */
+    border-radius: 0 0 8px 8px;
+    transition: opacity .9s cubic-bezier(.22,.61,.36,1), transform .7s cubic-bezier(.22,.61,.36,1);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.42) inset, 0 24px 48px rgba(0,0,0,0.35);
 }
+.hero-banner.overflow-hidden { overflow: hidden; }
 .hero-banner .hero-bg {
     position: absolute;
     inset: 0;
     background-size: cover;
     background-position: center;
+    filter: saturate(1.05) contrast(1.03);
+    will-change: filter, transform;
+    transition: filter .6s ease, transform .6s ease;
 }
 .hero-banner .hero-overlay {
     position: absolute;
     inset: 0;
-    /* reduzir a escuridão para deixar a imagem mais visível */
-    background: linear-gradient(180deg, rgba(10,10,10,0.12) 0%, rgba(10,10,10,0.45) 100%);
+    /* overlay levemente quente para combinar com o design, porém mais claro */
+    background: linear-gradient(180deg, rgba(255,140,0,0.02) 0%, rgba(10,10,10,0.08) 100%);
+    pointer-events: none;
+    transition: background .5s ease;
 }
 .hero-banner .hero-content {
     position: relative;
-    z-index: 10;
+    z-index: 20; /* acima da imagem, abaixo do header */
     text-align: center;
     padding: 2rem;
     width: 100%;
-    max-width: 800px;
+    max-width: 900px;
     margin: 0 auto;
+    color: #fff;
+    /* texto mais brilhante e legível */
+    text-shadow: 0 18px 46px rgba(0,0,0,0.6), 0 6px 20px rgba(255,160,0,0.12);
+    transition: transform .6s cubic-bezier(.22,.61,.36,1), opacity .6s ease;
 }
+.hero-banner .hero-text-panel {
+    display: inline-block;
+    background: linear-gradient(135deg, rgba(8,8,8,0.24), rgba(8,8,8,0.12));
+    border: 1px solid rgba(255,255,255,0.16);
+    backdrop-filter: blur(2px) saturate(1.06);
+    -webkit-backdrop-filter: blur(2px) saturate(1.06);
+    padding: clamp(18px, 3vw, 30px);
+    border-radius: 12px;
+    box-shadow: 0 18px 48px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.08);
+    max-width: min(92%, 760px);
+    animation: fadeInUp .72s cubic-bezier(.22,.61,.36,1) both;
+    transition: background .35s ease, transform .35s ease, box-shadow .35s ease, border-color .35s ease;
+}
+.hero-banner .hero-text-panel:hover {
+    transform: translateY(-3px);
+    border-color: rgba(255,215,0,0.26);
+    box-shadow: 0 22px 52px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.12);
+}
+.hero-banner .hero-text-panel p,
+.hero-banner .hero-text-panel h1,
+.hero-banner .hero-text-panel .mb-2.5 {
+    color: #ffffff !important;
+    opacity: 1 !important;
+}
+.hero-banner .hero-content h1 {
+    font-size: clamp(2.4rem,5.2vw,4.8rem);
+    font-weight: 950;
+    letter-spacing: 0;
+    -webkit-text-stroke: 0.5px rgba(0,0,0,0.5);
+    filter: drop-shadow(0 14px 34px rgba(0,0,0,0.62));
+    line-height: 0.98;
+}
+.hero-banner .hero-content .bg-clip-text {
+    -webkit-text-stroke: 0.4px rgba(0,0,0,0.38);
+}
+.hero-banner .hero-brand-word {
+    color: #ffb000 !important;
+    background: none !important;
+    -webkit-text-fill-color: #ffb000;
+    -webkit-text-stroke: 1px rgba(0,0,0,0.72);
+    text-shadow:
+        0 2px 0 rgba(255,60,56,0.88),
+        0 10px 24px rgba(0,0,0,0.72),
+        0 0 18px rgba(255,176,0,0.42);
+    filter: none;
+}
+.hero-banner .hero-kicker {
+    color: #ffd700 !important;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.72);
+}
+.hero-banner .hero-copy {
+    color: rgba(255,255,255,0.9) !important;
+    font-size: clamp(1rem, 1.5vw, 1.2rem);
+    font-weight: 650;
+    line-height: 1.6;
+    text-shadow: 0 3px 16px rgba(0,0,0,0.82);
+}
+.hero-banner .hero-content a {
+    z-index: 21;
+    box-shadow: 0 14px 38px rgba(0,0,0,0.45), 0 8px 22px rgba(255,140,0,0.14);
+    transition: transform .28s ease, box-shadow .28s ease;
+}
+.hero-banner .hero-content a:hover { transform: translateY(-3px); }
 @media (max-width: 640px) {
     .hero-banner {
         height: 70vh;
-        min-height: 400px;
+        min-height: 360px;
+        margin-top: calc(-72px);
+        border-radius: 0 0 6px 6px;
     }
+    .hero-banner .hero-content { padding: 1.25rem; }
+    .hero-banner .hero-text-panel { padding: 16px; max-width: 95%; }
+}
+
+/* garantir que main comece após o banner na página (não flutue sobre a imagem) */
+main.relative.z-10.mx-auto.max-w-[1280px].px-4.py-8.md\:px-6.md\:py-10.lg\:px-8 {
+    margin-top: 0; /* conteúdo seguirá normalmente abaixo do banner */
 }
 </style>
 
@@ -86,10 +180,14 @@ include __DIR__ . '/includes/header.php';
     <div class="hero-bg" style="background-image: url('<?= url('assets/images/banners/Produtos.png') ?>');"></div>
     <div class="hero-overlay"></div>
     <div class="hero-content">
-        <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-glow-400">apoio ao projeto</p>
-        <h1 class="m-0 text-[clamp(2.5rem,6vw,5rem)] font-black leading-tight tracking-tight text-white">Produtos <span class="bg-gradient-to-r from-ember-500 to-glow-400 bg-clip-text text-transparent drop-shadow-[0_0_10px_rgba(255,107,0,0.8)]">CAFÉ</span></h1>
-        <p class="mt-4 mx-auto max-w-[42rem] text-lg text-midnight-300">Camisetas, acessórios, chaveiros, canecas e moletons para quem quer apoiar a CAFÉ STORE.</p>
-        <a href="#produtos" class="mt-8 inline-flex min-h-[44px] items-center justify-center gap-2 rounded-[10px] border border-glow-400 bg-gradient-to-r from-ember-500 to-glow-400 bg-[length:200%_100%] bg-[0%_0%] px-[18px] font-black leading-none text-midnight-950 shadow-[0_0_15px_rgba(255,107,0,0.3)] transition-all duration-300 hover:bg-[100%_0] hover:scale-105 hover:shadow-[0_0_20px_rgba(255,107,0,0.6),0_0_40px_rgba(255,107,0,0.3)]">Ver Produtos</a>
+        <div class="hero-text-panel">
+            <p class="hero-kicker mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em]">apoio ao projeto</p>
+            <h1 class="m-0 text-[clamp(2.5rem,6vw,5rem)] font-black leading-tight tracking-tight text-white">Produtos <span class="hero-brand-word">CAFÉ</span></h1>
+            <p class="hero-copy mt-4 mx-auto max-w-[42rem]">Camisetas, acessórios, chaveiros, canecas e moletons para quem quer apoiar a CAFÉ STORE.</p>
+            <div style="margin-top:14px; display:flex; justify-content:center;">
+                <a href="#produtos" class="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-[10px] border border-glow-400 bg-gradient-to-r from-ember-500 to-glow-400 bg-[length:200%_100%] bg-[0%_0%] px-[18px] font-black leading-none text-midnight-950 shadow-[0_0_15px_rgba(255,107,0,0.3)] transition-all duration-300 hover:bg-[100%_0] hover:scale-105 hover:shadow-[0_0_20px_rgba(255,107,0,0.6),0_0_40px_rgba(255,107,0,0.3)]">Ver Produtos</a>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -148,16 +246,23 @@ include __DIR__ . '/includes/header.php';
 <script>
 (function() {
     var hero = document.getElementById('heroBanner');
+    if (!hero) return;
+    var heroBg = hero.querySelector('.hero-bg');
     function updateOpacity() {
-        if (!hero) return;
-        var scrollY = window.scrollY;
+        var scrollY = window.scrollY || 0;
         var heroHeight = hero.offsetHeight || 1;
-        var distance = Math.min(heroHeight, scrollY);
-        var progress = distance / heroHeight;
-        // começar mais visível (0.6) e tornar totalmente opaco ao rolar
-        hero.style.opacity = 0.6 + (progress * 0.4);
+        // progress 0..1 as we scroll through the hero height
+        var progress = Math.min(Math.max(scrollY / heroHeight, 0), 1);
+        // banner fades from 1 -> 0 as user scrolls through hero
+        hero.style.opacity = String(1 - progress);
+        // subtle parallax and transform for depth
+        heroBg.style.transform = 'translateY(' + Math.round(progress * 20) + 'px) scale(' + (1 - progress*0.02) + ')';
+        // increase blur slightly as it fades
+        heroBg.style.filter = 'saturate(1.05) contrast(1.03) blur(' + (progress * 4).toFixed(2) + 'px)';
     }
     window.addEventListener('scroll', updateOpacity, { passive: true });
+    // also update on resize
+    window.addEventListener('resize', updateOpacity, { passive: true });
     updateOpacity();
 })();
 </script>

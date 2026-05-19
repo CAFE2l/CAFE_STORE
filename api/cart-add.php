@@ -21,4 +21,6 @@ $quantity = min($quantity, (int) $product['stock']);
 $_SESSION['cart'][$productId]['quantity'] = min((int) $product['stock'], (int) ($_SESSION['cart'][$productId]['quantity'] ?? 0) + $quantity);
 
 flash('success', 'Produto adicionado ao carrinho.');
-redirect('cart.php');
+$redirectTo = $_POST['redirect_to'] ?? 'cart.php';
+$allowedRedirects = ['cart.php', 'checkout.php'];
+redirect(in_array($redirectTo, $allowedRedirects, true) ? $redirectTo : 'cart.php');
