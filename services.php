@@ -120,33 +120,33 @@ include __DIR__ . "/includes/header.php";
 
 <section class="grid items-center gap-8 py-8 md:grid-cols-[minmax(0,1fr)_minmax(360px,0.92fr)] md:py-14">
     <div class="max-w-[680px]">
-        <p class="mb-4 text-[0.75rem] font-black uppercase tracking-[0.12em] text-glow-400">agência digital</p>
+        <p class="mb-4 text-[0.75rem] font-black uppercase tracking-[0.12em] text-amber-glow">agência digital</p>
         <h1 class="m-0 max-w-[660px] text-[clamp(2.55rem,4.8vw,4.35rem)] font-black leading-[1.08]">
-            <span class="block text-white">Soluções digitais</span>
-            <span class="mt-3 block text-glow-400">CAFÉ STORE</span>
+            <span class="block text-text-primary">Soluções digitais</span>
+            <span class="mt-3 block text-amber-glow">CAFÉ STORE</span>
         </h1>
-        <p class="mt-7 max-w-[40rem] text-[clamp(1rem,1.5vw,1.16rem)] leading-relaxed text-midnight-400">Eu faço sites, landing pages, vídeos curtos, vídeos longos e web aplicações para o seu negócio. Cada produto digital tem escopo, prazo e entrega definidos antes do início.</p>
+        <p class="mt-7 max-w-[40rem] text-[clamp(1rem,1.5vw,1.16rem)] leading-relaxed text-text-muted">Eu faço sites, landing pages, vídeos curtos, vídeos longos e web aplicações para o seu negócio. Cada produto digital tem escopo, prazo e entrega definidos antes do início.</p>
         <div class="mt-8 flex flex-wrap gap-3">
-            <a class="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-[10px] border border-glow-400 bg-glow-400 px-[18px] font-black leading-none text-midnight-950 transition-all duration-300 hover:bg-glow-300" href="#serviços">Ver soluções</a>
-            <a class="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-[10px] border border-white/20 bg-white/5 px-[18px] font-black leading-none text-white transition-all duration-300 hover:border-glow-400 hover:bg-white/10" href="<?= url(
+            <a class="btn-primary" href="#serviços">Ver soluções</a>
+            <a class="btn-ghost min-h-[44px]" href="<?= url(
                 "products.php",
             ) ?>">Ver produtos</a>
         </div>
     </div>
-    <div class="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-lg">
-        <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-glow-400">como funciona</p>
+    <div class="glass p-6">
+        <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-amber-glow">como funciona</p>
         <div class="grid gap-4">
-            <div class="rounded-[10px] border border-white/10 bg-midnight-950/70 p-4">
-                <strong class="text-glow-400">1. Briefing</strong>
-                <p class="mt-2 text-midnight-400">Você explica seu objetivo, público, prazo e o que o negócio precisa resolver.</p>
+            <div class="rounded-[10px] border border-white/10 bg-background/60 p-4">
+                <strong class="text-amber-glow">1. Briefing</strong>
+                <p class="mt-2 text-text-muted">Você explica seu objetivo, público, prazo e o que o negócio precisa resolver.</p>
             </div>
-            <div class="rounded-[10px] border border-white/10 bg-midnight-950/70 p-4">
-                <strong class="text-glow-400">2. Orçamento</strong>
-                <p class="mt-2 text-midnight-400">O valor é definido pelo produto escolhido e pelo escopo real da entrega.</p>
+            <div class="rounded-[10px] border border-white/10 bg-background/60 p-4">
+                <strong class="text-amber-glow">2. Orçamento</strong>
+                <p class="mt-2 text-text-muted">O valor é definido pelo produto escolhido e pelo escopo real da entrega.</p>
             </div>
-            <div class="rounded-[10px] border border-white/10 bg-midnight-950/70 p-4">
-                <strong class="text-glow-400">3. Entrega online</strong>
-                <p class="mt-2 text-midnight-400">O projeto é entregue digitalmente, com revisão e orientação de uso conforme combinado.</p>
+            <div class="rounded-[10px] border border-white/10 bg-background/60 p-4">
+                <strong class="text-amber-glow">3. Entrega online</strong>
+                <p class="mt-2 text-text-muted">O projeto é entregue digitalmente, com revisão e orientação de uso conforme combinado.</p>
             </div>
         </div>
     </div>
@@ -155,61 +155,61 @@ include __DIR__ . "/includes/header.php";
 <section id="serviços" class="mt-4">
     <div class="mb-6 flex items-end justify-between gap-6">
         <div>
-            <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-glow-400">catálogo de produtos digitais</p>
-            <h2 class="m-0 text-[clamp(2rem,4vw,3.4rem)] font-black leading-tight tracking-tight text-ember-400">O que posso fazer pelo seu negócio</h2>
+            <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-amber-glow">catálogo de produtos digitais</p>
+            <h2 class="m-0 text-[clamp(2rem,4vw,3.4rem)] font-black leading-tight tracking-tight text-amber-glow">O que posso fazer pelo seu negócio</h2>
         </div>
     </div>
 
     <div class="grid gap-5 lg:grid-cols-2">
         <?php foreach ($services as $service): ?>
-            <article class="group flex min-h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.055] p-4 backdrop-blur-xl shadow-[0_18px_48px_rgba(0,0,0,0.28)] transition-all duration-300 hover:-translate-y-1 hover:border-ember-500/45 hover:shadow-[0_24px_58px_rgba(0,0,0,0.36),0_0_26px_rgba(255,107,0,0.12)]">
-                <div class="overflow-hidden rounded-[14px] border border-white/10 bg-midnight-950">
+            <article class="group flex min-h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.055] p-4 backdrop-blur-xl shadow-[0_18px_48px_rgba(0,0,0,0.28)] transition-all duration-300 hover:-translate-y-1 hover:border-amber-secondary/40 hover:shadow-[0_24px_58px_rgba(0,0,0,0.36),0_0_26px_rgba(200,135,58,0.12)]">
+                <div class="overflow-hidden rounded-[14px] border border-white/10 bg-background">
                     <img src="<?= e(url($service["image"])) ?>" alt="Resultado de <?= e($service["name"]) ?>" class="aspect-[16/9] w-full object-cover opacity-90 transition duration-500 group-hover:scale-[1.04] group-hover:opacity-100">
                 </div>
 
                 <div class="mt-5 flex flex-wrap items-center justify-between gap-3">
-                    <span class="inline-flex w-fit items-center justify-center rounded-full border border-glow-400/35 bg-glow-400/10 px-3 py-1 text-[0.76rem] font-black leading-none text-glow-400"><?= e($service["tag"]) ?></span>
+                    <span class="inline-flex w-fit items-center justify-center rounded-full border border-amber-accent/30 bg-amber-accent/10 px-3 py-1 text-[0.76rem] font-black leading-none text-amber-glow"><?= e($service["tag"]) ?></span>
                     <div class="text-right">
-                        <strong class="block text-sm font-black text-glow-400"><?= e($service["price"]) ?></strong>
-                        <span class="mt-1 block text-xs font-bold text-midnight-400">Prazo: <?= e($service["deadline"]) ?></span>
+                        <strong class="block text-sm font-black text-amber-glow"><?= e($service["price"]) ?></strong>
+                        <span class="mt-1 block text-xs font-bold text-text-muted">Prazo: <?= e($service["deadline"]) ?></span>
                     </div>
                 </div>
 
-                <h3 class="mt-4 m-0 text-2xl font-black text-white"><?= e($service["name"]) ?></h3>
-                <p class="mt-3 leading-relaxed text-midnight-300"><?= e($service["description"]) ?></p>
+                <h3 class="mt-4 m-0 text-2xl font-black text-text-primary"><?= e($service["name"]) ?></h3>
+                <p class="mt-3 leading-relaxed text-text-secondary"><?= e($service["description"]) ?></p>
 
-                <div class="mt-4 rounded-[10px] border border-glow-400/35 bg-glow-400/10 p-3">
-                    <strong class="text-sm font-black text-glow-400">Resultado que o cliente terá</strong>
-                    <p class="mt-2 text-sm leading-relaxed text-white/85"><?= e($service["result"]) ?></p>
+                <div class="mt-4 rounded-[10px] border border-amber-accent/30 bg-amber-accent/10 p-3">
+                    <strong class="text-sm font-black text-amber-glow">Resultado que o cliente terá</strong>
+                    <p class="mt-2 text-sm leading-relaxed text-text-primary/85"><?= e($service["result"]) ?></p>
                 </div>
 
-                <ul class="mt-4 grid gap-2 text-midnight-300">
+                <ul class="mt-4 grid gap-2 text-text-secondary">
                     <?php foreach ($service["items"] as $item): ?>
-                        <li class="rounded-[10px] border border-white/10 bg-midnight-950/60 px-3 py-2"><?= e(
+                        <li class="rounded-[10px] border border-white/10 bg-background/50 px-3 py-2"><?= e(
                             $item,
                         ) ?></li>
                     <?php endforeach; ?>
                 </ul>
 
-                <a class="mt-5 inline-flex min-h-[48px] w-fit items-center justify-center gap-2 rounded-[10px] border border-ember-500/45 bg-ember-500/15 px-[18px] font-black leading-none text-white transition-all duration-300 hover:-translate-y-0.5 hover:border-glow-400 hover:bg-ember-500/25" href="<?= e(url($service["portfolio"])) ?>">Ver projeto real</a>
+                <a class="mt-5 inline-flex min-h-[48px] w-fit items-center justify-center gap-2 rounded-[10px] border border-amber-secondary/40 bg-amber-secondary/10 px-[18px] font-black leading-none text-text-primary transition-all duration-300 hover:-translate-y-0.5 hover:border-amber-accent hover:bg-amber-secondary/20" href="<?= e(url($service["portfolio"])) ?>">Ver projeto real</a>
 
-                <blockquote class="mt-4 rounded-[10px] border border-glow-400/35 bg-glow-400/10 p-3 text-sm font-semibold leading-relaxed text-glow-100">
+                <blockquote class="mt-4 rounded-[10px] border border-amber-accent/30 bg-amber-accent/10 p-3 text-sm font-semibold leading-relaxed text-amber-glow/90">
                     “<?= e($service["testimonial"]) ?>”
                 </blockquote>
 
                 <div class="mt-auto grid gap-3 pt-4 sm:grid-cols-2">
-                    <a class="inline-flex min-h-[44px] items-center justify-center rounded-[10px] border border-ember-500 bg-ember-600/75 px-[18px] font-black leading-none text-white transition-all duration-300 hover:bg-ember-500 hover:shadow-[0_0_18px_rgba(249,115,22,0.32)]" href="<?= url('orcamento.php?service=' . urlencode($service['name'])) ?>">Solicitar orçamento</a>
-                    <a class="inline-flex min-h-[44px] items-center justify-center rounded-[10px] border border-white/20 bg-white/5 px-[18px] font-black leading-none text-white transition-all duration-300 hover:border-glow-400 hover:bg-white/10" href="<?= e(url($service["portfolio"])) ?>">Ver exemplo</a>
+                    <a class="inline-flex min-h-[44px] items-center justify-center rounded-[10px] border border-amber-secondary bg-amber-accent/70 px-[18px] font-black leading-none text-background transition-all duration-300 hover:bg-amber-accent hover:shadow-[0_0_18px_rgba(200,135,58,0.32)]" href="<?= url('orcamento.php?service=' . urlencode($service['name'])) ?>">Solicitar orçamento</a>
+                    <a class="btn-ghost min-h-[44px]" href="<?= e(url($service["portfolio"])) ?>">Ver exemplo</a>
                 </div>
             </article>
         <?php endforeach; ?>
     </div>
 </section>
 
-<section class="mt-14 rounded-2xl border border-glow-400/40 bg-glow-400/10 p-6 backdrop-blur-lg">
-    <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-glow-400">portfólio e prova social</p>
-    <h2 class="m-0 text-2xl font-black text-glow-400">Cada serviço mostra resultado, projeto real e depoimento.</h2>
-    <p class="mt-3 max-w-[56rem] leading-relaxed text-midnight-300">A ideia é o cliente entender o que recebe, ver um exemplo publicado e conferir uma prova social antes de pedir orçamento.</p>
+<section class="mt-14 rounded-2xl border border-amber-accent/30 bg-amber-accent/10 p-6 backdrop-blur-lg">
+    <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-amber-glow">portfólio e prova social</p>
+    <h2 class="m-0 text-2xl font-black text-amber-glow">Cada serviço mostra resultado, projeto real e depoimento.</h2>
+    <p class="mt-3 max-w-[56rem] leading-relaxed text-text-secondary">A ideia é o cliente entender o que recebe, ver um exemplo publicado e conferir uma prova social antes de pedir orçamento.</p>
 </section>
 
 <?php include __DIR__ . "/includes/footer.php"; ?>

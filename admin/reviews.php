@@ -57,25 +57,25 @@ include __DIR__ . '/../includes/header.php';
     <section class="grid gap-5 min-w-0">
         <div class="flex items-end justify-between gap-6">
             <div>
-                <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-glow-400">moderação</p>
+                <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-amber-glow">moderação</p>
                 <h1 class="m-0 text-[clamp(2rem,4vw,3.4rem)] font-black leading-tight tracking-tight">Avaliações</h1>
             </div>
         </div>
 
-        <form class="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-lg flex flex-wrap gap-3 items-center" method="get">
-            <select name="status" class="min-h-[44px] rounded-[10px] border border-white/10 bg-midnight-950/80 p-2.5 text-white outline-none backdrop-blur transition-all duration-300 focus:border-glow-400">
+        <form class="glass flex flex-wrap items-center gap-3 p-4" method="get">
+            <select name="status" class="input-field">
                 <option value="" class="text-black">Todos os status</option>
                 <?php foreach (['pending', 'approved', 'rejected'] as $item): ?>
                     <option value="<?= e($item) ?>" <?= $status === $item ? 'selected' : '' ?> class="text-black"><?= e($item) ?></option>
                 <?php endforeach; ?>
             </select>
-            <select name="product_id" class="min-h-[44px] rounded-[10px] border border-white/10 bg-midnight-950/80 p-2.5 text-white outline-none backdrop-blur transition-all duration-300 focus:border-glow-400">
+            <select name="product_id" class="input-field">
                 <option value="0" class="text-black">Todos os produtos</option>
                 <?php foreach ($products as $product): ?>
                     <option value="<?= (int) $product['id'] ?>" <?= $productId === (int) $product['id'] ? 'selected' : '' ?> class="text-black"><?= e($product['name']) ?></option>
                 <?php endforeach; ?>
             </select>
-            <button class="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-[10px] border border-white/20 bg-white/5 px-[18px] font-black leading-none text-white backdrop-blur transition-all duration-300 hover:scale-105 hover:border-glow-400 hover:shadow-[0_0_15px_rgba(255,215,0,0.2)]" type="submit">Filtrar</button>
+            <button class="btn-secondary min-h-[44px]" type="submit">Filtrar</button>
         </form>
 
         <div class="grid gap-3">
@@ -87,23 +87,23 @@ include __DIR__ . '/../includes/header.php';
                 ?>
                 <article class="rounded-2xl border border-white/10 bg-white/5 p-3.5 backdrop-blur-lg">
                     <div class="grid gap-2">
-                        <strong><?= e($review['product_name']) ?></strong>
-                        <small class="text-midnight-400"><?= e($review['user_name']) ?> - <?= (int) $review['rating'] ?> estrelas - <?= e($review['status']) ?></small>
-                        <p class="text-midnight-400"><?= nl2br(e($review['comment'])) ?></p>
+                        <strong class="text-text-primary"><?= e($review['product_name']) ?></strong>
+                        <small class="text-text-muted"><?= e($review['user_name']) ?> - <?= (int) $review['rating'] ?> estrelas - <?= e($review['status']) ?></small>
+                        <p class="text-text-muted"><?= nl2br(e($review['comment'])) ?></p>
                         <?php foreach ($images as $image): ?>
-                            <a href="<?= e(product_image($image['image_url'])) ?>" target="_blank" rel="noopener" class="text-glow-400 font-bold">Foto</a>
+                            <a href="<?= e(product_image($image['image_url'])) ?>" target="_blank" rel="noopener" class="text-amber-glow font-bold">Foto</a>
                         <?php endforeach; ?>
                     </div>
                     <form method="post" class="flex flex-wrap items-center gap-3 mt-3">
                         <input type="hidden" name="csrf_token" value="<?= e(generate_csrf_token()) ?>">
                         <input type="hidden" name="review_id" value="<?= (int) $review['id'] ?>">
-                        <button class="inline-flex min-h-[36px] items-center justify-center gap-2 rounded-[10px] border border-glow-400 bg-gradient-to-r from-ember-500 to-glow-400 bg-[length:200%_100%] bg-[0%_0%] px-3 text-[0.86rem] font-black leading-none text-midnight-950 transition-all duration-300 hover:bg-[100%_0] hover:scale-105" name="action" value="approved" type="submit">Aprovar</button>
-                        <button class="inline-flex min-h-[36px] items-center justify-center gap-2 rounded-[10px] border border-white/20 bg-white/5 px-3 text-[0.86rem] font-black leading-none text-white backdrop-blur transition-all duration-300 hover:scale-105 hover:border-glow-400" name="action" value="rejected" type="submit">Rejeitar</button>
-                        <button class="border-0 bg-transparent cursor-pointer font-black text-fire-300 transition-all duration-300 hover:text-fire-500 hover:drop-shadow-[0_0_10px_rgba(255,60,56,0.5)]" name="action" value="delete" type="submit">Excluir</button>
+                        <button class="btn-primary min-h-[36px] px-3 text-[0.86rem]" name="action" value="approved" type="submit">Aprovar</button>
+                        <button class="btn-secondary min-h-[36px] px-3 text-[0.86rem]" name="action" value="rejected" type="submit">Rejeitar</button>
+                        <button class="border-0 bg-transparent cursor-pointer font-black text-state-error transition-all duration-300 hover:text-state-error/80 hover:drop-shadow-[0_0_10px_rgba(224,85,85,0.5)]" name="action" value="delete" type="submit">Excluir</button>
                     </form>
                 </article>
             <?php endforeach; ?>
-            <?php if (!$reviews): ?><p class="text-midnight-400">Nenhuma avaliação encontrada.</p><?php endif; ?>
+            <?php if (!$reviews): ?><p class="text-text-muted">Nenhuma avaliação encontrada.</p><?php endif; ?>
         </div>
     </section>
 </div>

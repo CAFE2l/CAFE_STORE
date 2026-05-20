@@ -52,81 +52,81 @@ include __DIR__ . '/../includes/header.php';
     <section class="grid min-w-0 gap-5">
         <div class="flex items-end justify-between gap-6 max-md:flex-col max-md:items-start">
             <div>
-                <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-glow-400">painel administrativo</p>
+                <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-amber-glow">painel administrativo</p>
                 <h1 class="m-0 text-[clamp(2rem,4vw,3.4rem)] font-black leading-tight tracking-tight">Dashboard da empresa</h1>
             </div>
-            <a class="inline-flex min-h-[44px] items-center justify-center rounded-[10px] border border-glow-400 bg-glow-400 px-[18px] font-black text-midnight-950" href="<?= url('admin/products.php') ?>">Gerenciar produtos</a>
+            <a class="btn-primary min-h-[44px]" href="<?= url('admin/products.php') ?>">Gerenciar produtos</a>
         </div>
 
         <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <div class="min-h-[132px] rounded-2xl border border-white/10 bg-white/5 p-[18px] backdrop-blur-lg">
-                <span class="text-[0.92rem] text-midnight-400">Receita aprovada</span>
-                <strong class="mt-3.5 block text-[clamp(1.55rem,3vw,2.15rem)] font-black leading-none text-glow-400"><?= money($metrics['revenue']) ?></strong>
+            <div class="min-h-[132px] rounded-2xl border border-white/10 bg-background/60 p-[18px]">
+                <span class="text-[0.92rem] text-text-muted">Receita aprovada</span>
+                <strong class="mt-3.5 block text-[clamp(1.55rem,3vw,2.15rem)] font-black leading-none text-amber-glow"><?= money($metrics['revenue']) ?></strong>
             </div>
-            <div class="min-h-[132px] rounded-2xl border border-white/10 bg-white/5 p-[18px] backdrop-blur-lg">
-                <span class="text-[0.92rem] text-midnight-400">Pedidos pendentes</span>
-                <strong class="mt-3.5 block text-[clamp(1.55rem,3vw,2.15rem)] font-black leading-none text-glow-400"><?= $metrics['pending'] ?></strong>
+            <div class="min-h-[132px] rounded-2xl border border-white/10 bg-background/60 p-[18px]">
+                <span class="text-[0.92rem] text-text-muted">Pedidos pendentes</span>
+                <strong class="mt-3.5 block text-[clamp(1.55rem,3vw,2.15rem)] font-black leading-none text-amber-glow"><?= $metrics['pending'] ?></strong>
             </div>
-            <div class="min-h-[132px] rounded-2xl border border-white/10 bg-white/5 p-[18px] backdrop-blur-lg">
-                <span class="text-[0.92rem] text-midnight-400">Produtos ativos</span>
-                <strong class="mt-3.5 block text-[clamp(1.55rem,3vw,2.15rem)] font-black leading-none text-glow-400"><?= $metrics['products'] ?></strong>
+            <div class="min-h-[132px] rounded-2xl border border-white/10 bg-background/60 p-[18px]">
+                <span class="text-[0.92rem] text-text-muted">Produtos ativos</span>
+                <strong class="mt-3.5 block text-[clamp(1.55rem,3vw,2.15rem)] font-black leading-none text-amber-glow"><?= $metrics['products'] ?></strong>
             </div>
-            <div class="min-h-[132px] rounded-2xl border border-white/10 bg-white/5 p-[18px] backdrop-blur-lg">
-                <span class="text-[0.92rem] text-midnight-400">Clientes registrados</span>
-                <strong class="mt-3.5 block text-[clamp(1.55rem,3vw,2.15rem)] font-black leading-none text-glow-400"><?= $metrics['customers'] ?></strong>
+            <div class="min-h-[132px] rounded-2xl border border-white/10 bg-background/60 p-[18px]">
+                <span class="text-[0.92rem] text-text-muted">Clientes registrados</span>
+                <strong class="mt-3.5 block text-[clamp(1.55rem,3vw,2.15rem)] font-black leading-none text-amber-glow"><?= $metrics['customers'] ?></strong>
             </div>
         </div>
 
         <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <a class="rounded-2xl border border-white/10 bg-white/5 p-5 transition-all hover:border-glow-400" href="<?= url('admin/orders.php') ?>">
-                <span class="text-sm text-midnight-400">Pedidos totais</span>
-                <strong class="mt-2 block text-2xl font-black text-white"><?= $metrics['orders'] ?></strong>
+            <a class="rounded-2xl border border-white/10 bg-background/60 p-5 transition-all hover:border-amber-accent" href="<?= url('admin/orders.php') ?>">
+                <span class="text-sm text-text-muted">Pedidos totais</span>
+                <strong class="mt-2 block text-2xl font-black text-text-primary"><?= $metrics['orders'] ?></strong>
             </a>
-            <a class="rounded-2xl border border-white/10 bg-white/5 p-5 transition-all hover:border-glow-400" href="<?= url('admin/users.php') ?>">
-                <span class="text-sm text-midnight-400">Usuários totais</span>
-                <strong class="mt-2 block text-2xl font-black text-white"><?= $metrics['users'] ?></strong>
+            <a class="rounded-2xl border border-white/10 bg-background/60 p-5 transition-all hover:border-amber-accent" href="<?= url('admin/users.php') ?>">
+                <span class="text-sm text-text-muted">Usuários totais</span>
+                <strong class="mt-2 block text-2xl font-black text-text-primary"><?= $metrics['users'] ?></strong>
             </a>
-            <a class="rounded-2xl border border-white/10 bg-white/5 p-5 transition-all hover:border-glow-400" href="<?= url('admin/reviews.php?status=pending') ?>">
-                <span class="text-sm text-midnight-400">Avaliações pendentes</span>
-                <strong class="mt-2 block text-2xl font-black text-white"><?= $metrics['reviews_pending'] ?></strong>
+            <a class="rounded-2xl border border-white/10 bg-background/60 p-5 transition-all hover:border-amber-accent" href="<?= url('admin/reviews.php?status=pending') ?>">
+                <span class="text-sm text-text-muted">Avaliações pendentes</span>
+                <strong class="mt-2 block text-2xl font-black text-text-primary"><?= $metrics['reviews_pending'] ?></strong>
             </a>
-            <div class="rounded-2xl border border-white/10 bg-white/5 p-5">
-                <span class="text-sm text-midnight-400">Cupons ativos</span>
-                <strong class="mt-2 block text-2xl font-black text-white"><?= $metrics['coupons_active'] ?></strong>
+            <div class="rounded-2xl border border-white/10 bg-background/60 p-5">
+                <span class="text-sm text-text-muted">Cupons ativos</span>
+                <strong class="mt-2 block text-2xl font-black text-text-primary"><?= $metrics['coupons_active'] ?></strong>
             </div>
         </div>
 
         <div class="grid gap-5 xl:grid-cols-[1.15fr_0.85fr]">
-            <section class="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-lg">
+            <section class="glass rounded-2xl p-6">
                 <div class="mb-4 flex items-center justify-between gap-4">
-                    <h2 class="m-0 text-2xl font-black text-white">Pedidos recentes</h2>
-                    <a class="text-sm font-black text-glow-400" href="<?= url('admin/orders.php') ?>">Ver todos</a>
+                    <h2 class="m-0 text-2xl font-black text-text-primary">Pedidos recentes</h2>
+                    <a class="text-sm font-black text-amber-glow" href="<?= url('admin/orders.php') ?>">Ver todos</a>
                 </div>
                 <div class="grid gap-3">
                     <?php foreach ($recentOrders as $order): ?>
-                        <div class="grid items-center gap-3 rounded-[10px] border border-white/10 bg-midnight-950/60 p-4 md:grid-cols-[1fr_auto_auto]">
+                        <div class="grid items-center gap-3 rounded-[10px] border border-white/10 bg-background/60 p-4 md:grid-cols-[1fr_auto_auto]">
                             <div>
-                                <strong class="text-white">#<?= (int) $order['id'] ?> - <?= e($order['user_name'] ?? 'Cliente') ?></strong>
-                                <p class="mt-1 text-sm text-midnight-400"><?= e($order['user_email'] ?? '') ?> • <?= date('d/m/Y H:i', strtotime((string) $order['created_at'])) ?></p>
+                                <strong class="text-text-primary">#<?= (int) $order['id'] ?> - <?= e($order['user_name'] ?? 'Cliente') ?></strong>
+                                <p class="mt-1 text-sm text-text-muted"><?= e($order['user_email'] ?? '') ?> • <?= date('d/m/Y H:i', strtotime((string) $order['created_at'])) ?></p>
                             </div>
-                            <span class="rounded-full border border-white/20 px-3 py-1 text-xs font-black text-midnight-300"><?= e($order['payment_status']) ?></span>
-                            <strong class="text-glow-400"><?= money((float) ($order['total_amount'] ?? $order['total'])) ?></strong>
+                            <span class="badge-muted"><?= e($order['payment_status']) ?></span>
+                            <strong class="text-amber-glow"><?= money((float) ($order['total_amount'] ?? $order['total'])) ?></strong>
                         </div>
                     <?php endforeach; ?>
-                    <?php if (!$recentOrders): ?><p class="text-midnight-400">Nenhum pedido encontrado.</p><?php endif; ?>
+                    <?php if (!$recentOrders): ?><p class="text-text-muted">Nenhum pedido encontrado.</p><?php endif; ?>
                 </div>
             </section>
 
-            <section class="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-lg">
-                <h2 class="m-0 mb-4 text-2xl font-black text-white">Estoque e produtos</h2>
+            <section class="glass rounded-2xl p-6">
+                <h2 class="m-0 mb-4 text-2xl font-black text-text-primary">Estoque e produtos</h2>
                 <div class="grid gap-3">
                     <?php foreach ($lowStock as $product): ?>
-                        <a class="rounded-[10px] border border-white/10 bg-midnight-950/60 p-4 transition-all hover:border-glow-400" href="<?= url('admin/product-edit.php?id=' . (int) $product['id']) ?>">
+                        <a class="rounded-[10px] border border-white/10 bg-background/60 p-4 transition-all hover:border-amber-accent" href="<?= url('admin/product-edit.php?id=' . (int) $product['id']) ?>">
                             <div class="flex items-center justify-between gap-3">
-                                <strong class="text-white"><?= e($product['name']) ?></strong>
-                                <span class="text-glow-400"><?= (int) $product['stock'] ?></span>
+                                <strong class="text-text-primary"><?= e($product['name']) ?></strong>
+                                <span class="text-amber-glow"><?= (int) $product['stock'] ?></span>
                             </div>
-                            <p class="mt-1 text-sm text-midnight-400"><?= e(product_type_label($product['type'])) ?></p>
+                            <p class="mt-1 text-sm text-text-muted"><?= e(product_type_label($product['type'])) ?></p>
                         </a>
                     <?php endforeach; ?>
                 </div>
@@ -134,46 +134,46 @@ include __DIR__ . '/../includes/header.php';
         </div>
 
         <div class="grid gap-5 xl:grid-cols-3">
-            <section class="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-lg xl:col-span-1">
-                <h2 class="m-0 mb-4 text-2xl font-black text-white">Usuários recentes</h2>
+            <section class="glass rounded-2xl p-6 xl:col-span-1">
+                <h2 class="m-0 mb-4 text-2xl font-black text-text-primary">Usuários recentes</h2>
                 <div class="grid gap-3">
                     <?php foreach ($recentUsers as $recentUser): ?>
-                        <div class="rounded-[10px] border border-white/10 bg-midnight-950/60 p-4">
-                            <strong class="text-white"><?= e($recentUser['name']) ?></strong>
-                            <p class="mt-1 text-sm text-midnight-400"><?= e($recentUser['email']) ?></p>
-                            <span class="mt-2 inline-flex rounded-full border border-white/20 px-3 py-1 text-xs font-black text-midnight-300"><?= e($recentUser['role']) ?></span>
+                        <div class="rounded-[10px] border border-white/10 bg-background/60 p-4">
+                            <strong class="text-text-primary"><?= e($recentUser['name']) ?></strong>
+                            <p class="mt-1 text-sm text-text-muted"><?= e($recentUser['email']) ?></p>
+                            <span class="badge-muted mt-2"><?= e($recentUser['role']) ?></span>
                         </div>
                     <?php endforeach; ?>
                 </div>
             </section>
 
-            <section class="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-lg xl:col-span-1">
-                <h2 class="m-0 mb-4 text-2xl font-black text-white">Avaliações pendentes</h2>
+            <section class="glass rounded-2xl p-6 xl:col-span-1">
+                <h2 class="m-0 mb-4 text-2xl font-black text-text-primary">Avaliações pendentes</h2>
                 <div class="grid gap-3">
                     <?php foreach ($pendingReviews as $review): ?>
-                        <a class="rounded-[10px] border border-white/10 bg-midnight-950/60 p-4 transition-all hover:border-glow-400" href="<?= url('admin/reviews.php') ?>">
+                        <a class="rounded-[10px] border border-white/10 bg-background/60 p-4 transition-all hover:border-amber-accent" href="<?= url('admin/reviews.php') ?>">
                             <div class="flex items-center justify-between gap-3">
-                                <strong class="text-white"><?= e($review['product_name']) ?></strong>
-                                <span class="text-glow-400"><?= str_repeat('★', (int) $review['rating']) ?></span>
+                                <strong class="text-text-primary"><?= e($review['product_name']) ?></strong>
+                                <span class="text-amber-glow"><?= str_repeat('★', (int) $review['rating']) ?></span>
                             </div>
-                            <p class="mt-2 text-sm text-midnight-400"><?= e(excerpt($review['comment'] ?: 'Sem comentário.', 100)) ?></p>
-                            <p class="mt-2 text-xs font-bold text-midnight-500"><?= e($review['user_name']) ?></p>
+                            <p class="mt-2 text-sm text-text-muted"><?= e(excerpt($review['comment'] ?: 'Sem comentário.', 100)) ?></p>
+                            <p class="mt-2 text-xs font-bold text-text-muted"><?= e($review['user_name']) ?></p>
                         </a>
                     <?php endforeach; ?>
-                    <?php if (!$pendingReviews): ?><p class="text-midnight-400">Nenhuma avaliação pendente.</p><?php endif; ?>
+                    <?php if (!$pendingReviews): ?><p class="text-text-muted">Nenhuma avaliação pendente.</p><?php endif; ?>
                 </div>
             </section>
 
-            <section class="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-lg xl:col-span-1">
-                <h2 class="m-0 mb-4 text-2xl font-black text-white">Mais apoiados</h2>
+            <section class="glass rounded-2xl p-6 xl:col-span-1">
+                <h2 class="m-0 mb-4 text-2xl font-black text-text-primary">Mais apoiados</h2>
                 <div class="grid gap-3">
                     <?php foreach ($topProducts as $product): ?>
-                        <a class="rounded-[10px] border border-white/10 bg-midnight-950/60 p-4 transition-all hover:border-glow-400" href="<?= url('product.php?slug=' . urlencode($product['slug'])) ?>">
+                        <a class="rounded-[10px] border border-white/10 bg-background/60 p-4 transition-all hover:border-amber-accent" href="<?= url('product.php?slug=' . urlencode($product['slug'])) ?>">
                             <div class="flex items-center justify-between gap-3">
-                                <strong class="text-white"><?= e($product['name']) ?></strong>
-                                <span class="text-glow-400"><?= (int) $product['sold'] ?>x</span>
+                                <strong class="text-text-primary"><?= e($product['name']) ?></strong>
+                                <span class="text-amber-glow"><?= (int) $product['sold'] ?>x</span>
                             </div>
-                            <p class="mt-1 text-sm text-midnight-400"><?= money((float) $product['total']) ?></p>
+                            <p class="mt-1 text-sm text-text-muted"><?= money((float) $product['total']) ?></p>
                         </a>
                     <?php endforeach; ?>
                 </div>

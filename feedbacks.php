@@ -142,19 +142,19 @@ include __DIR__ . '/includes/header.php';
 ?>
 <section class="grid items-end gap-6 py-8 lg:grid-cols-[1fr_auto]">
     <div>
-        <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-glow-400">prova social</p>
+        <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-amber-glow">prova social</p>
         <h1 class="m-0 max-w-[760px] text-[clamp(2.4rem,5vw,4.6rem)] font-black leading-tight tracking-tight">
-            Feedbacks que viram <span class="text-glow-400">cases reais</span>
+            Feedbacks que viram <span class="text-amber-glow">cases reais</span>
         </h1>
-        <p class="mt-5 max-w-[48rem] text-[1.05rem] leading-relaxed text-midnight-400">Aqui o cliente mostra o projeto entregue, resultado, stack usada, imagens, prints ou vídeos. Não é só elogio: é contexto, história e prova do trabalho.</p>
+        <p class="mt-5 max-w-[48rem] text-[1.05rem] leading-relaxed text-text-muted">Aqui o cliente mostra o projeto entregue, resultado, stack usada, imagens, prints ou vídeos. Não é só elogio: é contexto, história e prova do trabalho.</p>
     </div>
-    <a class="inline-flex min-h-[44px] items-center justify-center rounded-[10px] border border-glow-400 bg-glow-400 px-[18px] font-black text-midnight-950 transition-all duration-300 hover:bg-glow-300" href="#enviar">Enviar feedback</a>
+    <a class="btn-primary" href="#enviar">Enviar feedback</a>
 </section>
 
 <form class="mb-6 flex flex-wrap gap-2" method="get">
-    <a class="inline-flex min-h-[38px] items-center rounded-[10px] border <?= $filter === '' ? 'border-glow-400 bg-glow-400 text-midnight-950' : 'border-white/20 bg-white/5 text-white' ?> px-4 font-black" href="<?= url('feedbacks.php') ?>">Todos</a>
+    <a class="inline-flex min-h-[38px] items-center rounded-[10px] border <?= $filter === '' ? 'border-amber-accent bg-amber-accent text-background' : 'border-white/20 bg-white/5 text-text-primary' ?> px-4 font-black" href="<?= url('feedbacks.php') ?>">Todos</a>
     <?php foreach ($categories as $category): ?>
-        <a class="inline-flex min-h-[38px] items-center rounded-[10px] border <?= $filter === $category ? 'border-glow-400 bg-glow-400 text-midnight-950' : 'border-white/20 bg-white/5 text-white' ?> px-4 font-black" href="<?= url('feedbacks.php?category=' . urlencode($category)) ?>"><?= e($category) ?></a>
+        <a class="inline-flex min-h-[38px] items-center rounded-[10px] border <?= $filter === $category ? 'border-amber-accent bg-amber-accent text-background' : 'border-white/20 bg-white/5 text-text-primary' ?> px-4 font-black" href="<?= url('feedbacks.php?category=' . urlencode($category)) ?>"><?= e($category) ?></a>
     <?php endforeach; ?>
 </form>
 
@@ -166,44 +166,44 @@ include __DIR__ . '/includes/header.php';
         $firstMedia = $media[0] ?? null;
         $modalId = 'feedback-modal-' . (int) $feedback['id'];
         ?>
-        <article class="flex min-h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-lg transition-all duration-300 hover:-translate-y-1 hover:border-ember-500/40">
+        <article class="flex min-h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-lg transition-all duration-300 hover:-translate-y-1 hover:border-amber-secondary/40">
             <button class="block border-0 bg-transparent p-0 text-left" type="button" onclick="document.getElementById('<?= e($modalId) ?>').showModal()">
                 <?php if ($firstMedia && ($firstMedia['type'] ?? '') === 'image'): ?>
-                    <img src="<?= e(url($firstMedia['url'])) ?>" alt="<?= e($feedback['project_name']) ?>" class="aspect-[16/10] w-full bg-midnight-900 object-cover">
+                    <img src="<?= e(url($firstMedia['url'])) ?>" alt="<?= e($feedback['project_name']) ?>" class="aspect-[16/10] w-full bg-background/80 object-cover">
                 <?php elseif ($firstMedia && ($firstMedia['type'] ?? '') === 'video'): ?>
-                    <video src="<?= e(url($firstMedia['url'])) ?>" class="aspect-[16/10] w-full bg-midnight-900 object-cover" muted></video>
+                    <video src="<?= e(url($firstMedia['url'])) ?>" class="aspect-[16/10] w-full bg-background/80 object-cover" muted></video>
                 <?php elseif ($firstMedia && ($firstMedia['type'] ?? '') === 'audio'): ?>
-                    <div class="grid aspect-[16/10] place-items-center bg-midnight-950 p-5 text-center">
-                        <span class="text-4xl font-black text-glow-400">ÁUDIO</span>
+                    <div class="grid aspect-[16/10] place-items-center bg-background p-5 text-center">
+                        <span class="text-4xl font-black text-amber-glow">ÁUDIO</span>
                     </div>
                 <?php else: ?>
-                    <div class="grid aspect-[16/10] place-items-center bg-midnight-950 text-5xl font-black text-glow-400">CAFÉ</div>
+                    <div class="grid aspect-[16/10] place-items-center bg-background text-5xl font-black text-amber-glow">CAFÉ</div>
                 <?php endif; ?>
             </button>
             <div class="flex flex-1 flex-col p-5">
                 <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
-                    <span class="inline-flex w-fit rounded-full border border-white/20 px-3 py-1 text-xs font-black text-glow-400"><?= e($feedback['category']) ?></span>
-                    <span class="text-glow-400"><?= str_repeat('★', (int) $feedback['rating']) ?><?= str_repeat('☆', 5 - (int) $feedback['rating']) ?></span>
+                    <span class="inline-flex w-fit rounded-full border border-white/20 px-3 py-1 text-xs font-black text-amber-glow"><?= e($feedback['category']) ?></span>
+                    <span class="text-amber-glow"><?= str_repeat('★', (int) $feedback['rating']) ?><?= str_repeat('☆', 5 - (int) $feedback['rating']) ?></span>
                 </div>
-                <h2 class="m-0 text-xl font-black text-white"><?= e($feedback['project_name']) ?></h2>
-                <p class="mt-2 text-sm font-bold text-midnight-400"><?= e($feedback['client_name']) ?><?= $feedback['role_company'] ? ' • ' . e($feedback['role_company']) : '' ?></p>
-                <p class="mt-4 line-clamp-4 leading-relaxed text-midnight-300"><?= e($feedback['feedback_text']) ?></p>
+                <h2 class="m-0 text-xl font-black text-text-primary"><?= e($feedback['project_name']) ?></h2>
+                <p class="mt-2 text-sm font-bold text-text-muted"><?= e($feedback['client_name']) ?><?= $feedback['role_company'] ? ' • ' . e($feedback['role_company']) : '' ?></p>
+                <p class="mt-4 line-clamp-4 leading-relaxed text-text-secondary"><?= e($feedback['feedback_text']) ?></p>
                 <?php if (!empty($feedback['results'])): ?>
-                    <div class="mt-4 rounded-[10px] border border-glow-400/30 bg-glow-400/10 p-3 text-sm font-bold text-glow-400"><?= nl2br(e($feedback['results'])) ?></div>
+                    <div class="mt-4 rounded-[10px] border border-amber-accent/30 bg-amber-accent/10 p-3 text-sm font-bold text-amber-glow"><?= nl2br(e($feedback['results'])) ?></div>
                 <?php endif; ?>
-                <button class="mt-5 inline-flex min-h-[44px] w-fit items-center justify-center rounded-[10px] border border-white/20 bg-white/5 px-[18px] font-black text-white transition-all duration-300 hover:border-glow-400" type="button" onclick="document.getElementById('<?= e($modalId) ?>').showModal()">Ver case</button>
+                <button class="mt-5 inline-flex min-h-[44px] w-fit items-center justify-center rounded-[10px] border border-white/20 bg-white/5 px-[18px] font-black text-text-primary transition-all duration-300 hover:border-amber-accent" type="button" onclick="document.getElementById('<?= e($modalId) ?>').showModal()">Ver case</button>
             </div>
         </article>
 
-        <dialog id="<?= e($modalId) ?>" class="w-[min(960px,calc(100vw-24px))] rounded-2xl border border-white/10 bg-midnight-950 p-0 text-white backdrop:bg-black/75">
+        <dialog id="<?= e($modalId) ?>" class="w-[min(960px,calc(100vw-24px))] rounded-2xl border border-white/10 bg-background p-0 text-text-primary backdrop:bg-black/75">
             <div class="grid max-h-[88vh] overflow-y-auto">
                 <div class="flex items-center justify-between gap-4 border-b border-white/10 p-5">
                     <div>
-                        <p class="mb-1 text-xs font-black uppercase tracking-[0.12em] text-glow-400"><?= e($feedback['category']) ?></p>
+                        <p class="mb-1 text-xs font-black uppercase tracking-[0.12em] text-amber-glow"><?= e($feedback['category']) ?></p>
                         <h3 class="m-0 text-2xl font-black"><?= e($feedback['project_name']) ?></h3>
                     </div>
                     <form method="dialog">
-                        <button class="inline-flex h-10 w-10 items-center justify-center rounded-[10px] border border-white/20 bg-white/5 font-black text-white" type="submit">×</button>
+                        <button class="inline-flex h-10 w-10 items-center justify-center rounded-[10px] border border-white/20 bg-white/5 font-black text-text-primary" type="submit">×</button>
                     </form>
                 </div>
                 <div class="grid gap-5 p-5 lg:grid-cols-[1.15fr_0.85fr]">
@@ -213,45 +213,45 @@ include __DIR__ . '/includes/header.php';
                                 <?php if (($item['type'] ?? '') === 'video'): ?>
                                     <video src="<?= e(url($item['url'])) ?>" controls class="w-full rounded-[10px] border border-white/10 bg-black"></video>
                                 <?php elseif (($item['type'] ?? '') === 'audio'): ?>
-                                    <audio src="<?= e(url($item['url'])) ?>" controls class="w-full rounded-[10px] border border-white/10 bg-midnight-900 p-3"></audio>
+                                    <audio src="<?= e(url($item['url'])) ?>" controls class="w-full rounded-[10px] border border-white/10 bg-background/80 p-3"></audio>
                                 <?php else: ?>
                                     <img src="<?= e(url($item['url'])) ?>" alt="<?= e($item['name'] ?? $feedback['project_name']) ?>" class="w-full rounded-[10px] border border-white/10 bg-black object-cover">
                                 <?php endif; ?>
                             <?php endforeach; ?>
                         <?php else: ?>
-                            <div class="rounded-[10px] border border-white/10 bg-midnight-900 p-8 text-center text-midnight-400">Este case ainda não tem mídia enviada.</div>
+                            <div class="rounded-[10px] border border-white/10 bg-background/80 p-8 text-center text-text-muted">Este case ainda não tem mídia enviada.</div>
                         <?php endif; ?>
                     </div>
                     <div class="grid content-start gap-4">
                         <section class="rounded-[10px] border border-white/10 bg-white/5 p-4">
-                            <p class="mb-2 text-sm font-black text-glow-400">Feedback do cliente</p>
-                            <p class="leading-relaxed text-midnight-300">“<?= e($feedback['feedback_text']) ?>”</p>
+                            <p class="mb-2 text-sm font-black text-amber-glow">Feedback do cliente</p>
+                            <p class="leading-relaxed text-text-secondary">“<?= e($feedback['feedback_text']) ?>”</p>
                         </section>
                         <?php if (!empty($feedback['project_summary'])): ?>
                             <section class="rounded-[10px] border border-white/10 bg-white/5 p-4">
-                                <p class="mb-2 text-sm font-black text-glow-400">Projeto entregue</p>
-                                <p class="leading-relaxed text-midnight-300"><?= nl2br(e($feedback['project_summary'])) ?></p>
+                                <p class="mb-2 text-sm font-black text-amber-glow">Projeto entregue</p>
+                                <p class="leading-relaxed text-text-secondary"><?= nl2br(e($feedback['project_summary'])) ?></p>
                             </section>
                         <?php endif; ?>
                         <?php if (!empty($feedback['results'])): ?>
-                            <section class="rounded-[10px] border border-glow-400/30 bg-glow-400/10 p-4">
-                                <p class="mb-2 text-sm font-black text-glow-400">Resultados</p>
-                                <p class="leading-relaxed text-midnight-200"><?= nl2br(e($feedback['results'])) ?></p>
+                            <section class="rounded-[10px] border border-amber-accent/30 bg-amber-accent/10 p-4">
+                                <p class="mb-2 text-sm font-black text-amber-glow">Resultados</p>
+                                <p class="leading-relaxed text-text-secondary"><?= nl2br(e($feedback['results'])) ?></p>
                             </section>
                         <?php endif; ?>
                         <?php if (!empty($feedback['stack_used'])): ?>
                             <section class="rounded-[10px] border border-white/10 bg-white/5 p-4">
-                                <p class="mb-2 text-sm font-black text-glow-400">Stack usada</p>
-                                <p class="leading-relaxed text-midnight-300"><?= e($feedback['stack_used']) ?></p>
+                                <p class="mb-2 text-sm font-black text-amber-glow">Stack usada</p>
+                                <p class="leading-relaxed text-text-secondary"><?= e($feedback['stack_used']) ?></p>
                             </section>
                         <?php endif; ?>
                         <?php if (!empty($feedback['story_steps'])): ?>
                             <section class="rounded-[10px] border border-white/10 bg-white/5 p-4">
-                                <p class="mb-2 text-sm font-black text-glow-400">História do projeto</p>
-                                <p class="leading-relaxed text-midnight-300"><?= nl2br(e($feedback['story_steps'])) ?></p>
+                                <p class="mb-2 text-sm font-black text-amber-glow">História do projeto</p>
+                                <p class="leading-relaxed text-text-secondary"><?= nl2br(e($feedback['story_steps'])) ?></p>
                             </section>
                         <?php endif; ?>
-                        <p class="text-sm text-midnight-500"><?= date('d/m/Y', strtotime((string) $feedback['created_at'])) ?></p>
+                        <p class="text-sm text-text-muted/60"><?= date('d/m/Y', strtotime((string) $feedback['created_at'])) ?></p>
                     </div>
                 </div>
             </div>
@@ -259,67 +259,67 @@ include __DIR__ . '/includes/header.php';
     <?php endforeach; ?>
 
     <?php if (!$feedbacks): ?>
-        <p class="col-span-full rounded-2xl border border-white/10 bg-white/5 p-6 text-midnight-400">Nenhum feedback publicado nesta categoria ainda.</p>
+        <p class="col-span-full glass rounded-2xl p-6 text-text-muted">Nenhum feedback publicado nesta categoria ainda.</p>
     <?php endif; ?>
 </div>
 
-<section id="enviar" class="mt-14 rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-lg">
-    <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-glow-400">enviar feedback</p>
-    <h2 class="m-0 text-[clamp(1.8rem,4vw,3rem)] font-black text-white">Transforme seu depoimento em case</h2>
+<section id="enviar" class="mt-14 glass p-6">
+    <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-amber-glow">enviar feedback</p>
+    <h2 class="m-0 text-[clamp(1.8rem,4vw,3rem)] font-black text-text-primary">Transforme seu depoimento em case</h2>
 
     <?php if (!$user): ?>
-        <p class="mt-4 max-w-[46rem] leading-relaxed text-midnight-400">Faça login para enviar seu feedback com nome, projeto, resultado, mídia e stack usada.</p>
-        <a class="mt-5 inline-flex min-h-[44px] items-center justify-center rounded-[10px] border border-glow-400 bg-glow-400 px-[18px] font-black text-midnight-950" href="<?= url('login.php') ?>">Entrar para enviar</a>
+        <p class="mt-4 max-w-[46rem] leading-relaxed text-text-muted">Faça login para enviar seu feedback com nome, projeto, resultado, mídia e stack usada.</p>
+        <a class="btn-primary mt-5" href="<?= url('login.php') ?>">Entrar para enviar</a>
     <?php else: ?>
         <form class="mt-6 grid gap-4" method="post" enctype="multipart/form-data">
             <input type="hidden" name="csrf_token" value="<?= e(generate_csrf_token()) ?>">
             <div class="grid gap-4 md:grid-cols-3">
-                <label class="grid gap-1.5 text-sm font-black text-midnight-400">Nota
-                    <select name="rating" class="min-h-[44px] rounded-[10px] border border-white/10 bg-midnight-950/80 p-2.5 text-white outline-none focus:border-glow-400">
+                <label class="grid gap-1.5 text-sm font-black text-text-muted">Nota
+                    <select name="rating" class="input-field">
                         <?php for ($i = 5; $i >= 1; $i--): ?>
                             <option value="<?= $i ?>" class="text-black"><?= $i ?> estrelas</option>
                         <?php endfor; ?>
                     </select>
                 </label>
-                <label class="grid gap-1.5 text-sm font-black text-midnight-400">Nome do cliente
-                    <input name="client_name" value="<?= e($user['name']) ?>" class="min-h-[44px] rounded-[10px] border border-white/10 bg-midnight-950/80 p-2.5 text-white outline-none focus:border-glow-400">
+                <label class="grid gap-1.5 text-sm font-black text-text-muted">Nome do cliente
+                    <input name="client_name" value="<?= e($user['name']) ?>" class="input-field">
                 </label>
-                <label class="grid gap-1.5 text-sm font-black text-midnight-400">Cargo/empresa
-                    <input name="role_company" placeholder="Founder, editor, loja, canal..." class="min-h-[44px] rounded-[10px] border border-white/10 bg-midnight-950/80 p-2.5 text-white outline-none focus:border-glow-400">
+                <label class="grid gap-1.5 text-sm font-black text-text-muted">Cargo/empresa
+                    <input name="role_company" placeholder="Founder, editor, loja, canal..." class="input-field">
                 </label>
             </div>
             <div class="grid gap-4 md:grid-cols-2">
-                <label class="grid gap-1.5 text-sm font-black text-midnight-400">Nome do projeto
-                    <input name="project_name" required placeholder="Landing Page, Sistema Web, vídeo..." class="min-h-[44px] rounded-[10px] border border-white/10 bg-midnight-950/80 p-2.5 text-white outline-none focus:border-glow-400">
+                <label class="grid gap-1.5 text-sm font-black text-text-muted">Nome do projeto
+                    <input name="project_name" required placeholder="Landing Page, Sistema Web, vídeo..." class="input-field">
                 </label>
-                <label class="grid gap-1.5 text-sm font-black text-midnight-400">Categoria
-                    <select name="category" required class="min-h-[44px] rounded-[10px] border border-white/10 bg-midnight-950/80 p-2.5 text-white outline-none focus:border-glow-400">
+                <label class="grid gap-1.5 text-sm font-black text-text-muted">Categoria
+                    <select name="category" required class="input-field">
                         <?php foreach ($categories as $category): ?>
                             <option value="<?= e($category) ?>" class="text-black"><?= e($category) ?></option>
                         <?php endforeach; ?>
                     </select>
                 </label>
             </div>
-            <label class="grid gap-1.5 text-sm font-black text-midnight-400">Projeto entregue
-                <textarea name="project_summary" rows="3" placeholder="Ex: Criamos uma landing page responsiva, vídeos curtos e estrutura de captação." class="min-h-[100px] rounded-[10px] border border-white/10 bg-midnight-950/80 p-2.5 text-white outline-none focus:border-glow-400"></textarea>
+            <label class="grid gap-1.5 text-sm font-black text-text-muted">Projeto entregue
+                <textarea name="project_summary" rows="3" placeholder="Ex: Criamos uma landing page responsiva, vídeos curtos e estrutura de captação." class="input-field"></textarea>
             </label>
-            <label class="grid gap-1.5 text-sm font-black text-midnight-400">Resultados
-                <textarea name="results" rows="3" placeholder="+300 leads, site 2x mais rápido, melhora de CTR, identidade mais profissional..." class="min-h-[100px] rounded-[10px] border border-white/10 bg-midnight-950/80 p-2.5 text-white outline-none focus:border-glow-400"></textarea>
+            <label class="grid gap-1.5 text-sm font-black text-text-muted">Resultados
+                <textarea name="results" rows="3" placeholder="+300 leads, site 2x mais rápido, melhora de CTR, identidade mais profissional..." class="input-field"></textarea>
             </label>
-            <label class="grid gap-1.5 text-sm font-black text-midnight-400">Feedback do cliente
-                <textarea name="feedback_text" rows="4" required placeholder="Conte o que mudou depois do projeto." class="min-h-[120px] rounded-[10px] border border-white/10 bg-midnight-950/80 p-2.5 text-white outline-none focus:border-glow-400"></textarea>
+            <label class="grid gap-1.5 text-sm font-black text-text-muted">Feedback do cliente
+                <textarea name="feedback_text" rows="4" required placeholder="Conte o que mudou depois do projeto." class="input-field"></textarea>
             </label>
-            <label class="grid gap-1.5 text-sm font-black text-midnight-400">História do projeto
-                <textarea name="story_steps" rows="4" placeholder="1. Cheguei sem identidade visual&#10;2. Criamos branding&#10;3. Desenvolvemos landing page&#10;4. Melhoramos conversão" class="min-h-[120px] rounded-[10px] border border-white/10 bg-midnight-950/80 p-2.5 text-white outline-none focus:border-glow-400"></textarea>
+            <label class="grid gap-1.5 text-sm font-black text-text-muted">História do projeto
+                <textarea name="story_steps" rows="4" placeholder="1. Cheguei sem identidade visual&#10;2. Criamos branding&#10;3. Desenvolvemos landing page&#10;4. Melhoramos conversão" class="input-field"></textarea>
             </label>
-            <label class="grid gap-1.5 text-sm font-black text-midnight-400">Stack usada
-                <input name="stack_used" placeholder="React • Vite • Firebase • Tailwind • Cloudinary" class="min-h-[44px] rounded-[10px] border border-white/10 bg-midnight-950/80 p-2.5 text-white outline-none focus:border-glow-400">
+            <label class="grid gap-1.5 text-sm font-black text-text-muted">Stack usada
+                <input name="stack_used" placeholder="React • Vite • Firebase • Tailwind • Cloudinary" class="input-field">
             </label>
-            <label class="grid gap-1.5 text-sm font-black text-midnight-400">Imagens, prints, vídeos curtos ou áudios
-                <input type="file" name="media_files[]" multiple accept="image/png,image/jpeg,image/webp,video/mp4,video/webm,video/quicktime,audio/mpeg,audio/wav,audio/ogg,audio/webm" class="rounded-[10px] border border-white/10 bg-midnight-950/80 p-2.5 text-white file:mr-4 file:rounded-[8px] file:border-0 file:bg-glow-400 file:px-3 file:py-2 file:font-black file:text-midnight-950">
-                <small class="text-midnight-500">Até 4 arquivos, 12MB cada.</small>
+            <label class="grid gap-1.5 text-sm font-black text-text-muted">Imagens, prints, vídeos curtos ou áudios
+                <input type="file" name="media_files[]" multiple accept="image/png,image/jpeg,image/webp,video/mp4,video/webm,video/quicktime,audio/mpeg,audio/wav,audio/ogg,audio/webm" class="rounded-[10px] border border-white/10 bg-background/60 p-2.5 text-text-primary file:mr-4 file:rounded-[8px] file:border-0 file:bg-amber-accent file:px-3 file:py-2 file:font-black file:text-background">
+                <small class="text-text-muted/60">Até 4 arquivos, 12MB cada.</small>
             </label>
-            <button class="inline-flex min-h-[44px] w-fit items-center justify-center rounded-[10px] border border-glow-400 bg-gradient-to-r from-ember-500 to-glow-400 px-[18px] font-black text-midnight-950" type="submit">Enviar feedback</button>
+            <button class="btn-primary w-fit" type="submit">Enviar feedback</button>
         </form>
     <?php endif; ?>
 </section>

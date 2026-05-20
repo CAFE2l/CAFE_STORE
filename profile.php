@@ -39,6 +39,69 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirect('profile.php');
     }
 
+    if ($action === 'password') {
+        $currentPassword = (string) ($_POST['current_password'] ?? '');
+        $newPassword = (string) ($_POST['new_password'] ?? '');
+        $confirmPassword = (string) ($_POST['confirm_password'] ?? '');
+
+        if (mb_strlen($newPassword) < 8) {
+            flash('error', 'A nova senha precisa ter pelo menos 8 caracteres.');
+            redirect('profile.php#seguranca');
+        }
+
+        if ($newPassword !== $confirmPassword) {
+            flash('error', 'A confirmação de senha não confere.');
+            redirect('profile.php#seguranca');
+        }
+
+        $passwordStmt = db()->prepare('SELECT password_hash, auth_provider, password_updated_at FROM users WHERE id = ? LIMIT 1');
+        $passwordStmt->execute([(int) $user['id']]);
+        $passwordUser = $passwordStmt->fetch();
+        $needsCurrentPassword = ($passwordUser['auth_provider'] ?? 'password') !== 'google' || !empty($passwordUser['password_updated_at']);
+
+        if ($needsCurrentPassword && !password_verify($currentPassword, (string) ($passwordUser['password_hash'] ?? ''))) {
+            flash('error', 'Senha atual inválida.');
+            redirect('profile.php#seguranca');
+        }
+
+        $stmt = db()->prepare("UPDATE users SET password_hash = ?, auth_provider = 'password', password_updated_at = NOW() WHERE id = ?");
+        $stmt->execute([password_hash($newPassword, PASSWORD_DEFAULT), (int) $user['id']]);
+
+        unset($_SESSION['user_cache']);
+        flash('success', 'Senha atualizada com segurança.');
+        redirect('profile.php#seguranca');
+    }
+
+    if ($action === 'address') {
+        $recipient = trim((string) ($_POST['recipient_name'] ?? ''));
+        $phone = trim((string) ($_POST['phone'] ?? ''));
+        $postalCode = trim((string) ($_POST['postal_code'] ?? ''));
+        $addressLine = trim((string) ($_POST['address_line'] ?? ''));
+        $city = trim((string) ($_POST['city'] ?? ''));
+        $state = trim((string) ($_POST['state'] ?? ''));
+        $country = trim((string) ($_POST['country'] ?? 'Brasil')) ?: 'Brasil';
+
+        if ($addressLine === '') {
+            flash('error', 'Informe o endereço para entrega.');
+            redirect('profile.php#entrega');
+        }
+
+        $addressIdStmt = db()->prepare("SELECT id FROM addresses WHERE user_id = ? ORDER BY id LIMIT 1");
+        $addressIdStmt->execute([(int) $user['id']]);
+        $addressId = $addressIdStmt->fetchColumn();
+
+        if ($addressId) {
+            $addressStmt = db()->prepare('UPDATE addresses SET label = ?, recipient_name = ?, phone = ?, address_line = ?, city = ?, state = ?, postal_code = ?, country = ? WHERE id = ? AND user_id = ?');
+            $addressStmt->execute(['Entrega principal', $recipient, $phone, $addressLine, $city, $state, $postalCode, $country, (int) $addressId, (int) $user['id']]);
+        } else {
+            $addressStmt = db()->prepare('INSERT INTO addresses (user_id, label, recipient_name, phone, address_line, city, state, postal_code, country) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
+            $addressStmt->execute([(int) $user['id'], 'Entrega principal', $recipient, $phone, $addressLine, $city, $state, $postalCode, $country]);
+        }
+
+        flash('success', 'Endereço atualizado com sucesso.');
+        redirect('profile.php#entrega');
+    }
+
     $name = trim((string) ($_POST['name'] ?? ''));
     $bio = mb_substr(trim((string) ($_POST['bio'] ?? '')), 0, 500);
     $avatarUrl = $user['avatar_url'] ?? null;
@@ -94,44 +157,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirect('profile.php');
     }
 
-    $pdo = db();
-    $pdo->beginTransaction();
-    try {
-        $stmt = $pdo->prepare('UPDATE users SET name = ?, bio = ?, avatar_url = ? WHERE id = ?');
-        $stmt->execute([$name, $bio, $avatarUrl, (int) $user['id']]);
-
-        $recipient = trim((string) ($_POST['recipient_name'] ?? ''));
-        $phone = trim((string) ($_POST['phone'] ?? ''));
-        $postalCode = trim((string) ($_POST['postal_code'] ?? ''));
-        $addressLine = trim((string) ($_POST['address_line'] ?? ''));
-        $city = trim((string) ($_POST['city'] ?? ''));
-        $state = trim((string) ($_POST['state'] ?? ''));
-        $country = trim((string) ($_POST['country'] ?? 'Brasil')) ?: 'Brasil';
-
-        if ($recipient !== '' || $phone !== '' || $postalCode !== '' || $addressLine !== '' || $city !== '' || $state !== '') {
-            if ($addressLine === '') {
-                throw new RuntimeException('Informe o endereço para entrega.');
-            }
-
-            $addressIdStmt = $pdo->prepare("SELECT id FROM addresses WHERE user_id = ? ORDER BY id LIMIT 1");
-            $addressIdStmt->execute([(int) $user['id']]);
-            $addressId = $addressIdStmt->fetchColumn();
-
-            if ($addressId) {
-                $addressStmt = $pdo->prepare('UPDATE addresses SET label = ?, recipient_name = ?, phone = ?, address_line = ?, city = ?, state = ?, postal_code = ?, country = ? WHERE id = ? AND user_id = ?');
-                $addressStmt->execute(['Entrega principal', $recipient, $phone, $addressLine, $city, $state, $postalCode, $country, (int) $addressId, (int) $user['id']]);
-            } else {
-                $addressStmt = $pdo->prepare('INSERT INTO addresses (user_id, label, recipient_name, phone, address_line, city, state, postal_code, country) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
-                $addressStmt->execute([(int) $user['id'], 'Entrega principal', $recipient, $phone, $addressLine, $city, $state, $postalCode, $country]);
-            }
-        }
-
-        $pdo->commit();
-    } catch (Throwable $e) {
-        $pdo->rollBack();
-        flash('error', $e->getMessage());
-        redirect('profile.php');
-    }
+    $stmt = db()->prepare('UPDATE users SET name = ?, bio = ?, avatar_url = ? WHERE id = ?');
+    $stmt->execute([$name, $bio, $avatarUrl, (int) $user['id']]);
 
     unset($_SESSION['user_cache']);
     flash('success', 'Perfil atualizado com sucesso.');
@@ -209,23 +236,23 @@ include __DIR__ . '/includes/header.php';
 ?>
 <div class="mb-6 flex items-end justify-between gap-6 max-md:flex-col max-md:items-start">
     <div>
-        <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-glow-400">minha conta</p>
-        <h1 class="m-0 text-[clamp(2rem,4vw,3.4rem)] font-black leading-tight tracking-tight">Olá, <span class="bg-gradient-to-r from-ember-500 to-glow-400 bg-clip-text text-transparent drop-shadow-[0_0_10px_rgba(255,107,0,0.8)]"><?= e($user['name']) ?></span></h1>
+        <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-amber-glow">minha conta</p>
+        <h1 class="m-0 text-[clamp(2rem,4vw,3.4rem)] font-black leading-tight tracking-tight">Olá, <span class="gradient-text"><?= e($user['name']) ?></span></h1>
     </div>
-    <a class="inline-flex min-h-[44px] items-center justify-center rounded-[10px] border border-glow-400 bg-glow-400 px-[18px] font-black text-midnight-950 transition-all duration-300 hover:bg-glow-300" href="<?= url('products.php') ?>">Ver produtos</a>
+    <a class="btn-primary min-h-[44px]" href="<?= url('products.php') ?>">Ver produtos</a>
 </div>
 
 <div class="grid gap-5 lg:grid-cols-[0.78fr_1.22fr]">
-    <section class="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-lg">
+    <section class="glass rounded-2xl p-6">
         <div class="flex flex-wrap items-center gap-4">
-            <div class="relative h-28 w-28 overflow-hidden rounded-2xl border border-white/10 bg-midnight-950">
+            <div class="relative h-28 w-28 overflow-hidden rounded-2xl border border-white/10 bg-background">
                 <img src="<?= e($avatar) ?>" alt="<?= e($user['name']) ?>" class="h-full w-full object-cover">
-                <span class="absolute bottom-2 right-2 h-4 w-4 rounded-full border-2 border-midnight-950 <?= $isOnline ? 'bg-green-500' : 'bg-red-500' ?>"></span>
+                <span class="absolute bottom-2 right-2 h-4 w-4 rounded-full border-2 border-background <?= $isOnline ? 'bg-green-500' : 'bg-red-500' ?>"></span>
             </div>
             <div>
-                <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-glow-400">perfil</p>
-                <h2 class="m-0 text-2xl font-black text-white"><?= e($user['name']) ?></h2>
-                <p class="mt-1 text-midnight-400"><?= e($user['email']) ?></p>
+                <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-amber-glow">perfil</p>
+                <h2 class="m-0 text-2xl font-black text-text-primary"><?= e($user['name']) ?></h2>
+                <p class="mt-1 text-text-muted"><?= e($user['email']) ?></p>
                 <span class="mt-3 inline-flex items-center gap-2 rounded-full border border-white/20 px-3 py-1 text-sm font-black <?= $isOnline ? 'text-green-300' : 'text-red-300' ?>">
                     <span class="h-2.5 w-2.5 rounded-full <?= $isOnline ? 'bg-green-500' : 'bg-red-500' ?>"></span>
                     <?= $isOnline ? 'Online agora' : 'Offline' ?>
@@ -234,193 +261,225 @@ include __DIR__ . '/includes/header.php';
         </div>
 
         <div class="mt-6 grid gap-3 sm:grid-cols-2">
-            <div class="rounded-[10px] border border-white/10 bg-midnight-950/60 p-4">
-                <span class="text-sm text-midnight-400">Pedidos</span>
-                <strong class="mt-2 block text-2xl font-black text-glow-400"><?= (int) $profileMetrics['total_orders'] ?></strong>
+            <div class="rounded-[10px] border border-white/10 bg-background/60 p-4">
+                <span class="text-sm text-text-muted">Pedidos</span>
+                <strong class="mt-2 block text-2xl font-black text-amber-glow"><?= (int) $profileMetrics['total_orders'] ?></strong>
             </div>
-            <div class="rounded-[10px] border border-white/10 bg-midnight-950/60 p-4">
-                <span class="text-sm text-midnight-400">Cupons para usar</span>
-                <strong class="mt-2 block text-2xl font-black text-glow-400"><?= count($activeCoupons) ?></strong>
+            <div class="rounded-[10px] border border-white/10 bg-background/60 p-4">
+                <span class="text-sm text-text-muted">Cupons para usar</span>
+                <strong class="mt-2 block text-2xl font-black text-amber-glow"><?= count($activeCoupons) ?></strong>
             </div>
-            <div class="rounded-[10px] border border-white/10 bg-midnight-950/60 p-4">
-                <span class="text-sm text-midnight-400">Conta criada</span>
-                <strong class="mt-2 block text-base font-black text-glow-400"><?= e($accountCreatedAt) ?></strong>
+            <div class="rounded-[10px] border border-white/10 bg-background/60 p-4">
+                <span class="text-sm text-text-muted">Conta criada</span>
+                <strong class="mt-2 block text-base font-black text-amber-glow"><?= e($accountCreatedAt) ?></strong>
             </div>
-            <div class="rounded-[10px] border border-white/10 bg-midnight-950/60 p-4">
-                <span class="text-sm text-midnight-400">Senha</span>
-                <strong class="mt-2 block text-base font-black text-glow-400"><?= e($passwordUpdatedLabel) ?></strong>
+            <div class="rounded-[10px] border border-white/10 bg-background/60 p-4">
+                <span class="text-sm text-text-muted">Senha</span>
+                <strong class="mt-2 block text-base font-black text-amber-glow"><?= e($passwordUpdatedLabel) ?></strong>
             </div>
         </div>
 
-        <div class="mt-6 rounded-[10px] border border-white/10 bg-midnight-950/60 p-4">
-            <p class="mb-2 text-sm font-black text-glow-400">Bio</p>
-            <p class="m-0 leading-relaxed text-midnight-300"><?= e($user['bio'] ?: 'Adicione uma bio para contar um pouco sobre você ou seu negócio.') ?></p>
+        <div class="mt-6 rounded-[10px] border border-white/10 bg-background/60 p-4">
+            <p class="mb-2 text-sm font-black text-amber-glow">Bio</p>
+            <p class="m-0 leading-relaxed text-text-secondary"><?= e($user['bio'] ?: 'Adicione uma bio para contar um pouco sobre você ou seu negócio.') ?></p>
         </div>
 
         <div class="mt-5 grid gap-3 sm:grid-cols-2">
-            <a class="inline-flex min-h-[44px] items-center justify-center rounded-[10px] border border-glow-400 bg-glow-400 px-[18px] font-black text-midnight-950 transition-all duration-300 hover:bg-glow-300" href="<?= url('orcamento.php') ?>">Pedir orçamento</a>
+            <a class="btn-primary min-h-[44px] justify-center" href="<?= url('orcamento.php') ?>">Pedir orçamento</a>
             <?php if ($isClient): ?>
-                <a class="inline-flex min-h-[44px] items-center justify-center rounded-[10px] border border-white/20 bg-white/5 px-[18px] font-black text-white transition-all duration-300 hover:border-glow-400" href="<?= e(TELEGRAM_CLIENT_CHANNEL_URL) ?>" target="_blank" rel="noopener">Canal de clientes</a>
+                <a class="btn-ghost min-h-[44px] justify-center" href="<?= e(TELEGRAM_CLIENT_CHANNEL_URL) ?>" target="_blank" rel="noopener">Canal de clientes</a>
             <?php else: ?>
-                <a class="inline-flex min-h-[44px] items-center justify-center rounded-[10px] border border-white/20 bg-white/5 px-[18px] font-black text-white transition-all duration-300 hover:border-glow-400" href="<?= e($whatsappLink) ?>" target="_blank" rel="noopener">Falar no WhatsApp</a>
+                <a class="btn-ghost min-h-[44px] justify-center" href="<?= e($whatsappLink) ?>" target="_blank" rel="noopener">Falar no WhatsApp</a>
             <?php endif; ?>
         </div>
     </section>
 
-    <section class="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-lg">
-        <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-glow-400">configurações</p>
-        <h2 class="m-0 mb-4 text-2xl font-black text-white">Dados e entrega</h2>
+    <section class="glass rounded-2xl p-6">
+        <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-amber-glow">configurações</p>
+        <h2 class="m-0 mb-4 text-2xl font-black text-text-primary">Perfil público</h2>
         <form class="grid gap-4" method="post" enctype="multipart/form-data">
             <input type="hidden" name="csrf_token" value="<?= e(generate_csrf_token()) ?>">
             <input type="hidden" name="action" value="profile">
-            <div class="grid gap-4 md:grid-cols-2">
-                <label class="grid gap-1.5 text-[0.9rem] font-black text-midnight-400">
-                    <span>Nome</span>
-                    <input name="name" value="<?= e($user['name']) ?>" required class="w-full min-h-[44px] rounded-[10px] border border-white/10 bg-midnight-950/80 p-2.5 text-white outline-none focus:border-glow-400">
-                </label>
-                <label class="grid gap-1.5 text-[0.9rem] font-black text-midnight-400">
-                    <span>Telefone</span>
-                    <input name="phone" value="<?= e($address['phone'] ?? '') ?>" placeholder="+55 (41) 99999-9999" class="w-full min-h-[44px] rounded-[10px] border border-white/10 bg-midnight-950/80 p-2.5 text-white outline-none focus:border-glow-400">
-                </label>
-            </div>
-            <label class="grid gap-1.5 text-[0.9rem] font-black text-midnight-400">
+            <label class="grid gap-1.5 text-[0.9rem] font-black text-text-muted">
+                <span>Nome</span>
+                <input name="name" value="<?= e($user['name']) ?>" required class="input-field min-h-[44px]">
+            </label>
+            <label class="grid gap-1.5 text-[0.9rem] font-black text-text-muted">
                 <span>Bio</span>
-                <textarea name="bio" rows="4" maxlength="500" placeholder="Conte sobre seu negócio, área, objetivos ou preferências de atendimento." class="w-full min-h-[116px] rounded-[10px] border border-white/10 bg-midnight-950/80 p-2.5 text-white outline-none focus:border-glow-400"><?= e($user['bio'] ?? '') ?></textarea>
+                <textarea name="bio" rows="4" maxlength="500" placeholder="Conte sobre seu negócio, área, objetivos ou preferências de atendimento." class="input-field min-h-[116px]"><?= e($user['bio'] ?? '') ?></textarea>
+            </label>
+            <label class="grid gap-1.5 text-[0.9rem] font-black text-text-muted">
+                <span>Foto de perfil</span>
+                <input type="file" name="avatar" accept="image/png,image/jpeg,image/webp" class="w-full rounded-[10px] border border-white/10 bg-background/80 p-2.5 text-white outline-none file:mr-4 file:rounded-[8px] file:border-0 file:bg-amber-accent file:px-3 file:py-2 file:font-black file:text-background">
+            </label>
+            <button class="btn-primary w-fit min-h-[44px]" type="submit">Salvar perfil</button>
+        </form>
+    </section>
+</div>
+
+<div class="mt-5 grid gap-5 lg:grid-cols-2">
+    <section id="entrega" class="glass rounded-2xl p-6">
+        <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-amber-glow">entrega</p>
+        <h2 class="m-0 mb-4 text-2xl font-black text-text-primary">Endereço de entrega</h2>
+        <form class="grid gap-4" method="post">
+            <input type="hidden" name="csrf_token" value="<?= e(generate_csrf_token()) ?>">
+            <input type="hidden" name="action" value="address">
+            <label class="grid gap-1.5 text-[0.9rem] font-black text-text-muted">
+                <span>Telefone</span>
+                <input name="phone" value="<?= e($address['phone'] ?? '') ?>" placeholder="+55 (41) 99999-9999" class="input-field min-h-[44px]">
             </label>
             <div class="grid gap-4 md:grid-cols-[1fr_160px]">
-                <label class="grid gap-1.5 text-[0.9rem] font-black text-midnight-400">
+                <label class="grid gap-1.5 text-[0.9rem] font-black text-text-muted">
                     <span>Endereço</span>
-                    <input name="address_line" value="<?= e($address['address_line'] ?? '') ?>" placeholder="Rua, número, complemento" class="w-full min-h-[44px] rounded-[10px] border border-white/10 bg-midnight-950/80 p-2.5 text-white outline-none focus:border-glow-400">
+                    <input name="address_line" value="<?= e($address['address_line'] ?? '') ?>" placeholder="Rua, número, complemento" class="input-field min-h-[44px]">
                 </label>
-                <label class="grid gap-1.5 text-[0.9rem] font-black text-midnight-400">
+                <label class="grid gap-1.5 text-[0.9rem] font-black text-text-muted">
                     <span>CEP</span>
-                    <input name="postal_code" value="<?= e($address['postal_code'] ?? '') ?>" placeholder="00000-000" class="w-full min-h-[44px] rounded-[10px] border border-white/10 bg-midnight-950/80 p-2.5 text-white outline-none focus:border-glow-400">
+                    <input name="postal_code" value="<?= e($address['postal_code'] ?? '') ?>" placeholder="00000-000" class="input-field min-h-[44px]">
                 </label>
             </div>
             <div class="grid gap-4 md:grid-cols-4">
-                <label class="grid gap-1.5 text-[0.9rem] font-black text-midnight-400 md:col-span-2">
+                <label class="grid gap-1.5 text-[0.9rem] font-black text-text-muted md:col-span-2">
                     <span>Nome de recebimento</span>
-                    <input name="recipient_name" value="<?= e($address['recipient_name'] ?? $user['name']) ?>" class="w-full min-h-[44px] rounded-[10px] border border-white/10 bg-midnight-950/80 p-2.5 text-white outline-none focus:border-glow-400">
+                    <input name="recipient_name" value="<?= e($address['recipient_name'] ?? $user['name']) ?>" class="input-field min-h-[44px]">
                 </label>
-                <label class="grid gap-1.5 text-[0.9rem] font-black text-midnight-400">
+                <label class="grid gap-1.5 text-[0.9rem] font-black text-text-muted">
                     <span>Cidade</span>
-                    <input name="city" value="<?= e($address['city'] ?? '') ?>" class="w-full min-h-[44px] rounded-[10px] border border-white/10 bg-midnight-950/80 p-2.5 text-white outline-none focus:border-glow-400">
+                    <input name="city" value="<?= e($address['city'] ?? '') ?>" class="input-field min-h-[44px]">
                 </label>
-                <label class="grid gap-1.5 text-[0.9rem] font-black text-midnight-400">
+                <label class="grid gap-1.5 text-[0.9rem] font-black text-text-muted">
                     <span>Estado</span>
-                    <input name="state" value="<?= e($address['state'] ?? '') ?>" class="w-full min-h-[44px] rounded-[10px] border border-white/10 bg-midnight-950/80 p-2.5 text-white outline-none focus:border-glow-400">
+                    <input name="state" value="<?= e($address['state'] ?? '') ?>" class="input-field min-h-[44px]">
                 </label>
             </div>
-            <div class="grid gap-4 md:grid-cols-[1fr_1fr]">
-                <label class="grid gap-1.5 text-[0.9rem] font-black text-midnight-400">
-                    <span>País</span>
-                    <input name="country" value="<?= e($address['country'] ?? 'Brasil') ?>" class="w-full min-h-[44px] rounded-[10px] border border-white/10 bg-midnight-950/80 p-2.5 text-white outline-none focus:border-glow-400">
+            <label class="grid gap-1.5 text-[0.9rem] font-black text-text-muted">
+                <span>País</span>
+                <input name="country" value="<?= e($address['country'] ?? 'Brasil') ?>" class="input-field min-h-[44px]">
+            </label>
+            <button class="btn-primary w-fit min-h-[44px]" type="submit">Salvar entrega</button>
+        </form>
+    </section>
+
+    <section id="seguranca" class="glass rounded-2xl p-6">
+        <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-amber-glow">segurança</p>
+        <h2 class="m-0 mb-4 text-2xl font-black text-text-primary">Alterar senha</h2>
+        <form class="grid gap-4" method="post">
+            <input type="hidden" name="csrf_token" value="<?= e(generate_csrf_token()) ?>">
+            <input type="hidden" name="action" value="password">
+            <?php if (($user['auth_provider'] ?? 'password') !== 'google' || !empty($user['password_updated_at'] ?? null)): ?>
+                <label class="grid gap-1.5 text-[0.9rem] font-black text-text-muted">
+                    <span>Senha atual</span>
+                    <input type="password" name="current_password" autocomplete="current-password" class="input-field min-h-[44px]">
                 </label>
-                <label class="grid gap-1.5 text-[0.9rem] font-black text-midnight-400">
-                    <span>Foto de perfil</span>
-                    <input type="file" name="avatar" accept="image/png,image/jpeg,image/webp" class="w-full rounded-[10px] border border-white/10 bg-midnight-950/80 p-2.5 text-white outline-none file:mr-4 file:rounded-[8px] file:border-0 file:bg-glow-400 file:px-3 file:py-2 file:font-black file:text-midnight-950">
-                </label>
-            </div>
-            <button class="inline-flex min-h-[44px] w-fit items-center justify-center rounded-[10px] border border-glow-400 bg-gradient-to-r from-ember-500 to-glow-400 px-[18px] font-black text-midnight-950" type="submit">Salvar configurações</button>
+            <?php endif; ?>
+            <label class="grid gap-1.5 text-[0.9rem] font-black text-text-muted">
+                <span>Nova senha</span>
+                <input type="password" name="new_password" minlength="8" autocomplete="new-password" required class="input-field min-h-[44px]">
+            </label>
+            <label class="grid gap-1.5 text-[0.9rem] font-black text-text-muted">
+                <span>Confirmar nova senha</span>
+                <input type="password" name="confirm_password" minlength="8" autocomplete="new-password" required class="input-field min-h-[44px]">
+            </label>
+            <button class="btn-primary w-fit min-h-[44px]" type="submit">Salvar senha</button>
         </form>
     </section>
 </div>
 
 <div class="mt-5 grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
-    <section class="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-lg">
-        <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-glow-400">cupons</p>
-        <h2 class="m-0 text-2xl font-black text-white">Cupons para usar <?= count($activeCoupons) ?></h2>
-        <p class="mt-2 text-sm text-midnight-400">Você resgatou <?= count($activeCoupons) ?> de <?= $totalActiveCoupons ?> cupons ativos do site.</p>
+    <section class="glass rounded-2xl p-6">
+        <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-amber-glow">cupons</p>
+        <h2 class="m-0 text-2xl font-black text-text-primary">Cupons para usar <?= count($activeCoupons) ?></h2>
+        <p class="mt-2 text-sm text-text-muted">Você resgatou <?= count($activeCoupons) ?> de <?= $totalActiveCoupons ?> cupons ativos do site.</p>
         <form class="mt-4 grid gap-3 sm:grid-cols-[1fr_auto]" method="post">
             <input type="hidden" name="csrf_token" value="<?= e(generate_csrf_token()) ?>">
             <input type="hidden" name="action" value="redeem_coupon">
-            <input name="coupon_code" placeholder="Código do cupom" class="min-h-[44px] rounded-[10px] border border-white/10 bg-midnight-950/80 p-2.5 text-white outline-none focus:border-glow-400">
-            <button class="inline-flex min-h-[44px] items-center justify-center rounded-[10px] border border-glow-400 bg-glow-400 px-[18px] font-black text-midnight-950" type="submit">Resgatar</button>
+            <input name="coupon_code" placeholder="Código do cupom" class="input-field min-h-[44px]">
+            <button class="btn-primary min-h-[44px] px-[18px]" type="submit">Resgatar</button>
         </form>
         <div class="mt-4 grid gap-3">
             <?php foreach ($activeCoupons as $coupon): ?>
-                <div class="rounded-[10px] border border-white/10 bg-midnight-950/60 p-4">
+                <div class="rounded-[10px] border border-white/10 bg-background/60 p-4">
                     <div class="flex flex-wrap items-center justify-between gap-3">
-                        <strong class="text-glow-400"><?= e($coupon['code']) ?></strong>
-                        <span class="rounded-full border border-white/20 px-3 py-1 text-xs font-black text-white"><?= $coupon['discount_type'] === 'percent' ? (int) $coupon['discount_value'] . '%' : money((float) $coupon['discount_value']) ?></span>
+                        <strong class="text-amber-glow"><?= e($coupon['code']) ?></strong>
+                        <span class="badge-amber"><?= $coupon['discount_type'] === 'percent' ? (int) $coupon['discount_value'] . '%' : money((float) $coupon['discount_value']) ?></span>
                     </div>
-                    <p class="mt-2 font-bold text-white"><?= e($coupon['title']) ?></p>
-                    <p class="mt-1 text-sm text-midnight-400"><?= e($coupon['description'] ?? '') ?></p>
+                    <p class="mt-2 font-bold text-text-primary"><?= e($coupon['title']) ?></p>
+                    <p class="mt-1 text-sm text-text-muted"><?= e($coupon['description'] ?? '') ?></p>
                 </div>
             <?php endforeach; ?>
-            <?php if (!$activeCoupons): ?><p class="text-midnight-400">Nenhum cupom ativo resgatado ainda.</p><?php endif; ?>
+            <?php if (!$activeCoupons): ?><p class="text-text-muted">Nenhum cupom ativo resgatado ainda.</p><?php endif; ?>
         </div>
     </section>
 
-    <section class="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-lg">
-        <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-glow-400">avaliações feitas</p>
-        <h2 class="m-0 mb-4 text-2xl font-black text-white">Suas avaliações</h2>
+    <section class="glass rounded-2xl p-6">
+        <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-amber-glow">avaliações feitas</p>
+        <h2 class="m-0 mb-4 text-2xl font-black text-text-primary">Suas avaliações</h2>
         <div class="grid gap-3">
             <?php foreach ($myReviews as $review): ?>
-                <a class="rounded-[10px] border border-white/10 bg-midnight-950/60 p-4 transition-all hover:border-glow-400" href="<?= url('product.php?slug=' . urlencode($review['product_slug'])) ?>">
+                <a class="rounded-[10px] border border-white/10 bg-background/60 p-4 transition-all hover:border-amber-accent" href="<?= url('product.php?slug=' . urlencode($review['product_slug'])) ?>">
                     <div class="flex flex-wrap items-center justify-between gap-3">
-                        <strong class="text-white"><?= e($review['product_name']) ?></strong>
-                        <span class="text-glow-400"><?= str_repeat('★', (int) $review['rating']) ?></span>
+                        <strong class="text-text-primary"><?= e($review['product_name']) ?></strong>
+                        <span class="text-amber-glow"><?= str_repeat('★', (int) $review['rating']) ?></span>
                     </div>
-                    <p class="mt-2 text-sm text-midnight-400"><?= e(excerpt($review['comment'] ?: 'Sem comentário.', 140)) ?></p>
-                    <span class="mt-2 inline-flex rounded-full border border-white/20 px-3 py-1 text-xs font-black text-midnight-300"><?= e($review['status']) ?></span>
+                    <p class="mt-2 text-sm text-text-muted"><?= e(excerpt($review['comment'] ?: 'Sem comentário.', 140)) ?></p>
+                    <span class="badge-muted mt-2"><?= e($review['status']) ?></span>
                 </a>
             <?php endforeach; ?>
-            <?php if (!$myReviews): ?><p class="text-midnight-400">Você ainda não fez avaliações.</p><?php endif; ?>
+            <?php if (!$myReviews): ?><p class="text-text-muted">Você ainda não fez avaliações.</p><?php endif; ?>
         </div>
     </section>
 </div>
 
 <div class="mt-5 grid gap-5 lg:grid-cols-2">
-    <section class="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-lg">
-        <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-glow-400">lista de desejo</p>
-        <h2 class="m-0 mb-4 text-2xl font-black text-white">Produtos salvos</h2>
+    <section class="glass rounded-2xl p-6">
+        <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-amber-glow">lista de desejo</p>
+        <h2 class="m-0 mb-4 text-2xl font-black text-text-primary">Produtos salvos</h2>
         <div class="grid gap-3">
             <?php foreach ($wishlist as $item): ?>
-                <div class="grid items-center gap-3 rounded-[10px] border border-white/10 bg-midnight-950/60 p-3 sm:grid-cols-[64px_1fr_auto]">
+                <div class="grid items-center gap-3 rounded-[10px] border border-white/10 bg-background/60 p-3 sm:grid-cols-[64px_1fr_auto]">
                     <img src="<?= e(product_main_image($item)) ?>" alt="<?= e($item['name']) ?>" class="h-16 w-16 rounded-[8px] object-cover">
                     <div>
-                        <strong class="text-white"><?= e($item['name']) ?></strong>
-                        <p class="mt-1 text-sm text-midnight-400"><?= money((float) $item['price']) ?></p>
+                        <strong class="text-text-primary"><?= e($item['name']) ?></strong>
+                        <p class="mt-1 text-sm text-text-muted"><?= money((float) $item['price']) ?></p>
                     </div>
-                    <a class="inline-flex min-h-[38px] items-center justify-center rounded-[8px] border border-white/20 px-3 text-sm font-black text-white hover:border-glow-400" href="<?= url('product.php?slug=' . urlencode($item['slug'])) ?>">Ver</a>
+                    <a class="btn-ghost min-h-[38px] px-3 text-sm" href="<?= url('product.php?slug=' . urlencode($item['slug'])) ?>">Ver</a>
                 </div>
             <?php endforeach; ?>
-            <?php if (!$wishlist): ?><p class="text-midnight-400">Sua lista de desejo ainda está vazia.</p><?php endif; ?>
+            <?php if (!$wishlist): ?><p class="text-text-muted">Sua lista de desejo ainda está vazia.</p><?php endif; ?>
         </div>
     </section>
 
-    <section class="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-lg">
-        <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-glow-400">recomendados</p>
-        <h2 class="m-0 mb-4 text-2xl font-black text-white">Para você</h2>
+    <section class="glass rounded-2xl p-6">
+        <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-amber-glow">recomendados</p>
+        <h2 class="m-0 mb-4 text-2xl font-black text-text-primary">Para você</h2>
         <div class="grid gap-3">
             <?php foreach ($recommended as $item): ?>
-                <div class="grid items-center gap-3 rounded-[10px] border border-white/10 bg-midnight-950/60 p-3 sm:grid-cols-[64px_1fr_auto]">
+                <div class="grid items-center gap-3 rounded-[10px] border border-white/10 bg-background/60 p-3 sm:grid-cols-[64px_1fr_auto]">
                     <img src="<?= e(product_main_image($item)) ?>" alt="<?= e($item['name']) ?>" class="h-16 w-16 rounded-[8px] object-cover">
                     <div>
-                        <strong class="text-white"><?= e($item['name']) ?></strong>
-                        <p class="mt-1 text-sm text-midnight-400"><?= e(product_type_label($item['type'])) ?> • <?= money((float) $item['price']) ?></p>
+                        <strong class="text-text-primary"><?= e($item['name']) ?></strong>
+                        <p class="mt-1 text-sm text-text-muted"><?= e(product_type_label($item['type'])) ?> • <?= money((float) $item['price']) ?></p>
                     </div>
-                    <a class="inline-flex min-h-[38px] items-center justify-center rounded-[8px] border border-white/20 px-3 text-sm font-black text-white hover:border-glow-400" href="<?= url('product.php?slug=' . urlencode($item['slug'])) ?>">Ver</a>
+                    <a class="btn-ghost min-h-[38px] px-3 text-sm" href="<?= url('product.php?slug=' . urlencode($item['slug'])) ?>">Ver</a>
                 </div>
             <?php endforeach; ?>
-            <?php if (!$recommended): ?><p class="text-midnight-400">Sem recomendações novas no momento.</p><?php endif; ?>
+            <?php if (!$recommended): ?><p class="text-text-muted">Sem recomendações novas no momento.</p><?php endif; ?>
         </div>
     </section>
 </div>
 
-<section class="mt-5 rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-lg">
-    <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-glow-400">histórico</p>
-    <h2 class="m-0 mb-4 text-2xl font-black text-white">Pedidos</h2>
+<section class="mt-5 glass rounded-2xl p-6">
+    <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-amber-glow">histórico</p>
+    <h2 class="m-0 mb-4 text-2xl font-black text-text-primary">Pedidos</h2>
     <div class="grid gap-3">
         <?php foreach ($orders as $order): ?>
-            <div class="grid items-center gap-3.5 rounded-[10px] border border-white/10 bg-midnight-950/60 p-3.5 md:grid-cols-[1fr_auto_auto]">
-                <span>#<?= (int) $order['id'] ?> <small class="mt-1 block text-midnight-400 font-semibold"><?= e($order['status']) ?> / <?= e($order['payment_status']) ?></small></span>
-                <span class="text-sm text-midnight-400"><?= date('d/m/Y', strtotime((string) $order['created_at'])) ?></span>
-                <strong class="text-glow-400"><?= money((float) ($order['total_amount'] ?? $order['total'])) ?></strong>
+            <div class="grid items-center gap-3.5 rounded-[10px] border border-white/10 bg-background/60 p-3.5 md:grid-cols-[1fr_auto_auto]">
+                <span class="text-text-primary">#<?= (int) $order['id'] ?> <small class="mt-1 block text-text-muted font-semibold"><?= e($order['status']) ?> / <?= e($order['payment_status']) ?></small></span>
+                <span class="text-sm text-text-muted"><?= date('d/m/Y', strtotime((string) $order['created_at'])) ?></span>
+                <strong class="text-amber-glow"><?= money((float) ($order['total_amount'] ?? $order['total'])) ?></strong>
             </div>
         <?php endforeach; ?>
     </div>
-    <?php if (!$orders): ?><p class="text-midnight-400">Você ainda não fez pedidos.</p><?php endif; ?>
+    <?php if (!$orders): ?><p class="text-text-muted">Você ainda não fez pedidos.</p><?php endif; ?>
 </section>
 <?php include __DIR__ . '/includes/footer.php'; ?>

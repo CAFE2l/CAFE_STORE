@@ -24,10 +24,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $oldPrice = trim($_POST['old_price'] ?? '') === '' ? null : max(0, (float) $_POST['old_price']);
     $stock = max(0, (int) ($_POST['stock'] ?? 0));
     $mainImage = trim($_POST['main_image_url'] ?? '');
+    $gallery = array_filter(array_map('trim', preg_split('/\R/', $_POST['gallery_images'] ?? '')));
 
     if ($name === '' || $price <= 0) {
         flash('error', 'Nome e preço são obrigatorios.');
     } else {
+        $uploaded = product_upload_image_files($_FILES['product_images'] ?? [], $slug);
+        $imageSet = product_normalize_image_set($mainImage, $gallery, $uploaded['images']);
+        $mainImage = $imageSet['main'];
+
         $stmt = db()->prepare('UPDATE products SET category_id = ?, name = ?, slug = ?, description = ?, short_description = ?, price = ?, old_price = ?, image_url = ?, main_image_url = ?, stock = ?, type = ?, is_digital = ?, status = ? WHERE id = ?');
         $stmt->execute([
             (int) ($_POST['category_id'] ?? 0) ?: null,
@@ -46,10 +51,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id,
         ]);
         db()->prepare('DELETE FROM product_images WHERE product_id = ?')->execute([$id]);
-        $gallery = array_filter(array_map('trim', preg_split('/\R/', $_POST['gallery_images'] ?? '')));
         $imageStmt = db()->prepare('INSERT INTO product_images (product_id, image_url, sort_order) VALUES (?, ?, ?)');
-        foreach (array_values($gallery) as $index => $imageUrl) {
+        foreach ($imageSet['gallery'] as $index => $imageUrl) {
             $imageStmt->execute([$id, $imageUrl, $index]);
+        }
+        foreach ($uploaded['errors'] as $uploadError) {
+            flash('error', $uploadError);
         }
         flash('success', 'Produto atualizado.');
         redirect('admin/products.php');
@@ -60,7 +67,7 @@ include __DIR__ . '/../includes/header.php';
 <div class="grid items-start gap-6 max-md:grid-cols-1 md:grid-cols-[240px_1fr]">
     <?php include __DIR__ . '/../includes/sidebar-admin.php'; ?>
     <section class="grid gap-5 min-w-0">
-        <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-glow-400">edição</p>
+        <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-amber-glow">edição</p>
         <h1 class="m-0 text-[clamp(2rem,4vw,3.4rem)] font-black leading-tight tracking-tight">Editar produto</h1>
         <?php include __DIR__ . '/product-form.php'; ?>
     </section>

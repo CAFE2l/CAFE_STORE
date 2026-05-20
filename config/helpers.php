@@ -2,6 +2,9 @@
 /**
  * CAFÉ STORE - Helper Functions
  * Funções auxiliares para o projeto
+ *
+ * SQL manual da Correção 5, se necessário:
+ * ALTER TABLE product_reviews ADD COLUMN verified_purchase TINYINT(1) NOT NULL DEFAULT 0 AFTER order_id;
  */
 
 // Iniciar sessão se não estiver iniciada
@@ -240,9 +243,97 @@ function product_image($image_url) {
     if (strpos($image_url, '/') === false) {
         return url('assets/images/produtos/' . ltrim($image_url, '/'));
     }
+
+    $relativePath = ltrim($image_url, '/');
+    $absolutePath = __DIR__ . '/../' . $relativePath;
+    if (!file_exists($absolutePath) && strpos($relativePath, 'assets/images/produtos/') === 0) {
+        $fallbackMatches = glob(dirname($absolutePath) . '/*/' . basename($absolutePath));
+        if (!empty($fallbackMatches[0])) {
+            $relativePath = ltrim(str_replace(__DIR__ . '/../', '', $fallbackMatches[0]), '/');
+        }
+    }
     
     // Se é caminho relativo
-    return url($image_url);
+    return url($relativePath);
+}
+
+function product_upload_image_files($files, $slug) {
+    if (empty($files['name']) || !is_array($files['name'])) {
+        return ['images' => [], 'errors' => []];
+    }
+
+    $allowedTypes = [
+        'image/jpeg' => 'jpg',
+        'image/png' => 'png',
+        'image/webp' => 'webp',
+    ];
+    $images = [];
+    $errors = [];
+    $safeSlug = slugify($slug ?: 'produto');
+    $uploadDir = __DIR__ . '/../assets/uploads/products/' . $safeSlug;
+
+    if (!is_dir($uploadDir) && !mkdir($uploadDir, 0775, true)) {
+        return ['images' => [], 'errors' => ['Não foi possível criar a pasta de imagens do produto.']];
+    }
+
+    foreach ($files['name'] as $index => $name) {
+        if (($files['error'][$index] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+            continue;
+        }
+
+        if (($files['error'][$index] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK) {
+            $errors[] = 'Não foi possível enviar uma das imagens.';
+            continue;
+        }
+
+        if (($files['size'][$index] ?? 0) > 3 * 1024 * 1024) {
+            $errors[] = 'Cada imagem precisa ter até 3MB.';
+            continue;
+        }
+
+        $tmpName = $files['tmp_name'][$index] ?? '';
+        $mime = $tmpName ? mime_content_type($tmpName) : '';
+        if (!isset($allowedTypes[$mime])) {
+            $errors[] = 'Use apenas imagens JPG, PNG ou WebP.';
+            continue;
+        }
+
+        $filename = bin2hex(random_bytes(8)) . '.' . $allowedTypes[$mime];
+        $destination = $uploadDir . '/' . $filename;
+        if (!move_uploaded_file($tmpName, $destination)) {
+            $errors[] = 'Falha ao salvar uma das imagens enviadas.';
+            continue;
+        }
+
+        $images[] = 'assets/uploads/products/' . $safeSlug . '/' . $filename;
+    }
+
+    return ['images' => $images, 'errors' => array_values(array_unique($errors))];
+}
+
+function product_normalize_image_set($mainImage, $galleryImages, $uploadedImages = [], $limit = 4) {
+    $items = array_merge(
+        [trim((string) $mainImage)],
+        is_array($galleryImages) ? $galleryImages : [],
+        is_array($uploadedImages) ? $uploadedImages : []
+    );
+
+    $normalized = [];
+    foreach ($items as $item) {
+        $item = trim((string) $item);
+        if ($item === '' || in_array($item, $normalized, true)) {
+            continue;
+        }
+        $normalized[] = $item;
+        if (count($normalized) >= $limit) {
+            break;
+        }
+    }
+
+    return [
+        'main' => $normalized[0] ?? '',
+        'gallery' => array_slice($normalized, 1),
+    ];
 }
 
 function product_main_image(array $product) {
@@ -318,6 +409,7 @@ function require_login() {
  * Exigir usuário administrador
  */
 function require_admin() {
+    unset($_SESSION['user_cache']);
     $user = current_user();
     if (!$user || ($user['role'] ?? '') !== 'admin') {
         http_response_code(403);
@@ -348,6 +440,10 @@ function generate_csrf_token() {
  */
 function verify_csrf_token($token) {
     return hash_equals($_SESSION['csrf_token'] ?? '', $token ?? '');
+}
+
+function validate_csrf_token($token) {
+    return verify_csrf_token($token);
 }
 
 function require_post() {
@@ -667,179 +763,6 @@ function add_column_if_missing(PDO $pdo, $table, $column, $definition) {
     }
 }
 
-function seed_support_products_catalog(PDO $pdo) {
-    $categories = [
-        ['Camisetas', 'camisetas'],
-        ['Acessórios', 'acessorios'],
-        ['Chaveiros', 'chaveiros'],
-        ['Canecas', 'canecas'],
-        ['Moletons', 'moletons'],
-    ];
-
-    $categoryIds = [];
-    $categoryStmt = $pdo->prepare("
-        INSERT INTO categories (name, slug)
-        VALUES (?, ?)
-        ON DUPLICATE KEY UPDATE name = VALUES(name)
-    ");
-    $categorySelect = $pdo->prepare("SELECT id FROM categories WHERE slug = ? LIMIT 1");
-    foreach ($categories as [$name, $slug]) {
-        $categoryStmt->execute([$name, $slug]);
-        $categorySelect->execute([$slug]);
-        $categoryIds[$slug] = (int) $categorySelect->fetchColumn();
-    }
-
-    $serviceSlugs = [
-        'site-institucional-para-negocios',
-        'landing-page-de-alta-conversao',
-        'video-curto-para-redes-sociais',
-        'video-longo-profissional',
-        'web-aplicacao-para-empresas',
-        'kit-de-acessorios-cafe',
-    ];
-    $serviceStmt = $pdo->prepare("UPDATE products SET status = 'draft' WHERE slug = ?");
-    foreach ($serviceSlugs as $slug) {
-        $serviceStmt->execute([$slug]);
-    }
-
-    $products = [
-        [
-            'camisetas',
-            'Camiseta CAFÉ STORE Limited Edition',
-            'camiseta-cafe-store-limited-edition',
-            'Camiseta preta limited edition da CAFÉ STORE com estampa premium do mascote flame na frente, ícone na manga, tag personalizada e arte traseira com a frase CREATE BUILD INSPIRE. Malha 100% algodão, toque macio, alta durabilidade e cores vibrantes. Este item funciona como apoio/donate; produção e entrega física dependem de campanha confirmada.',
-            'Camiseta preta limited edition com mascote frontal, arte traseira CREATE BUILD INSPIRE, tag personalizada e malha 100% algodão.',
-            79.90,
-            50,
-            'camiseta',
-        ],
-        [
-            'camisetas',
-            'Camiseta CAFÉ STORE Support',
-            'camiseta-cafe-store-support',
-            'Camiseta simbólica da CAFÉ STORE para quem quer apoiar o projeto e representar a marca. Este item funciona como apoio/donate; produção e entrega física dependem de campanha confirmada.',
-            'Camiseta simbólica para apoiar a CAFÉ STORE.',
-            59.90,
-            50,
-            'camiseta',
-        ],
-        [
-            'camisetas',
-            'Camiseta CAFÉ STORE Dry Pro Poliéster',
-            'camiseta-cafe-store-dry-pro-poliester',
-            'Camiseta performance tech tee em poliéster dry pro com visual preto e laranja, mascote frontal, identidade CAFÉ STORE nas mangas e arte traseira CREATE BUILD INSPIRE. Tecido respirável, secagem rápida, proteção UV, leveza e flexibilidade para quem vive o digital. Este item funciona como apoio/donate; produção e entrega física dependem de campanha confirmada.',
-            'Camiseta de poliéster dry pro com visual tech, respirável, secagem rápida, proteção UV e arte CAFÉ STORE.',
-            89.90,
-            50,
-            'camiseta',
-        ],
-        [
-            'chaveiros',
-            'Chaveiro Flame CAFÉ',
-            'chaveiro-flame-cafe',
-            'Chaveiro simbólico com identidade da CAFÉ STORE para quem quer apoiar o projeto. Campanhas físicas serão comunicadas separadamente.',
-            'Chaveiro simbólico da marca CAFÉ.',
-            19.90,
-            120,
-            'chaveiro',
-        ],
-        [
-            'canecas',
-            'Caneca CAFÉ STORE',
-            'caneca-cafe-store',
-            'Caneca simbólica da CAFÉ STORE para apoiadores da marca. Este item representa apoio/donate enquanto a produção oficial não estiver ativa.',
-            'Caneca simbólica para apoiar a marca.',
-            44.90,
-            60,
-            'caneca',
-        ],
-        [
-            'moletons',
-            'Moletom CAFÉ STORE Support',
-            'moletom-cafe-store-support',
-            'Moletom simbólico da CAFÉ STORE para apoiadores. Compra registrada como apoio ao projeto, com entrega física apenas quando houver campanha oficial.',
-            'Moletom simbólico para apoiadores.',
-            119.90,
-            30,
-            'moletom',
-        ],
-    ];
-
-    $productStmt = $pdo->prepare("
-        INSERT INTO products (category_id, name, slug, description, short_description, price, old_price, image_url, main_image_url, stock, type, is_digital, status)
-        VALUES (?, ?, ?, ?, ?, ?, NULL, '', '', ?, ?, 1, 'active')
-        ON DUPLICATE KEY UPDATE
-            category_id = VALUES(category_id),
-            name = VALUES(name),
-            description = VALUES(description),
-            short_description = VALUES(short_description),
-            price = VALUES(price),
-            stock = VALUES(stock),
-            type = VALUES(type),
-            is_digital = 1,
-            status = 'active'
-    ");
-
-    foreach ($products as [$categorySlug, $name, $slug, $description, $shortDescription, $price, $stock, $type]) {
-        $productStmt->execute([
-            $categoryIds[$categorySlug] ?? null,
-            $name,
-            $slug,
-            $description,
-            $shortDescription,
-            $price,
-            $stock,
-            $type,
-        ]);
-    }
-
-    if (table_exists($pdo, 'product_images')) {
-        $seededImages = [
-            'camiseta-cafe-store-limited-edition' => [
-                'main' => 'assets/images/produtos/camisa_normal/design.jpeg',
-                'gallery' => [
-                    'assets/images/produtos/camisa_normal/camisaVtirine.png',
-                    'assets/images/produtos/camisa_normal/camisaAlgodão.png',
-                    'assets/images/produtos/camisa_normal/camisa_tras.png',
-                ],
-            ],
-            'camiseta-cafe-store-dry-pro-poliester' => [
-                'main' => 'assets/images/produtos/poliester/design.png',
-                'gallery' => [
-                    'assets/images/produtos/poliester/camisa_poliester.png',
-                    'assets/images/produtos/poliester/frente.jpeg',
-                    'assets/images/produtos/poliester/tras.png',
-                ],
-            ],
-            'moletom-cafe-store-support' => [
-                'main' => 'assets/images/produtos/moletons/design.png',
-                'gallery' => [
-                    'assets/images/produtos/moletons/design.png',
-                ],
-            ],
-        ];
-
-        $selectProduct = $pdo->prepare("SELECT id FROM products WHERE slug = ? LIMIT 1");
-        $updateProductImage = $pdo->prepare("UPDATE products SET image_url = ?, main_image_url = ? WHERE id = ?");
-        $deleteImages = $pdo->prepare("DELETE FROM product_images WHERE product_id = ?");
-        $insertImage = $pdo->prepare("INSERT INTO product_images (product_id, image_url, sort_order) VALUES (?, ?, ?)");
-
-        foreach ($seededImages as $slug => $imageSet) {
-            $selectProduct->execute([$slug]);
-            $productId = (int) $selectProduct->fetchColumn();
-            if ($productId <= 0) {
-                continue;
-            }
-
-            $updateProductImage->execute([$imageSet['main'], $imageSet['main'], $productId]);
-            $deleteImages->execute([$productId]);
-            foreach ($imageSet['gallery'] as $sortOrder => $imageUrl) {
-                $insertImage->execute([$productId, $imageUrl, $sortOrder]);
-            }
-        }
-    }
-}
-
 function ensure_app_schema(PDO $pdo) {
     static $done = false;
     if ($done) {
@@ -922,8 +845,6 @@ function ensure_app_schema(PDO $pdo) {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         CONSTRAINT fk_product_images_product FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-
-    seed_support_products_catalog($pdo);
 
     $pdo->exec("CREATE TABLE IF NOT EXISTS cart_items (
         id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -1025,6 +946,23 @@ function ensure_app_schema(PDO $pdo) {
         CONSTRAINT fk_product_reviews_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
         CONSTRAINT fk_product_reviews_order FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE SET NULL
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    add_column_if_missing($pdo, 'product_reviews', 'verified_purchase', "verified_purchase TINYINT(1) NOT NULL DEFAULT 0 AFTER order_id");
+    try {
+        $pdo->exec("
+            UPDATE product_reviews r
+            SET verified_purchase = 1
+            WHERE EXISTS (
+                SELECT 1
+                FROM order_items oi
+                JOIN orders o ON o.id = oi.order_id
+                WHERE oi.product_id = r.product_id
+                  AND o.user_id = r.user_id
+                  AND o.status NOT IN ('cancelled', 'cancelado')
+            )
+        ");
+    } catch (Throwable $e) {
+        error_log('Schema product_reviews verified_purchase migration skipped: ' . $e->getMessage());
+    }
 
     $pdo->exec("CREATE TABLE IF NOT EXISTS review_images (
         id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,

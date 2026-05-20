@@ -24,19 +24,26 @@ if (!$stmt->fetch()) {
     redirect('products.php');
 }
 
-$orderStmt = db()->prepare("SELECT oi.order_id FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE oi.product_id = ? AND o.user_id = ? AND o.status IN ('paid', 'completed', 'processing', 'pending', 'created') ORDER BY o.created_at DESC LIMIT 1");
+$orderStmt = db()->prepare("SELECT oi.order_id FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE oi.product_id = ? AND o.user_id = ? AND o.status NOT IN ('cancelled', 'cancelado') ORDER BY o.created_at DESC LIMIT 1");
 $orderStmt->execute([$productId, $_SESSION['user_id']]);
 $orderId = $orderStmt->fetchColumn() ?: null;
+
+if (!$orderId) {
+    http_response_code(403);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['success' => false, 'message' => 'Você precisa ter comprado este produto para avaliá-lo'], JSON_UNESCAPED_UNICODE);
+    exit;
+}
 
 $existing = db()->prepare('SELECT id FROM product_reviews WHERE product_id = ? AND user_id = ? LIMIT 1');
 $existing->execute([$productId, $_SESSION['user_id']]);
 $reviewId = (int) $existing->fetchColumn();
 
 if ($reviewId > 0) {
-    $update = db()->prepare("UPDATE product_reviews SET rating = ?, comment = ?, order_id = ?, status = 'pending' WHERE id = ?");
+    $update = db()->prepare("UPDATE product_reviews SET rating = ?, comment = ?, order_id = ?, verified_purchase = 1, status = 'pending' WHERE id = ?");
     $update->execute([$rating, $comment, $orderId, $reviewId]);
 } else {
-    $insert = db()->prepare("INSERT INTO product_reviews (product_id, user_id, order_id, rating, comment, status) VALUES (?, ?, ?, ?, ?, 'pending')");
+    $insert = db()->prepare("INSERT INTO product_reviews (product_id, user_id, order_id, verified_purchase, rating, comment, status) VALUES (?, ?, ?, 1, ?, ?, 'pending')");
     $insert->execute([$productId, $_SESSION['user_id'], $orderId, $rating, $comment]);
     $reviewId = (int) db()->lastInsertId();
 }

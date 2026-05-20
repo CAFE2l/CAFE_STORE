@@ -1,5 +1,5 @@
 </main>
-<footer class="site-footer-panel">
+<footer class="site-footer-panel noise">
     <div class="mx-auto grid max-w-[1280px] gap-10 px-4 py-14 md:grid-cols-[1.35fr_1fr_1fr] md:px-6 lg:px-8">
         <div>
             <a class="inline-flex items-center gap-2.5 font-black tracking-tight" href="<?= url(
@@ -10,9 +10,9 @@
                         "assets/images/icons/favicon.png",
                     ) ?>" alt="CAFÉ STORE" width="36" height="36" class="h-9 w-9 object-contain">
                 </span>
-                <span class="text-2xl font-black leading-none text-white">CAFÉ <span class="bg-gradient-to-r from-fire-500 via-ember-500 to-glow-400 bg-clip-text text-transparent">STORE</span></span>
+                <span class="font-display text-2xl font-black leading-none text-text-primary">CAFÉ <span class="gradient-text">STORE</span></span>
             </a>
-            <p class="mt-5 max-w-[320px] leading-relaxed text-midnight-400">Sua identidade digital começa aqui.</p>
+            <p class="mt-5 max-w-[320px] leading-relaxed text-text-secondary">Sua identidade digital começa aqui.</p>
             <div class="mt-6 flex gap-3">
                 <a class="footer-social" href="<?= e(whatsapp_url('Olá, vim pelo site da CAFÉ STORE e quero falar sobre um projeto.')) ?>" target="_blank" rel="noopener" aria-label="WhatsApp">
                     <img src="<?= url('assets/images/icons/Whatsapp.png') ?>" alt="WhatsApp" class="h-5 w-5 object-contain">
@@ -46,9 +46,9 @@
         </div>
     </div>
     <div class="border-t border-white/5">
-        <div class="mx-auto flex max-w-[1280px] items-center justify-between gap-4 px-4 py-6 text-sm text-midnight-500 md:px-6 lg:px-8 max-sm:flex-col max-sm:items-start">
+        <div class="mx-auto flex max-w-[1280px] items-center justify-between gap-4 px-4 py-6 text-sm text-text-muted md:px-6 lg:px-8 max-sm:flex-col max-sm:items-start">
             <span>© 2026 CAFÉ STORE. Todos os direitos reservados.</span>
-            <span>Sites, vídeos e web aplicações para negócios.</span>
+            <span class="font-mono">Sites, vídeos e web aplicações para negócios.</span>
         </div>
     </div>
 </footer>

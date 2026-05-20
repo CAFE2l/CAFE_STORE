@@ -42,81 +42,81 @@ include __DIR__ . '/includes/header.php';
 ?>
 <div class="flex items-end justify-between gap-6 mb-6">
     <div>
-        <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-glow-400">orçamento</p>
-        <h1 class="m-0 text-[clamp(2rem,4vw,3.4rem)] font-black leading-tight tracking-tight">Solicitar <span class="bg-gradient-to-r from-ember-500 to-glow-400 bg-clip-text text-transparent">atendimento</span></h1>
-        <p class="mt-4 max-w-[44rem] leading-relaxed text-midnight-400">Preencha o formulário e envie tudo direto para meu WhatsApp com a mensagem pronta.</p>
+        <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-amber-glow">orçamento</p>
+        <h1 class="m-0 text-[clamp(2rem,4vw,3.4rem)] font-black leading-tight tracking-tight">Solicitar <span class="gradient-text">atendimento</span></h1>
+        <p class="mt-4 max-w-[44rem] leading-relaxed text-text-muted">Preencha o formulário e envie tudo direto para meu WhatsApp com a mensagem pronta.</p>
     </div>
 </div>
 
 <div class="grid items-start gap-5 lg:grid-cols-[1fr_0.85fr]">
-    <section class="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-lg">
-        <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-glow-400">formulário</p>
+    <section class="glass p-6">
+        <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-amber-glow">formulário</p>
         <form class="grid gap-4" method="get" data-budget-form data-whatsapp-phone="<?= e(preg_replace('/\D+/', '', WHATSAPP_CONTACT_NUMBER)) ?>">
             <div class="grid gap-4 md:grid-cols-2">
-                <label class="grid gap-1.5 text-[0.9rem] font-black text-midnight-400">
+                <label class="grid gap-1.5 text-[0.9rem] font-black text-text-muted">
                     <span>Seu nome</span>
-                    <input name="name" value="<?= e($name) ?>" required class="w-full min-h-[44px] rounded-[10px] border border-white/10 bg-midnight-950/80 p-2.5 text-white outline-none backdrop-blur transition-all duration-300 focus:border-glow-400" placeholder="Seu nome">
+                    <input name="name" value="<?= e($name) ?>" required class="input-field" placeholder="Seu nome">
                 </label>
-                <label class="grid gap-1.5 text-[0.9rem] font-black text-midnight-400">
+                <label class="grid gap-1.5 text-[0.9rem] font-black text-text-muted">
                     <span>E-mail</span>
-                    <input name="email" type="email" value="<?= e($email) ?>" class="w-full min-h-[44px] rounded-[10px] border border-white/10 bg-midnight-950/80 p-2.5 text-white outline-none backdrop-blur transition-all duration-300 focus:border-glow-400" placeholder="voce@email.com">
+                    <input name="email" type="email" value="<?= e($email) ?>" class="input-field" placeholder="voce@email.com">
                 </label>
             </div>
-            <label class="grid gap-1.5 text-[0.9rem] font-black text-midnight-400">
+            <label class="grid gap-1.5 text-[0.9rem] font-black text-text-muted">
                 <span>Empresa ou nome do projeto</span>
-                <input name="company" value="<?= e($company) ?>" class="w-full min-h-[44px] rounded-[10px] border border-white/10 bg-midnight-950/80 p-2.5 text-white outline-none backdrop-blur transition-all duration-300 focus:border-glow-400" placeholder="Ex: loja, marca, canal, produto">
+                <input name="company" value="<?= e($company) ?>" class="input-field" placeholder="Ex: loja, marca, canal, produto">
             </label>
-            <label class="grid gap-1.5 text-[0.9rem] font-black text-midnight-400">
+            <label class="grid gap-1.5 text-[0.9rem] font-black text-text-muted">
                 <span>O que você quer orçar?</span>
-                <select name="service" class="w-full min-h-[44px] rounded-[10px] border border-white/10 bg-midnight-950/80 p-2.5 text-white outline-none backdrop-blur transition-all duration-300 focus:border-glow-400">
+                <select name="service" class="input-field">
                     <?php foreach ($services as $service): ?>
                         <option value="<?= e($service) ?>" <?= $selectedService === $service ? 'selected' : '' ?> class="text-black"><?= e($service) ?></option>
                     <?php endforeach; ?>
                 </select>
             </label>
-            <label class="grid gap-1.5 text-[0.9rem] font-black text-midnight-400">
+            <label class="grid gap-1.5 text-[0.9rem] font-black text-text-muted">
                 <span>Explique o objetivo</span>
-                <textarea name="objective" rows="5" required class="w-full min-h-[132px] rounded-[10px] border border-white/10 bg-midnight-950/80 p-2.5 text-white outline-none backdrop-blur transition-all duration-300 focus:border-glow-400" placeholder="Conte o que você precisa, qual problema quer resolver e se já tem referências."><?= e($objective) ?></textarea>
+                <textarea name="objective" rows="5" required class="input-field" placeholder="Conte o que você precisa, qual problema quer resolver e se já tem referências."><?= e($objective) ?></textarea>
             </label>
             <div class="grid gap-4 md:grid-cols-3">
-                <label class="grid gap-1.5 text-[0.9rem] font-black text-midnight-400">
+                <label class="grid gap-1.5 text-[0.9rem] font-black text-text-muted">
                     <span>Prazo desejado</span>
-                    <input name="deadline" value="<?= e($deadline) ?>" class="w-full min-h-[44px] rounded-[10px] border border-white/10 bg-midnight-950/80 p-2.5 text-white outline-none backdrop-blur transition-all duration-300 focus:border-glow-400" placeholder="Ex: 15 dias">
+                    <input name="deadline" value="<?= e($deadline) ?>" class="input-field" placeholder="Ex: 15 dias">
                 </label>
-                <label class="grid gap-1.5 text-[0.9rem] font-black text-midnight-400">
+                <label class="grid gap-1.5 text-[0.9rem] font-black text-text-muted">
                     <span>Orçamento estimado</span>
-                    <input name="budget" value="<?= e($budget) ?>" class="w-full min-h-[44px] rounded-[10px] border border-white/10 bg-midnight-950/80 p-2.5 text-white outline-none backdrop-blur transition-all duration-300 focus:border-glow-400" placeholder="Ex: R$ 800">
+                    <input name="budget" value="<?= e($budget) ?>" class="input-field" placeholder="Ex: R$ 800">
                 </label>
-                <label class="grid gap-1.5 text-[0.9rem] font-black text-midnight-400">
+                <label class="grid gap-1.5 text-[0.9rem] font-black text-text-muted">
                     <span>Melhor contato</span>
-                    <input name="contact" value="<?= e($contact) ?>" class="w-full min-h-[44px] rounded-[10px] border border-white/10 bg-midnight-950/80 p-2.5 text-white outline-none backdrop-blur transition-all duration-300 focus:border-glow-400" placeholder="WhatsApp, e-mail...">
+                    <input name="contact" value="<?= e($contact) ?>" class="input-field" placeholder="WhatsApp, e-mail...">
                 </label>
             </div>
             <div class="flex flex-wrap gap-3">
-                <button class="inline-flex min-h-[44px] items-center justify-center rounded-[10px] border border-white/20 bg-white/5 px-[18px] font-black text-white transition-all duration-300 hover:border-glow-400" type="submit">Atualizar mensagem</button>
-                <a class="inline-flex min-h-[44px] items-center justify-center rounded-[10px] border border-glow-400 bg-glow-400 px-[18px] font-black text-midnight-950 transition-all duration-300 hover:bg-glow-300" href="<?= e($whatsappLink) ?>" target="_blank" rel="noopener" data-whatsapp-submit>Enviar pelo WhatsApp</a>
+                <button class="btn-ghost min-h-[44px]" type="submit">Atualizar mensagem</button>
+                <a class="btn-primary" href="<?= e($whatsappLink) ?>" target="_blank" rel="noopener" data-whatsapp-submit>Enviar pelo WhatsApp</a>
             </div>
         </form>
 
-        <div class="mt-6 rounded-[10px] border border-white/10 bg-midnight-950/70 p-4">
-            <p class="mb-2 text-sm font-black text-glow-400">Mensagem pronta</p>
-            <pre class="whitespace-pre-wrap font-sans text-sm leading-relaxed text-midnight-300"><?= e($message) ?></pre>
+        <div class="mt-6 rounded-[10px] border border-white/10 bg-background/60 p-4">
+            <p class="mb-2 text-sm font-black text-amber-glow">Mensagem pronta</p>
+            <pre class="whitespace-pre-wrap font-sans text-sm leading-relaxed text-text-secondary"><?= e($message) ?></pre>
         </div>
 
     </section>
 
-    <aside class="rounded-2xl border border-glow-400/40 bg-glow-400/10 p-6 backdrop-blur-lg">
-        <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-glow-400">status</p>
-        <h2 class="m-0 text-2xl font-black text-glow-400">Contato direto</h2>
-        <p class="mt-3 leading-relaxed text-midnight-300">O formulário monta uma mensagem organizada para eu entender o serviço, objetivo, prazo e orçamento antes de responder.</p>
+    <aside class="glass p-6">
+        <p class="mb-2.5 text-[0.75rem] font-black uppercase tracking-[0.12em] text-amber-glow">status</p>
+        <h2 class="m-0 text-2xl font-black text-amber-glow">Contato direto</h2>
+        <p class="mt-3 leading-relaxed text-text-secondary">O formulário monta uma mensagem organizada para eu entender o serviço, objetivo, prazo e orçamento antes de responder.</p>
         <div class="mt-5 grid gap-3">
-            <div class="rounded-[10px] border border-white/10 bg-midnight-950/60 p-4">
-                <strong class="text-glow-400">WhatsApp</strong>
-                <p class="mt-2 text-midnight-300">Contato direto para orçamento, dúvidas e início de projeto.</p>
+            <div class="rounded-[10px] border border-white/10 bg-background/50 p-4">
+                <strong class="text-amber-glow">WhatsApp</strong>
+                <p class="mt-2 text-text-secondary">Contato direto para orçamento, dúvidas e início de projeto.</p>
             </div>
-            <div class="rounded-[10px] border border-white/10 bg-midnight-950/60 p-4">
-                <strong class="text-glow-400">Telegram</strong>
-                <p class="mt-2 text-midnight-300">Canal para clientes acompanharem a comunidade e a prova social dos trabalhos.</p>
+            <div class="rounded-[10px] border border-white/10 bg-background/50 p-4">
+                <strong class="text-amber-glow">Telegram</strong>
+                <p class="mt-2 text-text-secondary">Canal para clientes acompanharem a comunidade e a prova social dos trabalhos.</p>
             </div>
         </div>
     </aside>
