@@ -1,9 +1,40 @@
 {
+  "name": "cafe-store",
+  "version": "0.1.0",
+  "private": true,
   "scripts": {
-    "build:css": "tailwindcss -i ./assets/css/app.css -o ./assets/css/app.build.css --minify",
-    "watch:css": "tailwindcss -i ./assets/css/app.css -o ./assets/css/app.build.css --watch"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev"
   },
   "devDependencies": {
-    "tailwindcss": "^3.4.17"
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^20.19.41",
+    "@types/react": "^18.3.29",
+    "@types/react-dom": "^18.3.7",
+    "autoprefixer": "^10.5.0",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^14.2.35",
+    "postcss": "^8.5.15",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@auth/prisma-adapter": "^2.11.2",
+    "@mercadopago/sdk-js": "^0.0.3",
+    "@prisma/client": "^5.22.0",
+    "bcryptjs": "^3.0.3",
+    "cloudinary": "^2.10.0",
+    "next": "^14.2.35",
+    "next-auth": "^5.0.0-beta.31",
+    "prisma": "^5.22.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "resend": "^6.12.3",
+    "zod": "^4.4.3",
+    "zustand": "^5.0.13"
   }
 }
