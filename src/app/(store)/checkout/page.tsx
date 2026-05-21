@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { CheckoutPageClient } from '@/components/store/CheckoutPageClient';
 
 export const metadata: Metadata = {
   title: 'Checkout | Cafe Store',
@@ -6,5 +7,13 @@ export const metadata: Metadata = {
 };
 
 export default function CheckoutPage() {
-  return <main className="container-page py-16">Checkout</main>;
+  return (
+    <main className="container-page py-12">
+      <div className="mb-8">
+        <h1 className="font-display text-4xl font-semibold text-text-primary">Checkout</h1>
+        <p className="mt-3 text-sm text-text-secondary">Finalize em etapas com dados, entrega e pagamento.</p>
+      </div>
+      <CheckoutPageClient />
+    </main>
+  );
 }

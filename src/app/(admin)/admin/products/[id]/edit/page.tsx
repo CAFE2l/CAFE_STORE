@@ -1,4 +1,7 @@
 import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+import { ProductForm } from '@/components/admin/forms/ProductForm';
+import { getAdminCategories, getAdminProduct } from '@/lib/admin';
 
 type EditProductPageProps = {
   params: {
@@ -13,6 +16,16 @@ export function generateMetadata({ params }: EditProductPageProps): Metadata {
   };
 }
 
-export default function EditProductPage({ params }: EditProductPageProps) {
-  return <main className="container-page py-16">Editar produto: {params.id}</main>;
+export const dynamic = 'force-dynamic';
+
+export default async function EditProductPage({ params }: EditProductPageProps) {
+  const [product, categories] = await Promise.all([getAdminProduct(params.id), getAdminCategories()]);
+  if (!product) notFound();
+
+  return (
+    <main className="container-page grid gap-6 py-8">
+      <h1 className="font-display text-4xl font-semibold text-text-primary">Editar produto</h1>
+      <ProductForm categories={categories} product={product} />
+    </main>
+  );
 }

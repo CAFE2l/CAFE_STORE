@@ -83,6 +83,20 @@ const productListSelect = {
   },
 } satisfies Prisma.ProductSelect;
 
+const emptyProducts: PaginatedProducts = {
+  products: [],
+  pagination: {
+    page: 1,
+    perPage: 12,
+    total: 0,
+    totalPages: 1,
+  },
+};
+
+function hasDatabaseUrl() {
+  return Boolean(process.env.DATABASE_URL);
+}
+
 function toProductListItem(product: Prisma.ProductGetPayload<{ select: typeof productListSelect }>) {
   const reviewCount = product.reviews.length;
   const averageRating =
@@ -142,6 +156,17 @@ function getOrderBy(sort?: string): Prisma.ProductOrderByWithRelationInput {
 }
 
 export async function getProducts(filters: ProductFilters = {}): Promise<PaginatedProducts> {
+  if (!hasDatabaseUrl()) {
+    return {
+      ...emptyProducts,
+      pagination: {
+        ...emptyProducts.pagination,
+        page: Math.max(1, filters.page ?? 1),
+        perPage: Math.max(1, Math.min(48, filters.perPage ?? 12)),
+      },
+    };
+  }
+
   const page = Math.max(1, filters.page ?? 1);
   const perPage = Math.max(1, Math.min(48, filters.perPage ?? 12));
   const where = getWhere(filters);
@@ -179,6 +204,10 @@ export async function getFeaturedProducts(limit = 8) {
 }
 
 export async function getProductBySlug(slug: string): Promise<ProductDetail | null> {
+  if (!hasDatabaseUrl()) {
+    return null;
+  }
+
   const product = await prisma.product.findFirst({
     where: {
       slug,
@@ -223,6 +252,10 @@ export async function getProductBySlug(slug: string): Promise<ProductDetail | nu
 }
 
 export async function getRelatedProducts(product: ProductDetail, limit = 4) {
+  if (!hasDatabaseUrl()) {
+    return [];
+  }
+
   const products = await prisma.product.findMany({
     where: {
       id: {
@@ -242,6 +275,10 @@ export async function getRelatedProducts(product: ProductDetail, limit = 4) {
 }
 
 export async function getCategories() {
+  if (!hasDatabaseUrl()) {
+    return [];
+  }
+
   return prisma.category.findMany({
     orderBy: {
       name: 'asc',

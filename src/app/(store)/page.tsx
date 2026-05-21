@@ -97,6 +97,25 @@ export default async function HomePage() {
       </section>
 
       <section className="container-page py-16">
+        <div className="mb-8">
+          <h2 className="font-display text-3xl font-semibold text-text-primary">Depoimentos</h2>
+          <p className="mt-2 text-sm text-text-secondary">Relatos de quem usa a Cafe Store no dia a dia.</p>
+        </div>
+        <div className="grid gap-5 md:grid-cols-3">
+          {[
+            'Torra consistente e entrega cuidadosa. Virou meu cafe principal da semana.',
+            'O kit de presente chegou impecavel e com uma apresentacao muito acima do comum.',
+            'As recomendacoes de moagem fizeram diferenca real no espresso de casa.',
+          ].map((testimonial, index) => (
+            <article key={testimonial} className="card p-5">
+              <p className="text-sm leading-7 text-text-secondary">{testimonial}</p>
+              <p className="mt-4 text-sm font-semibold text-text-primary">Cliente {index + 1}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="container-page py-16">
         <div className="glass-light rounded-2xl p-8 text-center shadow-warm">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-accent-primary">Cafe Store</p>
           <h2 className="mt-3 font-display text-3xl font-semibold text-text-primary">

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { CheckoutConfirmationClient } from '@/components/store/CheckoutConfirmationClient';
 
 export const metadata: Metadata = {
   title: 'Pedido confirmado | Cafe Store',
@@ -6,5 +7,9 @@ export const metadata: Metadata = {
 };
 
 export default function CheckoutConfirmationPage() {
-  return <main className="container-page py-16">Pedido confirmado</main>;
+  return (
+    <main className="container-page py-12">
+      <CheckoutConfirmationClient />
+    </main>
+  );
 }
