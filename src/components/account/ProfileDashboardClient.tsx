@@ -190,26 +190,34 @@ export function ProfileDashboardClient({ addresses, orders, user, wishlist }: Pr
   return (
     <div className="grid gap-8">
       <section className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
-        <div className="glass grid gap-5 rounded-2xl p-6 shadow-warm md:grid-cols-[auto_1fr]">
+        <div className="rounded-card border border-border-subtle bg-background-card p-6 md:grid md:grid-cols-[auto_1fr] md:gap-5">
           <div className="grid gap-3 justify-items-center">
             {avatarPreview ? (
-              <Image src={avatarPreview} alt={displayName || 'Perfil'} width={112} height={112} className="size-28 rounded-full object-cover" />
+              <div className="relative">
+                <Image src={avatarPreview} alt={displayName || 'Perfil'} width={96} height={96} className="size-24 rounded-full object-cover ring-2 ring-cafe-orange-500/30" />
+                <label className="absolute bottom-0 right-0 grid size-8 cursor-pointer place-items-center rounded-full bg-cafe-orange-500 text-white shadow-lg transition hover:bg-cafe-orange-400">
+                  <span className="text-xs">📷</span>
+                  <input className="sr-only" type="file" accept="image/*" onChange={(event) => handleAvatarChange(event.target.files?.[0])} />
+                </label>
+              </div>
             ) : (
-              <div className="grid size-28 place-items-center rounded-full bg-accent-primary/10 text-4xl font-semibold text-accent-primary">
-                {(displayName || user.email || 'U').slice(0, 1).toUpperCase()}
+              <div className="relative">
+                <div className="grid size-24 place-items-center rounded-full bg-cafe-orange-500/10 text-3xl font-semibold text-cafe-orange-500 ring-2 ring-cafe-orange-500/30">
+                  {(displayName || user.email || 'U').slice(0, 1).toUpperCase()}
+                </div>
+                <label className="absolute bottom-0 right-0 grid size-8 cursor-pointer place-items-center rounded-full bg-cafe-orange-500 text-white shadow-lg transition hover:bg-cafe-orange-400">
+                  <span className="text-xs">📷</span>
+                  <input className="sr-only" type="file" accept="image/*" onChange={(event) => handleAvatarChange(event.target.files?.[0])} />
+                </label>
               </div>
             )}
-            <label className="btn-secondary cursor-pointer px-4 py-2 text-sm">
-              Upload foto
-              <input className="sr-only" type="file" accept="image/*" onChange={(event) => handleAvatarChange(event.target.files?.[0])} />
-            </label>
           </div>
           <div className="grid gap-4">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <Badge>{level.label}</Badge>
-                <h2 className="mt-3 font-display text-2xl font-semibold text-text-primary">{displayName || 'Cliente Cafe Store'}</h2>
-                <p className="mt-1 text-sm text-text-secondary">{user.email}</p>
+                <Badge>{level.label} 🏆</Badge>
+                <h2 className="mt-2 font-display text-2xl font-semibold text-text-primary">{displayName || 'Cliente Cafe Store'}</h2>
+                <p className="mt-1 text-sm text-text-muted">{user.email}</p>
               </div>
               <button type="button" className="btn-secondary px-4 py-2 text-sm">
                 Editar perfil
@@ -217,41 +225,41 @@ export function ProfileDashboardClient({ addresses, orders, user, wishlist }: Pr
             </div>
             <div className="grid gap-3 md:grid-cols-2">
               <Input label="Nome completo" value={displayName} onChange={(event) => setDisplayName(event.target.value)} />
-              <Input label="Apelido / nome de exibicao" placeholder="Como quer aparecer na loja" />
+              <Input label="Apelido" placeholder="Como quer aparecer na loja" />
               <Input label="Telefone" value={phone} onChange={(event) => setPhone(maskPhone(event.target.value))} placeholder="(00) 00000-0000" />
-              <Input label="CPF para nota fiscal" value={cpf} onChange={(event) => setCpf(maskCpf(event.target.value))} placeholder="000.000.000-00" />
+              <Input label="CPF" value={cpf} onChange={(event) => setCpf(maskCpf(event.target.value))} placeholder="000.000.000-00" />
               <Input label="Data de nascimento" type="date" value={birthDate} onChange={(event) => setBirthDate(event.target.value)} />
               <Input label="Cliente desde" value={user.createdAt ? new Date(user.createdAt).toLocaleDateString('pt-BR') : 'Conta nova'} readOnly />
             </div>
           </div>
         </div>
 
-        <div className="card grid gap-5 p-5">
-          <h2 className="font-display text-2xl font-semibold text-text-primary">Dashboard pessoal</h2>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-xl bg-background-surface p-4">
-              <p className="text-xs text-text-muted">Gasto historico</p>
-              <p className="mt-2 text-xl font-semibold text-text-primary">{currencyFormatter.format(totalSpent)}</p>
+        <div className="rounded-card border border-border-subtle bg-background-card p-5">
+          <h2 className="font-display text-xl font-semibold text-text-primary">Dashboard pessoal</h2>
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <div className="rounded-lg bg-cafe-dark-700 p-3">
+              <p className="text-xs text-text-muted">Gasto histórico</p>
+              <p className="mt-1 text-lg font-bold text-text-primary">{currencyFormatter.format(totalSpent)}</p>
             </div>
-            <div className="rounded-xl bg-background-surface p-4">
-              <p className="text-xs text-text-muted">Mes atual</p>
-              <p className="mt-2 text-xl font-semibold text-text-primary">{currencyFormatter.format(currentMonthSpent)}</p>
+            <div className="rounded-lg bg-cafe-dark-700 p-3">
+              <p className="text-xs text-text-muted">Mês atual</p>
+              <p className="mt-1 text-lg font-bold text-text-primary">{currencyFormatter.format(currentMonthSpent)}</p>
             </div>
-            <div className="rounded-xl bg-background-surface p-4">
-              <p className="text-xs text-text-muted">Produto mais comprado</p>
-              <p className="mt-2 text-sm font-semibold text-text-primary">Camiseta CAFÉ</p>
+            <div className="rounded-lg bg-cafe-dark-700 p-3">
+              <p className="text-xs text-text-muted">Produto favorito</p>
+              <p className="mt-1 text-sm font-semibold text-text-primary">Camiseta CAFÉ</p>
             </div>
-            <div className="rounded-xl bg-background-surface p-4">
-              <p className="text-xs text-text-muted">Categoria favorita</p>
-              <p className="mt-2 text-sm font-semibold text-text-primary">Camisetas</p>
+            <div className="rounded-lg bg-cafe-dark-700 p-3">
+              <p className="text-xs text-text-muted">Categoria</p>
+              <p className="mt-1 text-sm font-semibold text-text-primary">Camisetas</p>
             </div>
           </div>
-          <p className="text-sm text-accent-glow">Voce esta no top 10% dos clientes mais fieis.</p>
-          <div className="grid gap-2">
-            <div className="h-3 overflow-hidden rounded-full bg-background-surface">
-              <div className="h-full rounded-full bg-accent-primary" style={{ width: `${levelProgress}%` }} />
+          <p className="mt-3 text-sm text-cafe-orange-500">Você está no top 10% dos clientes mais fiéis.</p>
+          <div className="mt-3 grid gap-2">
+            <div className="h-2 overflow-hidden rounded-full bg-cafe-dark-700">
+              <div className="h-full rounded-full bg-cafe-orange-500 transition-all" style={{ width: `${levelProgress}%` }} />
             </div>
-            <p className="text-xs text-text-secondary">Faltam {currencyFormatter.format(Math.max(0, level.next - totalSpent))} para o proximo nivel.</p>
+            <p className="text-xs text-text-muted">Faltam {currencyFormatter.format(Math.max(0, level.next - totalSpent))} para o próximo nível.</p>
           </div>
         </div>
       </section>

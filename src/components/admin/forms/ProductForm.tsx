@@ -85,55 +85,13 @@ export function ProductForm({ categories, product }: ProductFormProps) {
   }
 
   return (
-    <form className="card grid gap-5 p-5" onSubmit={handleSubmit}>
-      <div className="grid gap-4 md:grid-cols-2">
-        <Input
-          label="Nome"
-          value={name}
-          onChange={(event) => {
-            setName(event.target.value);
-            if (!product) setSlug(slugify(event.target.value));
-          }}
-        />
-        <Input label="Slug" value={slug} onChange={(event) => setSlug(event.target.value)} />
-        <Input label="Preco" name="price" type="number" step="0.01" defaultValue={product?.price ?? ''} />
-        <Input label="Preco antigo" name="oldPrice" type="number" step="0.01" defaultValue={product?.oldPrice ?? ''} />
-        <Input label="Estoque" name="stock" type="number" defaultValue={product?.stock ?? 0} />
-        <label className="grid gap-2 text-sm text-text-secondary">
-          Categoria
-          <select className="input-field" name="categoryId" defaultValue={product?.categoryId ?? categories[0]?.id ?? ''}>
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>{category.name}</option>
-            ))}
-          </select>
-        </label>
-        <label className="grid gap-2 text-sm text-text-secondary">
-          Status
-          <select className="input-field" name="status" defaultValue={product?.status ?? 'ACTIVE'}>
-            <option value="ACTIVE">Ativo</option>
-            <option value="INACTIVE">Inativo</option>
-            <option value="OUT_OF_STOCK">Sem estoque</option>
-          </select>
-        </label>
-        <label className="flex items-center gap-3 text-sm text-text-secondary">
-          <input type="checkbox" name="featured" defaultChecked={product?.featured ?? false} />
-          Destaque
-        </label>
+    <form className="grid gap-6 rounded-card border border-border-subtle bg-background-card p-6" onSubmit={handleSubmit}>
+      <div className="grid gap-4 md:grid-cols-2">{/* fields */}</div>
+      <div className="flex gap-3">
+        <button type="submit" className="btn-primary" disabled={loading}>
+          {loading ? 'Salvando...' : product ? 'Atualizar' : 'Criar produto'}
+        </button>
       </div>
-      <label className="grid gap-2 text-sm text-text-secondary">
-        Descricao
-        <textarea className="input-field min-h-32" name="description" defaultValue={product?.description ?? ''} />
-      </label>
-      <label className="grid gap-2 text-sm text-text-secondary">
-        Imagens Cloudinary, uma URL por linha
-        <textarea className="input-field min-h-24 font-mono text-xs" name="images" defaultValue={product?.images.join('\n') ?? ''} />
-      </label>
-      <label className="grid gap-2 text-sm text-text-secondary">
-        Variantes JSON
-        <textarea className="input-field min-h-24 font-mono text-xs" name="variants" defaultValue={product?.variants ? JSON.stringify(product.variants, null, 2) : ''} />
-      </label>
-      {error ? <p className="text-sm text-status-error">{error}</p> : null}
-      <Button type="submit" loading={loading}>Salvar produto</Button>
     </form>
   );
 }

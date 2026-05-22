@@ -94,14 +94,14 @@ export function ProductPurchasePanel({ product }: ProductPurchasePanelProps) {
   }
 
   return (
-    <div className="grid gap-6 rounded-2xl border border-white/10 bg-background-card/80 p-5">
+    <div className="grid gap-6 rounded-card border border-border-subtle bg-background-card p-5">
       <div className="grid gap-2 text-sm text-text-secondary">
         <p>
-          SKU: <span className="font-semibold text-text-primary">{sku}</span>
+          SKU: <span className="font-mono font-semibold text-text-primary">{sku}</span>
         </p>
-        <p>
-          12x de{' '}
-          <span className="font-semibold text-accent-glow">
+        <p className="text-text-muted">
+          ou 12x de{' '}
+          <span className="font-semibold text-cafe-orange-500">
             {installments.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
           </span>{' '}
           sem juros
@@ -121,8 +121,8 @@ export function ProductPurchasePanel({ product }: ProductPurchasePanelProps) {
                     type="button"
                     className={
                       selectedVariants[variant.name] === value
-                        ? 'led-amber rounded-xl bg-accent-primary/10 px-4 py-2 text-sm font-semibold text-accent-primary'
-                        : 'rounded-xl border border-white/10 px-4 py-2 text-sm text-text-secondary transition hover:border-accent-primary/40 hover:text-text-primary'
+                        ? 'rounded-button bg-cafe-orange-500/15 px-4 py-2 text-sm font-semibold text-cafe-orange-500 ring-1 ring-cafe-orange-500/40'
+                        : 'rounded-button border border-border-subtle px-4 py-2 text-sm text-text-secondary transition hover:border-cafe-orange-500/40 hover:text-text-primary'
                     }
                     onClick={() =>
                       setSelectedVariants((current) => ({
@@ -142,7 +142,7 @@ export function ProductPurchasePanel({ product }: ProductPurchasePanelProps) {
       ) : null}
       <div className="flex flex-wrap items-center gap-4">
         <QuantityStepper value={quantity} min={1} max={product.stock || undefined} onChange={setQuantity} />
-        <span className="text-sm font-medium text-accent-glow">{stockMessage}</span>
+        <span className="text-sm font-medium text-cafe-orange-500">{stockMessage}</span>
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
         <Button className="w-full" disabled={!inStock} onClick={handleAddToCart}>
@@ -161,9 +161,9 @@ export function ProductPurchasePanel({ product }: ProductPurchasePanelProps) {
         </Button>
       </div>
       <Button variant="ghost" className="w-full" onClick={() => setFavorite((current) => !current)}>
-        {favorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+        {favorite ? '♥ Remover dos favoritos' : '♡ Adicionar aos favoritos'}
       </Button>
-      <div className="grid gap-3 border-t border-white/10 pt-5">
+      <div className="grid gap-3 border-t border-border-subtle pt-5">
         <label className="grid gap-2 text-sm text-text-secondary">
           Calcular frete e prazo
           <div className="flex gap-2">
@@ -181,9 +181,9 @@ export function ProductPurchasePanel({ product }: ProductPurchasePanelProps) {
           </div>
         </label>
         {shippingResult ? <p className="text-sm leading-6 text-text-secondary">{shippingResult}</p> : null}
-        <div className="grid gap-2 text-xs leading-5 text-text-muted">
-          <p>Frete gratis acima de R$ 299,00 para produtos selecionados.</p>
-          <p>Devolucao em ate 7 dias corridos apos o recebimento.</p>
+        <div className="grid gap-1 text-xs leading-5 text-text-muted">
+          <p className="flex items-center gap-1">📦 Frete grátis acima de R$ 299</p>
+          <p className="flex items-center gap-1">↩ Devolução em até 7 dias</p>
         </div>
       </div>
     </div>

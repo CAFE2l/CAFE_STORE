@@ -16,27 +16,35 @@ export default async function AdminProductsPage() {
   const products = await getAdminProducts();
 
   return (
-    <main className="container-page grid gap-6 py-8">
+    <main className="grid gap-8">
       <div className="flex items-center justify-between gap-4">
-        <h1 className="font-display text-4xl font-semibold text-text-primary">Produtos</h1>
-        <Link href="/admin/products/new" className="btn-primary">Novo produto</Link>
+        <div>
+          <h1 className="font-display text-3xl font-bold text-text-primary">Produtos</h1>
+          <p className="mt-1 text-sm text-text-muted">Gerencie o catálogo da loja.</p>
+        </div>
+        <Link href="/admin/products/new" className="btn-primary">
+          + Novo Produto
+        </Link>
       </div>
-      <section className="card overflow-hidden p-0">
-        <div className="grid gap-0">
-          {products.map((product) => (
-            <div key={product.id} className="grid gap-3 border-b border-border-subtle p-4 md:grid-cols-[1fr_auto_auto_auto]">
+      <div className="grid gap-3">
+        {products.map((product) => (
+          <article key={product.id} className="rounded-card border border-border-subtle bg-background-card p-5 md:flex md:items-center md:justify-between md:gap-4">
+            <div className="flex items-center gap-4">
               <div>
                 <p className="font-semibold text-text-primary">{product.name}</p>
-                <p className="text-sm text-text-muted">{product.category.name}</p>
+                <p className="text-xs text-text-muted">{product.category?.name ?? 'Sem categoria'}</p>
               </div>
-              <Badge variant={product.status === 'ACTIVE' ? 'success' : 'muted'}>{product.status}</Badge>
-              <span className="text-sm text-text-primary">{currencyFormatter.format(product.price)}</span>
-              <Link href={`/admin/products/${product.id}/edit`} className="btn-secondary px-3 py-2 text-sm">Editar</Link>
             </div>
-          ))}
-          {products.length === 0 ? <p className="p-5 text-sm text-text-secondary">Nenhum produto cadastrado.</p> : null}
-        </div>
-      </section>
+            <div className="mt-3 flex items-center gap-4 md:mt-0">
+              <Badge variant={product.status === 'ACTIVE' ? 'success' : 'muted'}>{product.status === 'ACTIVE' ? 'Ativo' : 'Inativo'}</Badge>
+              <span className="text-sm font-semibold text-cafe-orange-500">{currencyFormatter.format(product.price)}</span>
+              <Link href={`/admin/products/${product.id}/edit`} className="btn-ghost px-3 py-1.5 text-sm">
+                Editar
+              </Link>
+            </div>
+          </article>
+        ))}
+      </div>
     </main>
   );
 }

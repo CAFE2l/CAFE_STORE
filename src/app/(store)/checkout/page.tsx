@@ -10,8 +10,8 @@ export default function CheckoutPage() {
   return (
     <main className="container-page py-12">
       <div className="mb-8">
-        <h1 className="font-display text-4xl font-semibold text-text-primary">Checkout</h1>
-        <p className="mt-3 text-sm text-text-secondary">Finalize em etapas com dados, entrega e pagamento.</p>
+        <h1 className="font-display text-3xl font-bold text-text-primary">Checkout</h1>
+        <p className="mt-1 text-sm text-text-muted">Finalize sua compra em etapas.</p>
       </div>
       <CheckoutPageClient />
     </main>

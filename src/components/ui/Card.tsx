@@ -1,10 +1,21 @@
 import { HTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
 
-type CardProps = HTMLAttributes<HTMLDivElement>;
+type CardProps = HTMLAttributes<HTMLDivElement> & {
+  variant?: 'default' | 'featured';
+};
 
-export function Card({ className, ...props }: CardProps) {
-  return <div className={cn('card p-5', className)} {...props} />;
+export function Card({ className, variant = 'default', ...props }: CardProps) {
+  return (
+    <div
+      className={cn(
+        'card p-5',
+        variant === 'featured' ? 'relative overflow-hidden before:absolute before:inset-x-0 before:top-0 before:h-0.5 before:bg-gradient-to-r before:from-cafe-red-500 before:via-cafe-orange-500 before:to-cafe-yellow-500' : undefined,
+        className,
+      )}
+      {...props}
+    />
+  );
 }
 
 export function CardHeader({ className, ...props }: CardProps) {

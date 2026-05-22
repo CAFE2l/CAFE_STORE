@@ -8,7 +8,7 @@ type StoreLayoutProps = {
 
 export default function StoreLayout({ children }: StoreLayoutProps) {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-cafe-dark-900">
       <Header />
       <div className="flex-1">{children}</div>
       <Footer />

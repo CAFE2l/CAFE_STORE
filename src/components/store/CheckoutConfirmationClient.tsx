@@ -13,29 +13,30 @@ export function CheckoutConfirmationClient() {
 
   return (
     <div className="mx-auto grid max-w-3xl gap-6">
-      <section className="glass animate-fadeUp rounded-2xl p-8 text-center shadow-warm">
-        <div className="mx-auto grid size-16 place-items-center rounded-full bg-status-success/10 text-3xl text-status-success">
-          ✓
+      <section className="rounded-card border border-border-subtle bg-background-card p-8 text-center animate-scaleIn">
+        <div className="mx-auto grid size-16 place-items-center rounded-full bg-status-success/10 text-3xl">
+          <span className="text-status-success">✓</span>
         </div>
-        <h1 className="mt-5 font-display text-4xl font-semibold text-text-primary">Pedido recebido</h1>
-        <p className="mt-3 text-sm leading-6 text-text-secondary">
-          {orderId ? `Pedido ${orderId}` : 'Seu pedido foi criado'} e esta aguardando processamento.
+        <h1 className="mt-5 font-display text-3xl font-bold text-text-primary">Pedido confirmado! 🎉</h1>
+        <p className="mt-3 text-sm leading-6 text-text-muted">
+          {orderId ? `Pedido #${orderId}` : 'Seu pedido'} foi criado e está aguardando processamento.
         </p>
+        <p className="mt-1 text-xs text-text-muted">Você receberá um e-mail de confirmação em breve.</p>
       </section>
 
       {method === 'pix' && pixPayload ? (
-        <section className="card grid gap-5 p-6">
-          <div>
-            <h2 className="font-display text-2xl font-semibold text-text-primary">Pagamento Pix</h2>
-            <p className="mt-2 text-sm text-text-secondary">Use o QR Code ou copie o payload Pix abaixo.</p>
+        <section className="rounded-card border border-border-subtle bg-background-card p-6">
+          <div className="text-center">
+            <h2 className="font-display text-xl font-semibold text-text-primary">Pagamento via Pix</h2>
+            <p className="mt-1 text-sm text-text-muted">Escaneie o QR Code ou copie o código abaixo.</p>
           </div>
           {qrCodeUrl ? (
-            <div className="relative mx-auto aspect-square w-72 overflow-hidden rounded-2xl bg-white p-4">
-              <Image src={qrCodeUrl} alt="QR Code Pix" fill sizes="288px" className="object-contain p-4" />
+            <div className="relative mx-auto mt-4 aspect-square w-64 overflow-hidden rounded-card border border-border-subtle bg-white p-4">
+              <Image src={qrCodeUrl} alt="QR Code Pix" fill sizes="256px" className="object-contain p-4" />
             </div>
           ) : null}
           <textarea
-            className="input-field min-h-32 w-full font-mono text-xs"
+            className="input-field mt-4 min-h-24 w-full font-mono text-xs"
             readOnly
             value={pixPayload}
             aria-label="Payload Pix copia e cola"
@@ -45,7 +46,7 @@ export function CheckoutConfirmationClient() {
 
       <div className="flex flex-wrap justify-center gap-3">
         <Link href="/orders" className="btn-primary">
-          Ver pedidos
+          Acompanhar pedido
         </Link>
         <Link href="/products" className="btn-secondary">
           Continuar comprando

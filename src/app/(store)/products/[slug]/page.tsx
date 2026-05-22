@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ProductGrid } from '@/components/store/ProductGrid';
 import { ProductPurchasePanel } from '@/components/store/ProductPurchasePanel';
@@ -126,68 +127,70 @@ export default async function ProductPage({ params }: ProductPageProps) {
   };
 
   return (
-    <main className="container-page grid gap-12 py-10">
+    <main className="container-page grid gap-12 py-10 animate-fadeIn">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
-      <Breadcrumb
-        items={[
-          { href: '/', label: 'Inicio' },
-          { href: '/products', label: 'Produtos' },
-          { href: `/products?category=${product.category.slug}`, label: product.category.name },
-          { label: product.name },
-        ]}
-      />
+      <nav className="flex flex-wrap items-center gap-2 text-sm text-text-muted">
+        <Link href="/" className="transition hover:text-cafe-orange-500">Home</Link>
+        <span>&gt;</span>
+        <Link href="/products" className="transition hover:text-cafe-orange-500">Produtos</Link>
+        <span>&gt;</span>
+        <Link href={`/products?category=${product.category.slug}`} className="transition hover:text-cafe-orange-500">{product.category.name}</Link>
+        <span>&gt;</span>
+        <span className="text-text-primary">{product.name}</span>
+      </nav>
+
       <section className="grid gap-10 lg:grid-cols-[1fr_0.9fr]">
         <ImageGallery images={images} priority />
         <div className="grid content-start gap-6">
           <div className="grid gap-3">
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <Badge variant={product.stock > 0 ? 'success' : 'error'}>
-                {product.stock > 0 ? 'Em estoque' : 'Indisponivel'}
+                {product.stock > 0 ? 'Em estoque' : 'Indisponível'}
               </Badge>
-              {product.featured ? <Badge>Destaque</Badge> : null}
+              {Number(product.oldPrice) > Number(product.price) ? (
+                <Badge variant="sale">-{Math.round(((Number(product.oldPrice) - Number(product.price)) / Number(product.oldPrice)) * 100)}%</Badge>
+              ) : null}
+              {product.featured ? <Badge variant="hot">Destaque</Badge> : null}
             </div>
-            <p className="text-sm text-accent-primary">{product.category.name}</p>
-            <h1 className="font-display text-4xl font-semibold leading-tight text-text-primary md:text-5xl">
+            <p className="text-xs font-medium uppercase tracking-wider text-cafe-orange-500">{product.category.name}</p>
+            <h1 className="font-display text-3xl font-bold leading-tight text-text-primary md:text-4xl">
               {product.name}
             </h1>
             <p className="text-sm leading-7 text-text-secondary">
-              {product.description ?? 'Produto personalizado oficial CAFÉ Store.'}
+              {product.description ?? 'Produto oficial CAFÉ Store.'}
             </p>
-            <p className="text-xs text-text-muted">Codigo do produto: {sku}</p>
+            <p className="text-xs text-text-muted">SKU: {sku}</p>
           </div>
-          <PriceBlock price={product.price} oldPrice={product.oldPrice} />
-          <p className="text-sm text-text-secondary">
-            12x de{' '}
-            <span className="font-semibold text-accent-glow">
-              {currencyFormatter.format(product.price / 12)}
-            </span>{' '}
-            sem juros
-          </p>
-          <div className="flex items-center gap-3 text-sm text-text-secondary">
-            <span className="text-accent-glow">★</span>
-            <span>
+
+          <div className="flex items-center gap-3 text-sm">
+            <div className="flex items-center gap-1 text-cafe-yellow-500">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <span key={i}>{i < Math.round(Number(averageRating)) ? '★' : '☆'}</span>
+              ))}
+            </div>
+            <span className="text-text-muted">
               {product.reviewCount > 0
-                ? `${averageRating} de 5 em ${product.reviewCount} avaliacoes`
-                : 'Ainda sem avaliacoes'}
+                ? `${averageRating} (${product.reviewCount} avaliações)`
+                : 'Ainda sem avaliações'}
             </span>
           </div>
+
+          <PriceBlock price={product.price} oldPrice={product.oldPrice} showInstallments />
           <ProductPurchasePanel product={product} />
         </div>
       </section>
 
-      <section className="grid gap-4 rounded-2xl border border-white/10 bg-background-card/60 p-5 md:grid-cols-3">
-        <div>
-          <p className="text-sm font-semibold text-text-primary">Pagamento seguro</p>
-          <p className="mt-1 text-xs leading-5 text-text-secondary">Pix, cartao, Mercado Pago e PayPal preparados para o checkout.</p>
-        </div>
-        <div>
-          <p className="text-sm font-semibold text-text-primary">Garantia CAFÉ Store</p>
-          <p className="mt-1 text-xs leading-5 text-text-secondary">Troca ou devolucao em ate 7 dias apos o recebimento.</p>
-        </div>
-        <div>
-          <p className="text-sm font-semibold text-text-primary">Loja identificada</p>
-          <p className="mt-1 text-xs leading-5 text-text-secondary">CNPJ e dados fiscais entram no rodape antes da publicacao final.</p>
-        </div>
+      <section className="grid gap-4 rounded-card border border-border-subtle bg-cafe-dark-800 p-5 md:grid-cols-3">
+        {[
+          { title: '🔒 Pagamento seguro', desc: 'Pix, cartão, Mercado Pago e PayPal.' },
+          { title: '🔄 Garantia CAFÉ Store', desc: 'Troca ou devolução em até 7 dias.' },
+          { title: '📦 Frete rápido', desc: 'Enviamos para todo o Brasil.' },
+        ].map((item) => (
+          <div key={item.title}>
+            <p className="text-sm font-semibold text-text-primary">{item.title}</p>
+            <p className="mt-1 text-xs leading-5 text-text-muted">{item.desc}</p>
+          </div>
+        ))}
       </section>
 
       <ProductTabs
@@ -211,72 +214,57 @@ export default async function ProductPage({ params }: ProductPageProps) {
         </div>
       </section>
 
-      <section className="grid gap-5">
+      <section className="grid gap-6">
         <div>
-          <h2 className="font-display text-3xl font-semibold text-text-primary">Avaliacoes</h2>
-          <p className="mt-2 text-sm text-text-secondary">
-            Experiencias de clientes com compra verificada e moderacao ativa.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {['Todas', '5 estrelas', '4 estrelas', '3 estrelas', '2 estrelas', '1 estrela', 'Com foto'].map((filter) => (
-            <button key={filter} type="button" className="rounded-full border border-white/10 px-3 py-1 text-xs text-text-secondary hover:border-accent-primary/50 hover:text-text-primary">
-              {filter}
-            </button>
-          ))}
+          <h2 className="font-display text-2xl font-bold text-text-primary">Avaliações</h2>
+          <p className="mt-1 text-sm text-text-muted">O que nossos clientes estão dizendo.</p>
         </div>
         {product.reviews.length > 0 ? (
           <div className="grid gap-4 md:grid-cols-2">
             {product.reviews.map((review) => (
-              <article key={review.id} className="card p-5">
+              <article key={review.id} className="rounded-card border border-border-subtle bg-cafe-dark-800 p-5">
                 <div className="flex items-center gap-3">
                   {review.user.image ? (
-                    <Image
-                      src={review.user.image}
-                      alt={review.user.name ?? 'Cliente Cafe Store'}
-                      width={40}
-                      height={40}
-                      className="rounded-full"
-                    />
+                    <Image src={review.user.image} alt={review.user.name ?? 'Cliente'} width={40} height={40} className="rounded-full" />
                   ) : (
-                    <span className="grid size-10 place-items-center rounded-full bg-accent-primary/10 text-sm font-semibold text-accent-primary">
+                    <span className="grid size-10 place-items-center rounded-full bg-cafe-orange-500/10 text-sm font-semibold text-cafe-orange-500">
                       {(review.user.name ?? 'C').slice(0, 1).toUpperCase()}
                     </span>
                   )}
                   <div>
-                    <p className="font-semibold text-text-primary">{review.user.name ?? 'Cliente Cafe Store'}</p>
-                    <p className="text-xs text-text-muted">
-                      {review.verifiedPurchase ? 'Compra verificada' : 'Avaliacao'}
-                    </p>
+                    <p className="text-sm font-semibold text-text-primary">{review.user.name ?? 'Cliente'}</p>
+                    <p className="text-xs text-text-muted">{review.verifiedPurchase ? '✓ Compra verificada' : 'Avaliação'}</p>
                   </div>
                 </div>
-                <p className="mt-4 text-sm text-accent-glow">{'★'.repeat(review.rating)}</p>
-                <p className="mt-3 text-sm leading-6 text-text-secondary">
-                  {review.comment ?? 'Cliente avaliou este produto.'}
-                </p>
+                <div className="mt-3 flex items-center gap-1 text-cafe-yellow-500 text-sm">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <span key={i}>{i < review.rating ? '★' : '☆'}</span>
+                  ))}
+                </div>
+                <p className="mt-2 text-sm leading-6 text-text-secondary">{review.comment ?? 'Cliente avaliou este produto.'}</p>
               </article>
             ))}
           </div>
         ) : (
-          <div className="glass rounded-2xl p-6 text-sm text-text-secondary">
-            Este produto ainda nao recebeu avaliacoes aprovadas nem fotos reais de clientes.
+          <div className="rounded-card border border-border-subtle bg-cafe-dark-800 p-8 text-center text-sm text-text-muted">
+            Este produto ainda não recebeu avaliações.
           </div>
         )}
       </section>
 
       <section className="grid gap-4">
-        <h2 className="font-display text-3xl font-semibold text-text-primary">Perguntas e respostas</h2>
+        <h2 className="font-display text-2xl font-bold text-text-primary">Perguntas frequentes</h2>
         <div className="grid gap-3 md:grid-cols-2">
-          <article className="rounded-2xl border border-white/10 bg-background-card/60 p-5">
+          <article className="rounded-card border border-border-subtle bg-cafe-dark-800 p-5">
             <p className="text-sm font-semibold text-text-primary">Tem pronta entrega?</p>
-            <p className="mt-2 text-sm leading-6 text-text-secondary">
-              O estoque exibido acima indica a disponibilidade atual. Produtos personalizados podem exigir prazo adicional.
+            <p className="mt-2 text-sm leading-6 text-text-muted">
+              O estoque exibido indica a disponibilidade atual.
             </p>
           </article>
-          <article className="rounded-2xl border border-white/10 bg-background-card/60 p-5">
-            <p className="text-sm font-semibold text-text-primary">Posso trocar tamanho ou modelo?</p>
-            <p className="mt-2 text-sm leading-6 text-text-secondary">
-              Sim, seguindo a politica de devolucao de 7 dias e disponibilidade da variacao desejada.
+          <article className="rounded-card border border-border-subtle bg-cafe-dark-800 p-5">
+            <p className="text-sm font-semibold text-text-primary">Posso trocar?</p>
+            <p className="mt-2 text-sm leading-6 text-text-muted">
+              Sim, seguindo a política de devolução de 7 dias.
             </p>
           </article>
         </div>
@@ -284,8 +272,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
       <section className="grid gap-5">
         <div>
-          <h2 className="font-display text-3xl font-semibold text-text-primary">Quem viu tambem viu</h2>
-          <p className="mt-2 text-sm text-text-secondary">Complete o look, monte um kit ou veja produtos comprados juntos.</p>
+          <h2 className="font-display text-2xl font-bold text-text-primary">Você também pode gostar</h2>
+          <p className="mt-1 text-sm text-text-muted">Produtos relacionados para completar seu pedido.</p>
         </div>
         <ProductGrid products={relatedProducts} />
       </section>

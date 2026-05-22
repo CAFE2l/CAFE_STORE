@@ -166,20 +166,37 @@ export function CheckoutPageClient() {
 
   return (
     <form className="grid gap-8 lg:grid-cols-[1fr_24rem]" onSubmit={handleSubmit}>
-      <section className="glass rounded-2xl p-5 shadow-warm">
-        <div className="mb-6 flex flex-wrap gap-2">
-          {['Dados', 'Endereco', 'Pagamento', 'Confirmacao'].map((label, index) => (
+      <section className="rounded-card border border-border-subtle bg-background-card p-5">
+        <div className="mb-6 flex items-center gap-2">
+          {[
+            { label: 'Dados', step: 1 },
+            { label: 'Endereço', step: 2 },
+            { label: 'Pagamento', step: 3 },
+            { label: 'Confirmação', step: 4 },
+          ].map((item, index) => (
             <button
-              key={label}
+              key={item.label}
               type="button"
-              className={
-                step === index + 1
-                  ? 'rounded-full bg-accent-primary px-4 py-2 text-sm font-semibold text-background-base'
-                  : 'rounded-full border border-white/10 px-4 py-2 text-sm text-text-secondary'
-              }
-              onClick={() => setStep(index + 1)}
+              className={`flex items-center gap-2 text-sm font-medium transition-all ${
+                step > item.step
+                  ? 'text-status-success'
+                  : step === item.step
+                    ? 'text-cafe-orange-500'
+                    : 'text-text-muted'
+              }`}
+              onClick={() => setStep(item.step)}
             >
-              {label}
+              <span className={`grid size-7 place-items-center rounded-full text-xs font-bold ${
+                step > item.step
+                  ? 'bg-status-success/15 text-status-success'
+                  : step === item.step
+                    ? 'bg-cafe-orange-500/15 text-cafe-orange-500'
+                    : 'bg-cafe-dark-700 text-text-muted'
+              }`}>
+                {step > item.step ? '✓' : item.step}
+              </span>
+              <span className={`hidden sm:inline ${step === item.step ? 'text-text-primary' : ''}`}>{item.label}</span>
+              {index < 3 ? <span className="hidden h-px w-6 bg-border-subtle sm:block" /> : null}
             </button>
           ))}
         </div>
@@ -229,34 +246,52 @@ export function CheckoutPageClient() {
 
         {step === 3 ? (
           <fieldset className="grid gap-3">
-            <legend className="mb-2 text-sm font-semibold text-text-primary">Metodo de pagamento</legend>
+            <legend className="mb-2 text-sm font-semibold text-text-primary">Método de pagamento</legend>
             {[
-              { value: 'pix', label: 'Pix manual' },
-              { value: 'mercadopago', label: 'Mercado Pago' },
-              { value: 'paypal', label: 'PayPal' },
+              { value: 'pix', label: 'Pix', desc: 'Pagamento instantâneo' },
+              { value: 'mercadopago', label: 'Cartão de crédito', desc: 'Até 12x com Mercado Pago' },
+              { value: 'paypal', label: 'PayPal', desc: 'Internacional' },
             ].map((method) => (
-              <label key={method.value} className="card flex cursor-pointer items-center gap-3 p-4">
+              <label key={method.value} className={`flex cursor-pointer items-center gap-4 rounded-button border p-4 text-sm transition ${
+                form.paymentMethod === method.value
+                  ? 'border-cafe-orange-500 bg-cafe-orange-500/5'
+                  : 'border-border-subtle hover:border-cafe-orange-500/40'
+              }`}>
                 <input
                   type="radio"
                   name="paymentMethod"
                   value={method.value}
                   checked={form.paymentMethod === method.value}
                   onChange={() => updateForm('paymentMethod', method.value as CheckoutForm['paymentMethod'])}
+                  className="text-cafe-orange-500 focus:ring-cafe-orange-500/30"
                 />
-                <span className="font-medium text-text-primary">{method.label}</span>
+                <span>
+                  <span className="block font-medium text-text-primary">{method.label}</span>
+                  <span className="text-xs text-text-muted">{method.desc}</span>
+                </span>
               </label>
             ))}
           </fieldset>
         ) : null}
 
         {step === 4 ? (
-          <div className="grid gap-4 text-sm text-text-secondary">
-            <p className="text-text-primary">Revise os dados e confirme o pedido.</p>
-            <p>{form.name} - {form.email} - {form.phone}</p>
-            <p>
-              {form.street}, {form.number} - {form.neighborhood}, {form.city}/{form.state.toUpperCase()}
-            </p>
-            <p>Pagamento: {form.paymentMethod}</p>
+          <div className="grid gap-4">
+            <div className="rounded-lg bg-cafe-dark-700 p-4 text-sm text-text-secondary">
+              <p className="mb-2 font-semibold text-text-primary">Dados pessoais</p>
+              <p>{form.name}</p>
+              <p>{form.email}</p>
+              <p>{form.phone}</p>
+            </div>
+            <div className="rounded-lg bg-cafe-dark-700 p-4 text-sm text-text-secondary">
+              <p className="mb-2 font-semibold text-text-primary">Endereço de entrega</p>
+              <p>{form.street}, {form.number} {form.complement ? `- ${form.complement}` : ''}</p>
+              <p>{form.neighborhood} - {form.city}/{form.state.toUpperCase()}</p>
+              <p>CEP: {form.zip}</p>
+            </div>
+            <div className="rounded-lg bg-cafe-dark-700 p-4 text-sm text-text-secondary">
+              <p className="mb-2 font-semibold text-text-primary">Pagamento</p>
+              <p className="capitalize">{form.paymentMethod === 'pix' ? 'Pix' : form.paymentMethod === 'mercadopago' ? 'Cartão de crédito (Mercado Pago)' : 'PayPal'}</p>
+            </div>
           </div>
         ) : null}
 
@@ -280,13 +315,13 @@ export function CheckoutPageClient() {
         </div>
       </section>
 
-      <aside className="glass sticky top-28 h-fit rounded-2xl p-5 shadow-warm">
-        <h2 className="font-display text-2xl font-semibold text-text-primary">Pedido</h2>
-        <div className="mt-5 grid gap-4">
+      <aside className="sticky top-28 h-fit rounded-card border border-border-subtle bg-background-card p-5">
+        <h2 className="font-display text-xl font-semibold text-text-primary">Seu pedido</h2>
+        <div className="mt-5 grid gap-3">
           {items.map((item) => (
-            <div key={item.id} className="grid grid-cols-[3.5rem_1fr_auto] gap-3">
-              <div className="relative aspect-square overflow-hidden rounded-lg bg-background-surface">
-                <Image src={item.image} alt={item.name} fill sizes="56px" className="object-cover" />
+            <div key={item.id} className="grid grid-cols-[3rem_1fr_auto] gap-3">
+              <div className="relative aspect-square overflow-hidden rounded-lg bg-cafe-dark-700">
+                <Image src={item.image} alt={item.name} fill sizes="48px" className="object-cover" />
               </div>
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium text-text-primary">{item.name}</p>
@@ -296,7 +331,7 @@ export function CheckoutPageClient() {
             </div>
           ))}
         </div>
-        <dl className="mt-5 grid gap-3 border-t border-border-subtle pt-4 text-sm">
+        <dl className="mt-4 grid gap-2 border-t border-border-subtle pt-4 text-sm">
           <div className="flex justify-between text-text-secondary">
             <dt>Subtotal</dt>
             <dd>{currencyFormatter.format(total)}</dd>
@@ -305,7 +340,7 @@ export function CheckoutPageClient() {
             <dt>Frete</dt>
             <dd>{currencyFormatter.format(shipping)}</dd>
           </div>
-          <div className="flex justify-between text-base font-semibold text-text-primary">
+          <div className="flex justify-between border-t border-border-subtle pt-2 text-base font-bold text-text-primary">
             <dt>Total</dt>
             <dd>{currencyFormatter.format(finalTotal)}</dd>
           </div>

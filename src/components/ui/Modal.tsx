@@ -2,6 +2,7 @@
 
 import { ReactNode, useEffect, useId } from 'react';
 import { cn } from '@/lib/utils';
+import { X } from 'lucide-react';
 
 type ModalProps = {
   open: boolean;
@@ -42,7 +43,7 @@ export function Modal({ children, className, description, onClose, open, title }
 
   return (
     <div
-      className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 grid animate-fade-in place-items-center bg-black/70 p-4 backdrop-blur-sm"
       role="presentation"
       onMouseDown={onClose}
     >
@@ -51,7 +52,10 @@ export function Modal({ children, className, description, onClose, open, title }
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={description ? descriptionId : undefined}
-        className={cn('glass shadow-warm w-full max-w-lg rounded-2xl p-6', className)}
+        className={cn(
+          'glass shadow-warm w-full max-w-lg rounded-card p-6 animate-scaleIn',
+          className,
+        )}
         onMouseDown={(event) => event.stopPropagation()}
       >
         <div className="mb-5 flex items-start justify-between gap-4">
@@ -67,11 +71,11 @@ export function Modal({ children, className, description, onClose, open, title }
           </div>
           <button
             type="button"
-            className="btn-ghost size-10 p-0"
+            className="btn-ghost grid size-8 place-items-center rounded-full hover:bg-cafe-red-500/10 hover:text-cafe-red-500"
             aria-label="Fechar modal"
             onClick={onClose}
           >
-            X
+            <X className="h-4 w-4" />
           </button>
         </div>
         {children}

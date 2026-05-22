@@ -27,9 +27,9 @@ export default async function ProfilePage() {
   return (
     <main className="container-page grid gap-8 py-12">
       <div>
-        <h1 className="font-display text-4xl font-semibold text-text-primary">Perfil</h1>
-        <p className="mt-3 text-sm text-text-secondary">
-          Dados pessoais, enderecos, seguranca, pedidos, favoritos e beneficios em um so lugar.
+        <h1 className="font-display text-3xl font-bold text-text-primary">Meu Perfil</h1>
+        <p className="mt-1 text-sm text-text-muted">
+          Dados pessoais, endereços, segurança, pedidos, favoritos e benefícios.
         </p>
       </div>
 

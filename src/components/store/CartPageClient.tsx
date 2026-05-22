@@ -160,17 +160,17 @@ export function CartPageClient() {
               const hasFreeShipping = item.price * item.quantity >= 120;
 
               return (
-                <article key={item.id} className="card grid gap-4 p-4 sm:grid-cols-[7rem_1fr] xl:grid-cols-[7rem_1fr_auto]">
-                  <Link href={`/products/${item.slug}`} className="relative aspect-square overflow-hidden rounded-xl bg-background-surface">
-                    <Image src={item.image} alt={item.name} fill sizes="112px" className="object-cover transition hover:scale-105" />
+                  <article key={item.id} className="card grid gap-4 p-4 sm:grid-cols-[7rem_1fr] xl:grid-cols-[7rem_1fr_auto]">
+                  <Link href={`/products/${item.slug}`} className="relative aspect-square overflow-hidden rounded-lg bg-cafe-dark-700">
+                    <Image src={item.image} alt={item.name} fill sizes="112px" className="object-cover transition duration-300 hover:scale-105" />
                   </Link>
-                  <div className="grid content-start gap-3">
+                  <div className="grid content-start gap-2">
                     <div className="flex flex-wrap gap-2">
-                      {index === 0 ? <span className="badge-amber">Mais vendido da categoria</span> : null}
-                      {hasFreeShipping ? <span className="badge-amber">Elegivel a frete gratis</span> : null}
-                      {stockWarning ? <span className="rounded-full bg-status-error/15 px-3 py-1 text-xs font-semibold text-status-error">{stockWarning}</span> : null}
+                      {index === 0 ? <span className="badge-amber text-[10px]">Mais vendido</span> : null}
+                      {hasFreeShipping ? <span className="inline-flex rounded-badge bg-cafe-orange-500/15 px-2 py-0.5 text-[10px] font-medium text-cafe-orange-500 ring-1 ring-cafe-orange-500/30">Frete grátis</span> : null}
+                      {stockWarning ? <span className="inline-flex rounded-badge bg-cafe-red-500/15 px-2 py-0.5 text-[10px] font-semibold text-cafe-red-500">{stockWarning}</span> : null}
                     </div>
-                    <Link href={`/products/${item.slug}`} className="font-semibold text-text-primary hover:text-accent-glow">
+                    <Link href={`/products/${item.slug}`} className="font-semibold text-text-primary transition hover:text-cafe-orange-500">
                       {item.name}
                     </Link>
                     {item.variants?.length ? (
@@ -178,16 +178,16 @@ export function CartPageClient() {
                         {item.variants.map((variant) => `${variant.name}: ${variant.value}`).join(' / ')}
                       </p>
                     ) : null}
-                    <div className="grid gap-1 text-sm text-text-secondary sm:grid-cols-2">
-                      <p>Unitario: {currencyFormatter.format(item.price)}</p>
-                      <p className="font-semibold text-text-primary">Total: {currencyFormatter.format(lineTotal)}</p>
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-text-secondary">
+                      <span>Unit: {currencyFormatter.format(item.price)}</span>
+                      <span className="font-semibold text-cafe-orange-500">Total: {currencyFormatter.format(lineTotal)}</span>
                     </div>
-                    <div className="grid gap-1 text-xs text-text-muted">
-                      <p>★ 4.8 em 27 avaliacoes</p>
-                      <p>{38 + index * 9} pessoas estao olhando agora. Adicionado {47 + index * 5} vezes hoje.</p>
+                    <div className="flex items-center gap-2 text-xs text-text-muted">
+                      <span className="text-cafe-yellow-500">★★★★</span>
+                      <span>27 avaliações</span>
                     </div>
                   </div>
-                  <div className="flex flex-wrap items-center justify-between gap-3 xl:grid xl:justify-items-end">
+                  <div className="flex flex-wrap items-center justify-between gap-3 xl:flex-col xl:items-end xl:justify-between">
                     <QuantityStepper
                       value={item.quantity}
                       min={1}
@@ -195,10 +195,10 @@ export function CartPageClient() {
                       onChange={(quantity) => updateQty(item.id, quantity)}
                     />
                     <div className="flex flex-wrap gap-3 text-sm">
-                      <button type="button" className="text-accent-glow hover:text-accent-primary" onClick={() => handleSaveForLater(item)}>
+                      <button type="button" className="text-cafe-orange-500 transition hover:text-cafe-orange-400" onClick={() => handleSaveForLater(item)}>
                         Salvar pra depois
                       </button>
-                      <button type="button" className="text-status-error transition hover:brightness-125" onClick={() => removeItem(item.id)}>
+                      <button type="button" className="text-cafe-red-500 transition hover:text-cafe-red-400" onClick={() => removeItem(item.id)}>
                         Remover
                       </button>
                     </div>
@@ -215,14 +215,14 @@ export function CartPageClient() {
           />
         )}
 
-        <section className="grid gap-4 rounded-2xl border border-white/10 bg-background-card/70 p-5">
+        <section className="grid gap-4 rounded-card border border-border-subtle bg-background-card p-5">
           <div>
-            <h2 className="font-display text-2xl font-semibold text-text-primary">Cupons e beneficios</h2>
-            <p className="mt-1 text-sm text-text-secondary">Sugestao disponivel: use CAFE15 para economizar R$ 15.</p>
+            <h2 className="font-display text-xl font-semibold text-text-primary">Cupons e benefícios</h2>
+            <p className="mt-1 text-sm text-text-muted">Sugestão: use CAFE15 para economizar R$ 15.</p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row">
             <input
-              className="input-field"
+              className="input-field flex-1"
               placeholder="Digite seu cupom"
               value={coupon}
               onChange={(event) => setCoupon(event.target.value)}
@@ -232,16 +232,16 @@ export function CartPageClient() {
             </button>
           </div>
           {couponFeedback ? (
-            <p className={appliedCoupon ? 'text-sm text-status-success' : 'text-sm text-status-error'}>{couponFeedback}</p>
+            <p className={appliedCoupon ? 'rounded-lg bg-status-success/10 px-3 py-2 text-sm text-status-success' : 'rounded-lg bg-cafe-red-500/10 px-3 py-2 text-sm text-cafe-red-500'}>{couponFeedback}</p>
           ) : null}
           <div className="grid gap-2 text-sm text-text-secondary md:grid-cols-2">
-            <p>Voce vai ganhar {cashback} R-Coins nessa compra.</p>
-            <p>{giftRemaining > 0 ? `Adicione ${currencyFormatter.format(giftRemaining)} e ganhe um brinde.` : 'Brinde liberado para este pedido.'}</p>
+            <p className="flex items-center gap-1">🪙 Você vai ganhar {cashback} R-Coins</p>
+            <p className="flex items-center gap-1">{giftRemaining > 0 ? `🎁 Adicione ${currencyFormatter.format(giftRemaining)} e ganhe um brinde.` : '🎁 Brinde liberado para este pedido.'}</p>
           </div>
         </section>
 
-        <section className="grid gap-4 rounded-2xl border border-white/10 bg-background-card/70 p-5">
-          <h2 className="font-display text-2xl font-semibold text-text-primary">Entrega e presente</h2>
+        <section className="grid gap-4 rounded-card border border-border-subtle bg-background-card p-5">
+          <h2 className="font-display text-xl font-semibold text-text-primary">Entrega e presente</h2>
           <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
             <input
               className="input-field"
@@ -260,7 +260,7 @@ export function CartPageClient() {
               {deliveryOptions.map((option) => (
                 <label
                   key={option.id}
-                  className="flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-white/10 bg-background-surface p-3 text-sm"
+                  className="flex cursor-pointer items-center justify-between gap-4 rounded-button border border-border-subtle bg-cafe-dark-700 p-3 text-sm transition hover:border-cafe-orange-500/40"
                 >
                   <span className="flex items-center gap-3">
                     <input
@@ -268,6 +268,7 @@ export function CartPageClient() {
                       name="delivery"
                       checked={deliveryOption === option.id}
                       onChange={() => setDeliveryOption(option.id)}
+                      className="text-cafe-orange-500 focus:ring-cafe-orange-500/30"
                     />
                     <span>
                       <span className="block font-semibold text-text-primary">{option.name}</span>
@@ -275,31 +276,32 @@ export function CartPageClient() {
                     </span>
                   </span>
                   <span className="font-semibold text-text-primary">
-                    {option.price === 0 || total >= freeShippingGoal ? 'Gratis' : currencyFormatter.format(option.price)}
+                    {option.price === 0 || total >= freeShippingGoal ? 'Grátis' : currencyFormatter.format(option.price)}
                   </span>
                 </label>
               ))}
-              <p className="text-sm text-text-secondary">Chega ate {getEstimatedDelivery(deliveryOption)}.</p>
+              <p className="text-sm text-text-secondary">Chega até {getEstimatedDelivery(deliveryOption)}.</p>
             </div>
           ) : (
             <p className="text-sm text-text-muted">Informe o CEP para ver normal, expresso e retirada.</p>
           )}
           <div className="grid gap-3 text-sm text-text-secondary md:grid-cols-2">
-            <label className="flex items-center gap-3 rounded-xl border border-white/10 p-3">
-              <input type="checkbox" checked={isGift} onChange={(event) => setIsGift(event.target.checked)} />
-              E presente, esconder precos e adicionar mensagem
+            <label className="flex cursor-pointer items-center gap-3 rounded-button border border-border-subtle p-3 transition hover:border-cafe-orange-500/40">
+              <input type="checkbox" checked={isGift} onChange={(event) => setIsGift(event.target.checked)} className="rounded border-border-subtle text-cafe-orange-500 focus:ring-cafe-orange-500/30" />
+              🎁 É presente, esconder preços
             </label>
-            <label className="flex items-center gap-3 rounded-xl border border-white/10 p-3">
+            <label className="flex cursor-pointer items-center gap-3 rounded-button border border-border-subtle p-3 transition hover:border-cafe-orange-500/40">
               <input
                 type="checkbox"
                 checked={sustainablePackage}
                 onChange={(event) => setSustainablePackage(event.target.checked)}
+                className="rounded border-border-subtle text-cafe-orange-500 focus:ring-cafe-orange-500/30"
               />
-              Embalagem sustentavel +R$ 2
+              🌱 Embalagem sustentável +R$ 2
             </label>
           </div>
           {isGift ? (
-            <textarea className="input-field min-h-24" placeholder="Mensagem para o cartao do presente" />
+            <textarea className="input-field min-h-24" placeholder="Mensagem para o cartão do presente" />
           ) : null}
         </section>
 
@@ -343,20 +345,20 @@ export function CartPageClient() {
         </section>
       </section>
 
-      <aside className="glass sticky top-28 h-fit rounded-2xl p-5 shadow-warm">
-        <h2 className="font-display text-2xl font-semibold text-text-primary">Resumo do pedido</h2>
+      <aside className="sticky top-28 h-fit rounded-card border border-border-subtle bg-background-card p-5">
+        <h2 className="font-display text-xl font-semibold text-text-primary">Resumo do pedido</h2>
         <div className="mt-5 grid gap-3">
           <div className="grid gap-2">
-            <div className="h-3 overflow-hidden rounded-full bg-background-surface">
-              <div className="h-full rounded-full bg-accent-primary transition-all" style={{ width: `${freeShippingProgress}%` }} />
+            <div className="h-2 overflow-hidden rounded-full bg-cafe-dark-700">
+              <div className="h-full rounded-full bg-cafe-orange-500 transition-all duration-500" style={{ width: `${freeShippingProgress}%` }} />
             </div>
-            <p className="text-xs text-text-secondary">
+            <p className="text-xs text-text-muted">
               {freeShippingRemaining > 0
-                ? `Falta ${currencyFormatter.format(freeShippingRemaining)} pra ganhar frete gratis.`
-                : 'Frete gratis desbloqueado.'}
+                ? `Falta ${currencyFormatter.format(freeShippingRemaining)} para frete grátis`
+                : '🎉 Frete grátis desbloqueado!'}
             </p>
           </div>
-          <dl className="grid gap-3 text-sm">
+          <dl className="grid gap-2 text-sm">
             <div className="flex justify-between gap-4 text-text-secondary">
               <dt>Subtotal</dt>
               <dd>{currencyFormatter.format(total)}</dd>
@@ -367,7 +369,7 @@ export function CartPageClient() {
             </div>
             <div className="flex justify-between gap-4 text-text-secondary">
               <dt>Frete</dt>
-              <dd>{shippingCalculated ? currencyFormatter.format(shipping) : 'calcule o frete'}</dd>
+              <dd>{shippingCalculated ? currencyFormatter.format(shipping) : 'calcular'}</dd>
             </div>
             <div className="flex justify-between gap-4 text-text-secondary">
               <dt>Taxas</dt>
@@ -375,45 +377,35 @@ export function CartPageClient() {
             </div>
             {sustainableFee > 0 ? (
               <div className="flex justify-between gap-4 text-text-secondary">
-                <dt>Embalagem sustentavel</dt>
+                <dt>Embalagem sustentável</dt>
                 <dd>{currencyFormatter.format(sustainableFee)}</dd>
               </div>
             ) : null}
-            <div className="flex justify-between gap-4 border-t border-border-subtle pt-4 text-lg font-semibold text-text-primary">
+            <div className="flex justify-between gap-4 border-t border-border-subtle pt-3 text-lg font-bold text-text-primary">
               <dt>Total</dt>
               <dd>{currencyFormatter.format(finalTotal)}</dd>
             </div>
           </dl>
-          <div className="grid gap-1 text-sm text-text-secondary">
+          <div className="grid gap-1 text-sm text-text-muted">
             <p>ou 10x de {currencyFormatter.format(finalTotal / 10)}</p>
-            <p className="text-status-success">Voce esta economizando {currencyFormatter.format(discount + itemSavings)}.</p>
-            <p>Timeline: pagou {'->'} separou {'->'} enviou {'->'} chegou.</p>
+            <p className="text-status-success">Economizando {currencyFormatter.format(discount + itemSavings)}</p>
           </div>
-          <Link href="/checkout" className="btn-primary mt-3 w-full animate-pulse">
+          <Link href="/checkout" className="btn-primary mt-2 w-full h-12 text-base">
             Finalizar compra
           </Link>
           <div className="grid grid-cols-2 gap-2">
-            <Link href="/checkout" className="btn-secondary w-full text-center">
-              Comprar como convidado
+            <Link href="/checkout" className="btn-secondary w-full text-center text-sm">
+              Convidado
             </Link>
-            <Link href="/login?callbackUrl=/checkout" className="btn-ghost w-full text-center">
-              Login rapido
+            <Link href="/login?callbackUrl=/checkout" className="btn-ghost w-full text-center text-sm">
+              Login
             </Link>
           </div>
-          <Link href="/products" className="btn-ghost w-full text-center">
-            Continuar comprando
-          </Link>
-          <button type="button" className="btn-ghost w-full" onClick={clearCart}>
-            Limpar carrinho
-          </button>
-        </div>
-        <div className="mt-6 grid gap-3 border-t border-white/10 pt-5 text-xs leading-5 text-text-muted">
-          <p>Compra segura: SSL, antifraude, Pix, cartao, Mercado Pago e PayPal.</p>
-          <p>Garantia de 30 dias ou seu dinheiro de volta em produtos elegiveis.</p>
-          <Link href="/services" className="text-accent-glow hover:text-accent-primary">
-            Politica de devolucao e atendimento
-          </Link>
-          <p>Transparencia: produto {currencyFormatter.format(total * 0.76)}, operacao {currencyFormatter.format(total * 0.14)}, impostos inclusos.</p>
+          <div className="mt-4 grid gap-2 border-t border-border-subtle pt-4 text-xs leading-5 text-text-muted">
+            <p className="flex items-center gap-1">🔒 Compra segura • SSL • Antifraude</p>
+            <p className="flex items-center gap-1">🛡️ Garantia de 30 dias</p>
+            <p className="flex items-center gap-1">💳 Pix • Cartão • Mercado Pago • PayPal</p>
+          </div>
         </div>
       </aside>
     </div>

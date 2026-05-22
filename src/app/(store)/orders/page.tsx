@@ -30,30 +30,28 @@ export default async function OrdersPage() {
   return (
     <main className="container-page grid gap-8 py-12">
       <div>
-        <h1 className="font-display text-4xl font-semibold text-text-primary">Meus pedidos</h1>
-        <p className="mt-3 text-sm text-text-secondary">Acompanhe status, itens e historico de compras.</p>
+        <h1 className="font-display text-3xl font-bold text-text-primary">Meus Pedidos</h1>
+        <p className="mt-1 text-sm text-text-muted">Acompanhe o status de suas compras.</p>
       </div>
       {orders.length > 0 ? (
-        <div className="grid gap-4">
+        <div className="grid gap-3">
           {orders.map((order) => (
-            <Link key={order.id} href={`/orders/${order.id}`} className="card grid gap-4 p-5 md:grid-cols-4">
-              <div>
-                <p className="text-xs text-text-muted">Pedido</p>
-                <p className="mt-1 font-mono text-sm text-text-primary">{order.id}</p>
-              </div>
-              <div>
-                <p className="text-xs text-text-muted">Status</p>
-                <div className="mt-1">
+            <Link key={order.id} href={`/orders/${order.id}`} className="rounded-card border border-border-subtle bg-background-card p-5 transition hover:border-cafe-orange-500/40 md:flex md:items-center md:justify-between">
+              <div className="grid gap-2 md:flex md:items-center md:gap-8">
+                <div>
+                  <p className="text-xs text-text-muted">Pedido</p>
+                  <p className="font-mono text-sm text-text-primary">#{order.id.slice(0, 10)}</p>
+                </div>
+                <div>
                   <StatusBadge status={order.status} />
                 </div>
+                <div>
+                  <p className="text-xs text-text-muted">Itens</p>
+                  <p className="text-sm text-text-primary">{order.itemCount}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-xs text-text-muted">Itens</p>
-                <p className="mt-1 text-sm text-text-primary">{order.itemCount}</p>
-              </div>
-              <div>
-                <p className="text-xs text-text-muted">Total</p>
-                <p className="mt-1 text-sm font-semibold text-text-primary">{currencyFormatter.format(order.total)}</p>
+              <div className="mt-3 md:mt-0">
+                <p className="text-sm font-bold text-cafe-orange-500">{currencyFormatter.format(order.total)}</p>
               </div>
             </Link>
           ))}

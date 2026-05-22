@@ -1,88 +1,102 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ProductFilters } from '@/components/store/ProductFilters';
 import { ProductGrid } from '@/components/store/ProductGrid';
+import { ProductFilters } from '@/components/store/ProductFilters';
 import { getCategories, getProducts } from '@/lib/products';
 
 export const metadata: Metadata = {
-  title: 'Produtos | Cafe Store',
-  description: 'Catalogo de produtos personalizados CAFÉ Store.',
+  title: 'Produtos | CAFÉ Store',
+  description: 'Confira nossa seleção de cafés especiais, equipamentos e acessórios.',
 };
 
 export const dynamic = 'force-dynamic';
 
 type ProductsPageProps = {
-  searchParams: {
+  searchParams: Promise<{
     category?: string;
     q?: string;
     sort?: string;
     page?: string;
-  };
+  }>;
 };
 
+const PER_PAGE = 12;
+
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
-  const page = Number.parseInt(searchParams.page ?? '1', 10);
+  const params = await searchParams;
+  const page = Number(params.page) || 1;
   const [categories, result] = await Promise.all([
     getCategories(),
-    getProducts({
-      category: searchParams.category,
-      search: searchParams.q,
-      sort: searchParams.sort,
-      page: Number.isNaN(page) ? 1 : page,
-      perPage: 12,
-    }),
+    getProducts({ category: params.category, search: params.q, sort: params.sort, page, perPage: PER_PAGE }),
   ]);
-
-  const baseParams = new URLSearchParams();
-
-  if (searchParams.category) {
-    baseParams.set('category', searchParams.category);
-  }
-
-  if (searchParams.q) {
-    baseParams.set('q', searchParams.q);
-  }
-
-  if (searchParams.sort) {
-    baseParams.set('sort', searchParams.sort);
-  }
+  const products = result.products;
+  const total = result.pagination.total;
+  const totalPages = result.pagination.totalPages;
 
   return (
-    <main className="container-page grid gap-8 py-12">
-      <div>
-        <h1 className="font-display text-4xl font-semibold text-text-primary">Produtos</h1>
-        <p className="mt-3 max-w-2xl text-sm leading-6 text-text-secondary">
-          Filtre por categoria, busque por nome e escolha produtos oficiais da marca CAFÉ.
-        </p>
+    <main className="container-page py-8">
+      <nav className="mb-6 text-sm text-text-muted">
+        <Link href="/" className="transition hover:text-cafe-orange-500">Home</Link>
+        <span className="mx-2">&gt;</span>
+        <span className="text-text-primary">Produtos</span>
+        {params.category ? (
+          <>
+            <span className="mx-2">&gt;</span>
+            <span className="text-text-primary capitalize">{params.category}</span>
+          </>
+        ) : null}
+      </nav>
+
+      <div className="mb-6">
+        <h1 className="font-display text-3xl font-bold text-text-primary">
+          {params.category ? params.category.replace(/-/g, ' ') : 'Todos os Produtos'}
+        </h1>
+        <p className="mt-1 text-sm text-text-muted">{total} produtos encontrados</p>
       </div>
+
       <ProductFilters
         categories={categories}
-        selectedCategory={searchParams.category}
-        search={searchParams.q}
-        sort={searchParams.sort}
+        selectedCategory={params.category}
+        search={params.q}
+        sort={params.sort}
       />
-      <ProductGrid products={result.products} />
-      {result.pagination.totalPages > 1 ? (
-        <div className="flex flex-wrap items-center justify-center gap-2">
-          {Array.from({ length: result.pagination.totalPages }, (_, index) => index + 1).map((pageNumber) => {
-            const params = new URLSearchParams(baseParams);
-            params.set('page', String(pageNumber));
 
-            return (
-              <Link
-                key={pageNumber}
-                href={`/products?${params.toString()}`}
-                className={
-                  pageNumber === result.pagination.page
-                    ? 'led-amber rounded-xl bg-accent-primary px-4 py-2 text-sm font-semibold text-background-base'
-                    : 'rounded-xl border border-white/10 px-4 py-2 text-sm text-text-secondary transition hover:border-accent-primary/40 hover:text-text-primary'
-                }
-              >
-                {pageNumber}
-              </Link>
-            );
-          })}
-        </div>
+      <div className="mt-8">
+        <ProductGrid products={products} />
+      </div>
+
+      {totalPages > 1 ? (
+        <nav className="mt-10 flex items-center justify-center gap-2" aria-label="Paginação">
+          {page > 1 ? (
+            <Link
+              href={`/products?page=${page - 1}${params.category ? `&category=${params.category}` : ''}${params.q ? `&q=${params.q}` : ''}${params.sort ? `&sort=${params.sort}` : ''}`}
+              className="grid size-10 place-items-center rounded-button border border-border-subtle text-sm text-text-secondary transition hover:border-cafe-orange-500/40 hover:text-text-primary"
+            >
+              ←
+            </Link>
+          ) : null}
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+            <Link
+              key={p}
+              href={`/products?page=${p}${params.category ? `&category=${params.category}` : ''}${params.q ? `&q=${params.q}` : ''}${params.sort ? `&sort=${params.sort}` : ''}`}
+              className={`grid size-10 place-items-center rounded-button text-sm font-medium transition ${
+                p === page
+                  ? 'bg-cafe-red-500 text-white'
+                  : 'border border-border-subtle text-text-secondary hover:border-cafe-orange-500/40 hover:text-text-primary'
+              }`}
+            >
+              {p}
+            </Link>
+          ))}
+          {page < totalPages ? (
+            <Link
+              href={`/products?page=${page + 1}${params.category ? `&category=${params.category}` : ''}${params.q ? `&q=${params.q}` : ''}${params.sort ? `&sort=${params.sort}` : ''}`}
+              className="grid size-10 place-items-center rounded-button border border-border-subtle text-sm text-text-secondary transition hover:border-cafe-orange-500/40 hover:text-text-primary"
+            >
+              →
+            </Link>
+          ) : null}
+        </nav>
       ) : null}
     </main>
   );

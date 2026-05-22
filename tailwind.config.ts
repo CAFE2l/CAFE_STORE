@@ -9,37 +9,78 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        cafe: {
+          red: {
+            400: '#E74C3C',
+            500: '#C0392B',
+            600: '#A93226',
+          },
+          orange: {
+            400: '#F39C12',
+            500: '#E67E22',
+            600: '#CA6F1E',
+          },
+          yellow: {
+            400: '#F9CA24',
+            500: '#F1C40F',
+            600: '#D4AC0D',
+          },
+          dark: {
+            900: '#111111',
+            800: '#1A1A1A',
+            700: '#2C2C2C',
+            600: '#3A3A3A',
+          },
+          gray: {
+            400: '#A0A0A0',
+            300: '#C0C0C0',
+            200: '#E0E0E0',
+          },
+        },
         background: {
-          base: '#070707',
-          surface: '#121212',
-          card: '#1b1b1b',
+          base: '#111111',
+          surface: '#2C2C2C',
+          card: '#1A1A1A',
         },
         border: {
-          subtle: 'rgba(255,255,255,0.10)',
-          highlight: 'rgba(255,193,7,0.40)',
+          subtle: '#2C2C2C',
+          highlight: 'rgba(230,126,34,0.45)',
         },
         accent: {
-          primary: '#ff6a00',
-          secondary: '#e11d2e',
-          glow: '#ffd21f',
+          primary: '#E67E22',
+          secondary: '#C0392B',
+          glow: '#F1C40F',
         },
         text: {
           primary: '#ffffff',
-          secondary: '#e8e0d4',
-          muted: '#a79f95',
+          secondary: '#F5F5F5',
+          muted: '#A0A0A0',
         },
         status: {
           success: '#22c55e',
-          error: '#ef233c',
-          info: '#ffd21f',
+          error: '#E74C3C',
+          info: '#F39C12',
         },
       },
       fontFamily: {
-        display: ['Playfair Display', 'serif'],
-        sans: ['Inter', 'sans-serif'],
+        display: ['var(--font-playfair)', 'Playfair Display', 'serif'],
+        sans: ['var(--font-inter)', 'Inter', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
       },
+      borderRadius: {
+        card: '12px',
+        badge: '4px',
+        button: '8px',
+      },
       keyframes: {
+        flame: {
+          '0%, 100%': { opacity: '0.9', transform: 'scale(1)' },
+          '50%': { opacity: '1', transform: 'scale(1.06)' },
+        },
+        slideUp: {
+          from: { opacity: '0', transform: 'translateY(18px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
         fadeUp: {
           from: { opacity: '0', transform: 'translateY(16px)' },
           to: { opacity: '1', transform: 'translateY(0)' },
@@ -59,11 +100,11 @@ const config: Config = {
         pulseGlow: {
           '0%, 100%': {
             boxShadow:
-              '0 0 8px rgba(200,135,58,0.28), 0 0 18px rgba(200,135,58,0.12)',
+              '0 0 8px rgba(230,126,34,0.28), 0 0 18px rgba(192,57,43,0.12)',
           },
           '50%': {
             boxShadow:
-              '0 0 18px rgba(200,135,58,0.62), 0 0 44px rgba(200,135,58,0.26)',
+              '0 0 18px rgba(230,126,34,0.62), 0 0 44px rgba(241,196,15,0.22)',
           },
         },
         float: {
@@ -76,6 +117,9 @@ const config: Config = {
         },
       },
       animation: {
+        flame: 'flame 1.8s ease-out infinite',
+        'slide-up': 'slideUp 0.28s ease-out both',
+        'fade-in': 'fadeIn 0.25s ease-out both',
         fadeUp: 'fadeUp 0.5s ease-out both',
         fadeIn: 'fadeIn 0.35s ease-out both',
         scaleIn: 'scaleIn 0.25s ease-out both',

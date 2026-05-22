@@ -5,9 +5,19 @@ import { cn } from '@/lib/utils';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 
+type ButtonSize = 'sm' | 'md' | 'lg' | 'icon';
+
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant;
+  size?: ButtonSize;
   loading?: boolean;
+};
+
+const sizeClasses = {
+  sm: 'h-9 px-3 text-xs',
+  md: 'h-11 px-5 text-sm',
+  lg: 'h-13 px-7 text-base',
+  icon: 'h-10 w-10 p-0',
 };
 
 const variants: Record<ButtonVariant, string> = {
@@ -15,16 +25,17 @@ const variants: Record<ButtonVariant, string> = {
   secondary: 'btn-secondary',
   ghost: 'btn-ghost',
   danger:
-    'rounded-xl bg-status-error px-6 py-3 font-semibold text-white transition-all duration-300 hover:brightness-110 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-status-error/50',
+    'rounded-card bg-status-error px-6 py-3 font-semibold text-white transition-all duration-200 ease-out hover:brightness-110 active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-status-error/50',
 };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ children, className, variant = 'primary', loading = false, disabled, ...props }, ref) => {
+  ({ children, className, variant = 'primary', loading = false, disabled, size = 'md', ...props }, ref) => {
     return (
       <button
         ref={ref}
         className={cn(
-          'inline-flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-60',
+          'inline-flex items-center justify-center gap-2 transition-all duration-200 ease-out disabled:cursor-not-allowed disabled:opacity-50',
+          sizeClasses[size],
           variants[variant],
           className,
         )}

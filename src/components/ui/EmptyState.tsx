@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { ShoppingBag } from 'lucide-react';
 
 type EmptyStateProps = {
   icon?: ReactNode;
@@ -17,15 +18,13 @@ export function EmptyState({ action, className, icon, subtitle, title }: EmptySt
   return (
     <div
       className={cn(
-        'glass grid place-items-center rounded-2xl px-6 py-12 text-center shadow-card',
+        'flex flex-col items-center justify-center rounded-card px-6 py-16 text-center',
         className,
       )}
     >
-      {icon ? (
-        <div className="mb-4 grid size-14 place-items-center rounded-full bg-accent-primary/10 text-accent-primary">
-          {icon}
-        </div>
-      ) : null}
+      <div className="mb-6 grid size-20 place-items-center rounded-full bg-cafe-orange-500/10">
+        {icon ?? <ShoppingBag className="h-8 w-8 text-cafe-orange-500" />}
+      </div>
       <h2 className="font-display text-2xl font-semibold text-text-primary">{title}</h2>
       {subtitle ? <p className="mt-2 max-w-md text-sm leading-6 text-text-secondary">{subtitle}</p> : null}
       {action ? (

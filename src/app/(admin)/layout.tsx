@@ -1,13 +1,13 @@
 import type { ReactNode } from 'react';
 import { redirect } from 'next/navigation';
-import { Sidebar } from '@/components/layout/Sidebar';
 import { auth } from '@/lib/auth';
+import { Sidebar } from '@/components/layout/Sidebar';
 
-type AdminLayoutProps = {
-  children: ReactNode;
-};
-
-export default async function AdminLayout({ children }: AdminLayoutProps) {
+export default async function AdminLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   const session = await auth();
 
   if (!session?.user) {
@@ -19,9 +19,11 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
   }
 
   return (
-    <div className="min-h-screen bg-background-base text-text-primary lg:flex">
+    <div className="min-h-screen bg-cafe-dark-900 lg:flex">
       <Sidebar />
-      <main className="min-w-0 flex-1">{children}</main>
+      <main className="flex-1 p-5 lg:p-8">
+        {children}
+      </main>
     </div>
   );
 }

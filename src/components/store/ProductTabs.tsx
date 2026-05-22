@@ -67,8 +67,8 @@ export function ProductTabs({ category, composition, description, dimensions, fa
   };
 
   return (
-    <section className="grid gap-4">
-      <div className="flex flex-wrap gap-2 border-b border-border-subtle pb-2" role="tablist">
+    <section className="grid gap-6">
+      <div className="flex border-b border-border-subtle" role="tablist">
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -76,10 +76,10 @@ export function ProductTabs({ category, composition, description, dimensions, fa
             role="tab"
             aria-selected={activeTab === tab.id}
             className={cn(
-              'rounded-xl px-4 py-2 text-sm font-medium transition',
+              'px-5 py-3 text-sm font-medium transition-all duration-200 border-b-2 -mb-px',
               activeTab === tab.id
-                ? 'bg-accent-primary text-background-base'
-                : 'text-text-secondary hover:bg-background-surface hover:text-text-primary',
+                ? 'border-cafe-red-500 text-text-primary'
+                : 'border-transparent text-text-muted hover:text-text-secondary',
             )}
             onClick={() => setActiveTab(tab.id)}
           >
@@ -87,7 +87,9 @@ export function ProductTabs({ category, composition, description, dimensions, fa
           </button>
         ))}
       </div>
-      <p className="text-sm leading-7 text-text-secondary">{content[activeTab]}</p>
+      <div className="animate-fade-in">
+        <p className="text-sm leading-7 text-text-secondary">{content[activeTab]}</p>
+      </div>
     </section>
   );
 }
