@@ -54,7 +54,7 @@ export function ProductCard({ product }: ProductCardProps) {
             </button>
           </div>
           <p className="line-clamp-2 min-h-10 text-sm leading-5 text-text-secondary">
-            {product.description ?? 'Cafe premium selecionado para preparo especial.'}
+            {product.description ?? 'Produto personalizado oficial CAFÉ Store.'}
           </p>
         </div>
         <PriceBlock price={product.price} oldPrice={product.oldPrice} />

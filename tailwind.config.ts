@@ -10,28 +10,28 @@ const config: Config = {
     extend: {
       colors: {
         background: {
-          base: '#0a0806',
-          surface: '#110e0b',
-          card: '#1a1410',
+          base: '#070707',
+          surface: '#121212',
+          card: '#1b1b1b',
         },
         border: {
-          subtle: 'rgba(255,255,255,0.06)',
-          highlight: 'rgba(255,255,255,0.12)',
+          subtle: 'rgba(255,255,255,0.10)',
+          highlight: 'rgba(255,193,7,0.40)',
         },
         accent: {
-          primary: '#c8873a',
-          secondary: '#8b5e3c',
-          glow: '#e8a855',
+          primary: '#ff6a00',
+          secondary: '#e11d2e',
+          glow: '#ffd21f',
         },
         text: {
-          primary: '#f5ede4',
-          secondary: '#a08878',
-          muted: '#5a4a42',
+          primary: '#ffffff',
+          secondary: '#e8e0d4',
+          muted: '#a79f95',
         },
         status: {
-          success: '#4caf7d',
-          error: '#e05555',
-          info: '#5b9bd5',
+          success: '#22c55e',
+          error: '#ef233c',
+          info: '#ffd21f',
         },
       },
       fontFamily: {

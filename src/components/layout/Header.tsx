@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { auth } from '@/lib/auth';
 import { AuthMenu } from '@/components/layout/AuthMenu';
 import { CartCount } from '@/components/layout/CartCount';
@@ -15,8 +16,9 @@ export async function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-border-subtle bg-background-base/80 backdrop-blur-xl">
       <div className="container-page flex min-h-20 items-center justify-between gap-4">
-        <Link href="/" className="font-display text-2xl font-semibold text-text-primary">
-          Cafe Store
+        <Link href="/" className="flex items-center gap-3 font-display text-2xl font-semibold text-text-primary">
+          <Image src="/images/icons/favicon.png" alt="" width={38} height={38} className="rounded-full" />
+          <span>CAFÉ Store</span>
         </Link>
         <nav className="hidden items-center gap-2 md:flex" aria-label="Navegacao principal">
           {navItems.map((item) => (

@@ -49,11 +49,18 @@ export function ProductPurchasePanel({ product }: ProductPurchasePanelProps) {
   const addItem = useCartStore((state) => state.addItem);
   const variantOptions = useMemo(() => parseVariants(product.variants), [product.variants]);
   const [quantity, setQuantity] = useState(1);
+  const [favorite, setFavorite] = useState(false);
+  const [zip, setZip] = useState('');
+  const [shippingResult, setShippingResult] = useState<string | null>(null);
   const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>(() =>
     Object.fromEntries(variantOptions.map((variant) => [variant.name, variant.values[0] ?? ''])),
   );
   const image = product.images[0] ?? '/placeholder-product.svg';
   const inStock = product.stock > 0;
+  const sku = `CAF-${product.slug.slice(0, 3).toUpperCase()}-${product.id.slice(-6).toUpperCase()}`;
+  const installments = product.price / 12;
+  const stockMessage =
+    product.stock <= 0 ? 'Sem estoque' : product.stock <= 3 ? `Restam ${product.stock} unidades` : `${product.stock} unidades disponiveis`;
 
   function getCartVariants(): CartVariant[] {
     return Object.entries(selectedVariants)
@@ -75,13 +82,38 @@ export function ProductPurchasePanel({ product }: ProductPurchasePanelProps) {
     });
   }
 
+  function handleShippingQuote() {
+    const cleanZip = zip.replace(/\D/g, '');
+
+    if (cleanZip.length !== 8) {
+      setShippingResult('Digite um CEP com 8 numeros.');
+      return;
+    }
+
+    setShippingResult('Normal: 5 a 9 dias uteis | Expresso: 2 a 4 dias uteis | Retirada: combinar pelo atendimento.');
+  }
+
   return (
-    <div className="grid gap-6">
+    <div className="grid gap-6 rounded-2xl border border-white/10 bg-background-card/80 p-5">
+      <div className="grid gap-2 text-sm text-text-secondary">
+        <p>
+          SKU: <span className="font-semibold text-text-primary">{sku}</span>
+        </p>
+        <p>
+          12x de{' '}
+          <span className="font-semibold text-accent-glow">
+            {installments.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+          </span>{' '}
+          sem juros
+        </p>
+      </div>
       {variantOptions.length > 0 ? (
         <div className="grid gap-5">
           {variantOptions.map((variant) => (
             <fieldset key={variant.name} className="grid gap-3">
-              <legend className="text-sm font-medium text-text-secondary">{variant.name}</legend>
+              <legend className="text-sm font-medium text-text-secondary">
+                {variant.name} <span className="text-text-muted">({stockMessage})</span>
+              </legend>
               <div className="flex flex-wrap gap-2">
                 {variant.values.map((value) => (
                   <button
@@ -100,6 +132,7 @@ export function ProductPurchasePanel({ product }: ProductPurchasePanelProps) {
                     }
                   >
                     {value}
+                    <span className="ml-2 text-xs opacity-70">{product.stock} un.</span>
                   </button>
                 ))}
               </div>
@@ -109,14 +142,15 @@ export function ProductPurchasePanel({ product }: ProductPurchasePanelProps) {
       ) : null}
       <div className="flex flex-wrap items-center gap-4">
         <QuantityStepper value={quantity} min={1} max={product.stock || undefined} onChange={setQuantity} />
-        <span className="text-sm text-text-secondary">{inStock ? `${product.stock} unidades` : 'Sem estoque'}</span>
+        <span className="text-sm font-medium text-accent-glow">{stockMessage}</span>
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
-        <Button disabled={!inStock} onClick={handleAddToCart}>
+        <Button className="w-full" disabled={!inStock} onClick={handleAddToCart}>
           Adicionar ao Carrinho
         </Button>
         <Button
           variant="secondary"
+          className="w-full"
           disabled={!inStock}
           onClick={() => {
             handleAddToCart();
@@ -125,6 +159,32 @@ export function ProductPurchasePanel({ product }: ProductPurchasePanelProps) {
         >
           Comprar Agora
         </Button>
+      </div>
+      <Button variant="ghost" className="w-full" onClick={() => setFavorite((current) => !current)}>
+        {favorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+      </Button>
+      <div className="grid gap-3 border-t border-white/10 pt-5">
+        <label className="grid gap-2 text-sm text-text-secondary">
+          Calcular frete e prazo
+          <div className="flex gap-2">
+            <input
+              className="input-field"
+              inputMode="numeric"
+              maxLength={9}
+              placeholder="00000-000"
+              value={zip}
+              onChange={(event) => setZip(event.target.value)}
+            />
+            <Button type="button" variant="secondary" onClick={handleShippingQuote}>
+              Calcular
+            </Button>
+          </div>
+        </label>
+        {shippingResult ? <p className="text-sm leading-6 text-text-secondary">{shippingResult}</p> : null}
+        <div className="grid gap-2 text-xs leading-5 text-text-muted">
+          <p>Frete gratis acima de R$ 299,00 para produtos selecionados.</p>
+          <p>Devolucao em ate 7 dias corridos apos o recebimento.</p>
+        </div>
       </div>
     </div>
   );

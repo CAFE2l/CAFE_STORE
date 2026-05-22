@@ -6,7 +6,7 @@ import { getCategories, getProducts } from '@/lib/products';
 
 export const metadata: Metadata = {
   title: 'Produtos | Cafe Store',
-  description: 'Catalogo de cafes premium e acessorios.',
+  description: 'Catalogo de produtos personalizados CAFÉ Store.',
 };
 
 export const dynamic = 'force-dynamic';
@@ -52,7 +52,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       <div>
         <h1 className="font-display text-4xl font-semibold text-text-primary">Produtos</h1>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-text-secondary">
-          Filtre por categoria, busque por nome e escolha o lote ideal para seu preparo.
+          Filtre por categoria, busque por nome e escolha produtos oficiais da marca CAFÉ.
         </p>
       </div>
       <ProductFilters

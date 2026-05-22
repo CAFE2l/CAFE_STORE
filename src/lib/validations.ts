@@ -1,14 +1,52 @@
 import { z } from 'zod';
 
+function onlyDigits(value: string) {
+  return value.replace(/\D/g, '');
+}
+
+function isValidCpf(value: string) {
+  const cpf = onlyDigits(value);
+
+  if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) {
+    return false;
+  }
+
+  const calculateDigit = (base: string, factor: number) => {
+    const total = base
+      .split('')
+      .reduce((sum, digit) => sum + Number(digit) * factor--, 0);
+    const result = (total * 10) % 11;
+    return result === 10 ? 0 : result;
+  };
+
+  const firstDigit = calculateDigit(cpf.slice(0, 9), 10);
+  const secondDigit = calculateDigit(cpf.slice(0, 10), 11);
+
+  return firstDigit === Number(cpf[9]) && secondDigit === Number(cpf[10]);
+}
+
+const strongPasswordSchema = z
+  .string()
+  .min(8, 'A senha precisa ter pelo menos 8 caracteres.')
+  .regex(/[A-Z]/, 'A senha precisa ter pelo menos uma letra maiuscula.')
+  .regex(/\d/, 'A senha precisa ter pelo menos um numero.')
+  .regex(/[^A-Za-z0-9]/, 'A senha precisa ter pelo menos um caractere especial.');
+
 export const credentialsSchema = z.object({
   email: z.string().email('Informe um e-mail valido.'),
-  password: z.string().min(6, 'A senha precisa ter pelo menos 6 caracteres.'),
+  password: z.string().min(1, 'Informe sua senha.'),
 });
 
-export const registerSchema = credentialsSchema
-  .extend({
-    name: z.string().min(2, 'Informe seu nome.').max(120, 'Nome muito longo.'),
-    confirmPassword: z.string().min(6, 'Confirme sua senha.'),
+export const registerSchema = z
+  .object({
+    name: z.string().min(2, 'Informe seu nome completo.').max(120, 'Nome muito longo.'),
+    email: z.string().email('Informe um e-mail valido.'),
+    cpf: z.string().refine(isValidCpf, 'Informe um CPF valido.'),
+    phone: z.string().transform(onlyDigits).refine((value) => value.length >= 10 && value.length <= 11, {
+      message: 'Informe um telefone valido.',
+    }),
+    password: strongPasswordSchema,
+    confirmPassword: z.string().min(1, 'Confirme sua senha.'),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: 'As senhas nao conferem.',
@@ -17,6 +55,31 @@ export const registerSchema = credentialsSchema
 
 export type CredentialsInput = z.infer<typeof credentialsSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;
+
+export const emailVerificationSchema = z.object({
+  email: z.string().email('Informe um e-mail valido.'),
+  token: z.string().min(32, 'Token invalido.'),
+});
+
+export const passwordResetRequestSchema = z.object({
+  email: z.string().email('Informe um e-mail valido.'),
+});
+
+export const passwordResetSchema = z
+  .object({
+    email: z.string().email('Informe um e-mail valido.'),
+    token: z.string().min(32, 'Token invalido.'),
+    password: strongPasswordSchema,
+    confirmPassword: z.string().min(1, 'Confirme sua senha.'),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'As senhas nao conferem.',
+    path: ['confirmPassword'],
+  });
+
+export type EmailVerificationInput = z.infer<typeof emailVerificationSchema>;
+export type PasswordResetRequestInput = z.infer<typeof passwordResetRequestSchema>;
+export type PasswordResetInput = z.infer<typeof passwordResetSchema>;
 
 export const checkoutItemSchema = z.object({
   productId: z.string().min(1, 'Produto invalido.'),

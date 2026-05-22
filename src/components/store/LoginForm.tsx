@@ -5,10 +5,16 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FormEvent, useState } from 'react';
 
-export function LoginForm() {
+type LoginFormProps = {
+  googleEnabled?: boolean;
+};
+
+export function LoginForm({ googleEnabled = false }: LoginFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') ?? '/';
+  const verified = searchParams.get('verified');
+  const reset = searchParams.get('reset');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -28,7 +34,7 @@ export function LoginForm() {
     setLoading(false);
 
     if (result?.error) {
-      setError('E-mail ou senha invalidos.');
+      setError('E-mail ou senha invalidos, ou email ainda nao verificado.');
       return;
     }
 
@@ -69,20 +75,32 @@ export function LoginForm() {
             />
           </label>
           {error ? <p className="text-sm text-status-error">{error}</p> : null}
+          {verified === '1' ? <p className="text-sm text-status-success">Email verificado. Voce ja pode entrar.</p> : null}
+          {verified === 'expired' || verified === 'invalid' ? (
+            <p className="text-sm text-status-error">Link de verificacao invalido ou expirado.</p>
+          ) : null}
+          {reset === '1' ? <p className="text-sm text-status-success">Senha redefinida. Entre com a nova senha.</p> : null}
           <button type="submit" className="btn-primary mt-2" disabled={loading}>
             {loading ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
-        <button
-          type="button"
-          className="btn-secondary mt-4 w-full"
-          onClick={() => {
-            void signIn('google', { callbackUrl });
-          }}
-        >
-          Entrar com Google
-        </button>
+        {googleEnabled ? (
+          <button
+            type="button"
+            className="btn-secondary mt-4 w-full"
+            onClick={() => {
+              void signIn('google', { callbackUrl });
+            }}
+          >
+            Entrar com Google
+          </button>
+        ) : null}
         <p className="mt-6 text-center text-sm text-text-secondary">
+          <Link href="/forgot-password" className="font-semibold text-accent-primary hover:text-accent-glow">
+            Esqueci minha senha
+          </Link>
+        </p>
+        <p className="mt-3 text-center text-sm text-text-secondary">
           Ainda nao tem conta?{' '}
           <Link href="/register" className="font-semibold text-accent-primary hover:text-accent-glow">
             Criar conta

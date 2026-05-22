@@ -18,8 +18,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Cafe Store',
-  description: 'E-commerce de cafe premium com graos especiais, acessorios e experiencias.',
+  title: 'CAFÉ Store',
+  description: 'E-commerce de produtos personalizados da marca CAFÉ.',
 };
 
 export default function RootLayout({

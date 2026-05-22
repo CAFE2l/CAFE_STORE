@@ -1,6 +1,5 @@
 'use client';
 
-import { signIn } from 'next-auth/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { FormEvent, useState } from 'react';
@@ -8,22 +7,41 @@ import { FormEvent, useState } from 'react';
 type RegisterResponse = {
   success: boolean;
   error?: string;
+  data?: {
+    devVerificationUrl?: string;
+  };
 };
 
 export function RegisterForm() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [devVerificationUrl, setDevVerificationUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [password, setPassword] = useState('');
+
+  const passwordScore = [
+    password.length >= 8,
+    /[A-Z]/.test(password),
+    /\d/.test(password),
+    /[^A-Za-z0-9]/.test(password),
+  ].filter(Boolean).length;
+  const passwordStrength =
+    passwordScore <= 1 ? 'fraca' : passwordScore <= 3 ? 'media' : 'forte';
 
   async function handleRegister(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
+    setSuccess(null);
+    setDevVerificationUrl(null);
     setLoading(true);
 
     const formData = new FormData(event.currentTarget);
     const payload = {
       name: String(formData.get('name') ?? ''),
       email: String(formData.get('email') ?? ''),
+      cpf: String(formData.get('cpf') ?? ''),
+      phone: String(formData.get('phone') ?? ''),
       password: String(formData.get('password') ?? ''),
       confirmPassword: String(formData.get('confirmPassword') ?? ''),
     };
@@ -43,21 +61,9 @@ export function RegisterForm() {
       return;
     }
 
-    const signInResult = await signIn('credentials', {
-      email: payload.email,
-      password: payload.password,
-      redirect: false,
-      callbackUrl: '/',
-    });
-
     setLoading(false);
-
-    if (signInResult?.error) {
-      router.push('/login');
-      return;
-    }
-
-    router.push('/');
+    setSuccess('Conta criada. Confirme seu email antes de entrar.');
+    setDevVerificationUrl(result.data?.devVerificationUrl ?? null);
     router.refresh();
   }
 
@@ -73,7 +79,7 @@ export function RegisterForm() {
         </div>
         <form className="grid gap-4" onSubmit={handleRegister}>
           <label className="grid gap-2 text-sm text-text-secondary">
-            Nome
+            Nome completo
             <input
               className="input-field"
               name="name"
@@ -83,6 +89,32 @@ export function RegisterForm() {
               placeholder="Seu nome"
             />
           </label>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="grid gap-2 text-sm text-text-secondary">
+              CPF
+              <input
+                className="input-field"
+                name="cpf"
+                type="text"
+                inputMode="numeric"
+                autoComplete="off"
+                required
+                placeholder="000.000.000-00"
+              />
+            </label>
+            <label className="grid gap-2 text-sm text-text-secondary">
+              Telefone
+              <input
+                className="input-field"
+                name="phone"
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
+                required
+                placeholder="(00) 00000-0000"
+              />
+            </label>
+          </div>
           <label className="grid gap-2 text-sm text-text-secondary">
             E-mail
             <input
@@ -102,9 +134,26 @@ export function RegisterForm() {
               type="password"
               autoComplete="new-password"
               required
-              minLength={6}
-              placeholder="Minimo de 6 caracteres"
+              minLength={8}
+              placeholder="8+ caracteres, maiuscula, numero e especial"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
             />
+            <span className="grid gap-1 text-xs">
+              <span className="h-2 overflow-hidden rounded-full bg-background-surface">
+                <span
+                  className={
+                    passwordStrength === 'forte'
+                      ? 'block h-full bg-status-success transition-all'
+                      : passwordStrength === 'media'
+                        ? 'block h-full bg-accent-glow transition-all'
+                        : 'block h-full bg-status-error transition-all'
+                  }
+                  style={{ width: `${Math.max(12, passwordScore * 25)}%` }}
+                />
+              </span>
+              <span>Forca da senha: {passwordStrength}</span>
+            </span>
           </label>
           <label className="grid gap-2 text-sm text-text-secondary">
             Confirmar senha
@@ -114,11 +163,17 @@ export function RegisterForm() {
               type="password"
               autoComplete="new-password"
               required
-              minLength={6}
+              minLength={8}
               placeholder="Repita sua senha"
             />
           </label>
           {error ? <p className="text-sm text-status-error">{error}</p> : null}
+          {success ? <p className="text-sm text-status-success">{success}</p> : null}
+          {devVerificationUrl ? (
+            <Link href={devVerificationUrl} className="text-sm font-semibold text-accent-glow hover:text-accent-primary">
+              Abrir link de verificacao em dev
+            </Link>
+          ) : null}
           <button type="submit" className="btn-primary mt-2" disabled={loading}>
             {loading ? 'Criando...' : 'Criar conta'}
           </button>
