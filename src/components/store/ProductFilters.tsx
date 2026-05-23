@@ -1,51 +1,94 @@
+'use client';
+
 import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
+import { useDebounce } from '@/hooks/useDebounce';
 
 type ProductFiltersProps = {
-  categories: {
-    id: string;
-    name: string;
-    slug: string;
-  }[];
-  selectedCategory?: string;
-  search?: string;
-  sort?: string;
+  categories: { id: string; name: string; slug: string }[];
 };
 
-export function ProductFilters({ categories, search = '', selectedCategory, sort = 'relevance' }: ProductFiltersProps) {
+export function ProductFilters({ categories }: ProductFiltersProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const qParam = searchParams.get('q') ?? '';
+  const categoryParam = searchParams.get('category') ?? '';
+  const sortParam = searchParams.get('sort') ?? 'relevance';
+
+  const [search, setSearch] = useState(qParam);
+  const [category, setCategory] = useState(categoryParam);
+  const [sort, setSort] = useState(sortParam);
+  const debouncedSearch = useDebounce(search, 300);
+
+  const buildHref = useCallback(
+    (q: string, cat: string, s: string) => {
+      const params = new URLSearchParams();
+      if (q) params.set('q', q);
+      if (cat) params.set('category', cat);
+      if (s && s !== 'relevance') params.set('sort', s);
+      const qs = params.toString();
+      return `/products${qs ? `?${qs}` : ''}`;
+    },
+    [],
+  );
+
+  useEffect(() => {
+    router.replace(buildHref(debouncedSearch, category, sort));
+  }, [debouncedSearch, category, sort, router, buildHref]);
+
   return (
-    <form action="/products" className="glass grid gap-4 rounded-2xl p-4 md:grid-cols-[1fr_auto_auto]">
-      <label className="grid gap-2 text-sm text-text-secondary">
-        Buscar
-        <input className="input-field" type="search" name="q" defaultValue={search} placeholder="Nome do cafe" />
-      </label>
-      <label className="grid gap-2 text-sm text-text-secondary">
-        Categoria
-        <select className="input-field min-w-48" name="category" defaultValue={selectedCategory ?? ''}>
-          <option value="">Todas</option>
-          {categories.map((category) => (
-            <option key={category.id} value={category.slug}>
-              {category.name}
-            </option>
-          ))}
-        </select>
-      </label>
-      <label className="grid gap-2 text-sm text-text-secondary">
-        Ordenar
-        <select className="input-field min-w-48" name="sort" defaultValue={sort}>
-          <option value="relevance">Relevancia</option>
-          <option value="price-asc">Menor preco</option>
-          <option value="price-desc">Maior preco</option>
-          <option value="newest">Novidades</option>
-        </select>
-      </label>
-      <div className="flex items-end gap-3 md:col-span-3">
-        <button type="submit" className="btn-primary">
-          Filtrar
-        </button>
-        <Link href="/products" className="btn-ghost">
+    <div className="mb-8 animate-fade-up rounded-2xl border border-white/[0.08] bg-[rgba(26,26,26,0.6)] p-6 opacity-0 backdrop-blur"
+      style={{ animationDelay: '100ms', animationFillMode: 'forwards' }}
+    >
+      <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-[1fr_180px_180px]">
+        <div>
+          <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-500">Buscar</label>
+          <input
+            className="w-full rounded-xl border border-zinc-700 bg-white/[0.04] px-4 py-3 text-sm text-white placeholder:text-zinc-600 transition-all duration-200 focus:border-[#FF7A00]/60 focus:outline-none focus:shadow-[0_0_0_3px_rgba(255,122,0,0.1)]"
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Nome do produto"
+          />
+        </div>
+        <div>
+          <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-500">Categoria</label>
+          <select
+            className="w-full rounded-xl border border-zinc-700 bg-white/[0.04] px-4 py-3 text-sm text-white transition-all duration-200 focus:border-[#FF7A00]/60 focus:outline-none focus:shadow-[0_0_0_3px_rgba(255,122,0,0.1)]"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+          >
+            <option value="" className="bg-[#1a1a1a]">Todas</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.slug} className="bg-[#1a1a1a]">{cat.name}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-500">Ordenar</label>
+          <select
+            className="w-full rounded-xl border border-zinc-700 bg-white/[0.04] px-4 py-3 text-sm text-white transition-all duration-200 focus:border-[#FF7A00]/60 focus:outline-none focus:shadow-[0_0_0_3px_rgba(255,122,0,0.1)]"
+            value={sort}
+            onChange={(e) => setSort(e.target.value)}
+          >
+            <option value="relevance" className="bg-[#1a1a1a]">Relevância</option>
+            <option value="price-asc" className="bg-[#1a1a1a]">Menor preço</option>
+            <option value="price-desc" className="bg-[#1a1a1a]">Maior preço</option>
+            <option value="newest" className="bg-[#1a1a1a]">Mais recente</option>
+            <option value="bestselling" className="bg-[#1a1a1a]">Mais vendido</option>
+            <option value="rating" className="bg-[#1a1a1a]">Melhor avaliado</option>
+          </select>
+        </div>
+      </div>
+      <div className="flex items-center gap-3">
+        <Link
+          href="/products"
+          className="rounded-lg px-4 py-2 text-sm font-medium text-zinc-500 transition hover:bg-white/[0.06] hover:text-zinc-300"
+        >
           Limpar
         </Link>
       </div>
-    </form>
+    </div>
   );
 }

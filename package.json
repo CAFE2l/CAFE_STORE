@@ -26,6 +26,7 @@
     "@auth/prisma-adapter": "^2.11.2",
     "@mercadopago/sdk-js": "^0.0.3",
     "@prisma/client": "^5.22.0",
+    "@tailwindcss/forms": "^0.5.11",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.10.0",
     "lucide-react": "^1.16.0",
@@ -35,6 +36,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "resend": "^6.12.3",
+    "tailwindcss-animate": "^1.0.7",
     "zod": "^4.4.3",
     "zustand": "^5.0.13"
   }

@@ -110,6 +110,7 @@ export const checkoutSchema = z.object({
     zip: z.string().min(8, 'Informe o CEP.'),
   }),
   paymentMethod: z.enum(['pix', 'mercadopago', 'paypal']),
+  couponCode: z.string().optional(),
   items: z.array(checkoutItemSchema).min(1, 'Carrinho vazio.'),
 });
 

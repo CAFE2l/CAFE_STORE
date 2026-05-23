@@ -4,10 +4,13 @@ import { OrderStatus } from '@prisma/client';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
+import { Package } from 'lucide-react';
 import { StatusBadge } from '@/components/account/StatusBadge';
-import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { useCartStore } from '@/store/cart';
+import { Toast } from '@/components/ui/Toast';
+import { nameToBgColor, nameToTextColor, getCustomerLevel } from '@/lib/color';
+import { cn } from '@/lib/utils';
 
 type AddressItem = {
   id: string;
@@ -40,6 +43,7 @@ type OrderItem = {
   paymentMethod: string;
   createdAt: string;
   itemCount: number;
+  productImages: string[];
 };
 
 type ProfileDashboardClientProps = {
@@ -54,6 +58,7 @@ type ProfileDashboardClientProps = {
   addresses: AddressItem[];
   wishlist: WishlistItem[];
   orders: OrderItem[];
+  activeCoupons?: number;
 };
 
 const currencyFormatter = new Intl.NumberFormat('pt-BR', {
@@ -63,412 +68,655 @@ const currencyFormatter = new Intl.NumberFormat('pt-BR', {
 
 const statusFilters = ['Todos', 'PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'] as const;
 
-const fallbackWishlist: WishlistItem[] = [
-  {
-    id: 'wish-camiseta',
-    product: {
-      id: 'prod-camiseta-algodao-preta',
-      name: 'Camiseta Algodao Preta Cafe Store',
-      slug: 'camiseta-algodao-preta-cafe-store',
-      images: ['/images/produtos/camisa_normal/preta/banner.png'],
-      price: 89.9,
-    },
-  },
-  {
-    id: 'wish-caneca',
-    product: {
-      id: 'prod-caneca-preta',
-      name: 'Caneca Preta Cafe Store',
-      slug: 'caneca-preta-cafe-store',
-      images: ['/images/produtos/caneca/preta/banner.png'],
-      price: 49.9,
-    },
-  },
-];
-
-const fallbackOrders: OrderItem[] = [
-  {
-    id: 'CAF-2026-001',
-    status: 'DELIVERED',
-    total: 189.8,
-    paymentMethod: 'pix',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 21).toISOString(),
-    itemCount: 2,
-  },
-  {
-    id: 'CAF-2026-002',
-    status: 'SHIPPED',
-    total: 119.9,
-    paymentMethod: 'mercadopago',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 4).toISOString(),
-    itemCount: 1,
-  },
-];
-
 function maskPhone(value: string) {
   const digits = value.replace(/\D/g, '').slice(0, 11);
-  return digits
-    .replace(/^(\d{2})(\d)/, '($1) $2')
-    .replace(/(\d{5})(\d{1,4})$/, '$1-$2');
+  if (digits.length <= 2) return `(${digits}`;
+  if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
 }
 
-function maskCpf(value: string) {
-  const digits = value.replace(/\D/g, '').slice(0, 11);
-  return digits
-    .replace(/^(\d{3})(\d)/, '$1.$2')
-    .replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3')
-    .replace(/\.(\d{3})(\d)/, '.$1-$2');
+function validatePhone(value: string): string | null {
+  const digits = value.replace(/\D/g, '');
+  if (digits.length === 0) return null;
+  if (digits.length < 10 || digits.length > 11) return 'Telefone deve ter 10 ou 11 digitos.';
+  return null;
 }
 
-function getClientLevel(totalSpent: number) {
-  if (totalSpent >= 500) return { label: 'Cliente VIP', next: 800 };
-  if (totalSpent >= 250) return { label: 'Cliente Gold', next: 500 };
-  return { label: 'Novo cliente', next: 250 };
+function maskCep(value: string) {
+  const digits = value.replace(/\D/g, '').slice(0, 8);
+  return digits.replace(/^(\d{5})(\d)/, '$1-$2');
 }
 
-export function ProfileDashboardClient({ addresses, orders, user, wishlist }: ProfileDashboardClientProps) {
-  const addItem = useCartStore((state) => state.addItem);
+type AddressFormData = {
+  label: string;
+  street: string;
+  number: string;
+  complement: string;
+  neighborhood: string;
+  city: string;
+  state: string;
+  zip: string;
+  isDefault: boolean;
+};
+
+const emptyAddressForm: AddressFormData = {
+  label: '',
+  street: '',
+  number: '',
+  complement: '',
+  neighborhood: '',
+  city: '',
+  state: '',
+  zip: '',
+  isDefault: false,
+};
+
+export function ProfileDashboardClient({ addresses, orders, user, wishlist, activeCoupons = 0 }: ProfileDashboardClientProps) {
   const [avatarPreview, setAvatarPreview] = useState(user.image ?? '');
-  const [phone, setPhone] = useState(user.phone ?? '');
-  const [cpf, setCpf] = useState('');
-  const [birthDate, setBirthDate] = useState('');
+  const [avatarUploading, setAvatarUploading] = useState(false);
   const [displayName, setDisplayName] = useState(user.name ?? '');
+  const [phone, setPhone] = useState(user.phone ?? '');
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [profileMessage, setProfileMessage] = useState<string | null>(null);
+  const [profileError, setProfileError] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordSaving, setPasswordSaving] = useState(false);
+  const [passwordMessage, setPasswordMessage] = useState<string | null>(null);
+
+  const [addressList, setAddressList] = useState<AddressItem[]>(addresses);
+  const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
+  const [addressForm, setAddressForm] = useState<AddressFormData>(emptyAddressForm);
+  const [addressSaving, setAddressSaving] = useState(false);
+  const [addressError, setAddressError] = useState<string | null>(null);
+  const [showAddressForm, setShowAddressForm] = useState(false);
+
   const [statusFilter, setStatusFilter] = useState<(typeof statusFilters)[number]>('Todos');
-  const [periodFilter, setPeriodFilter] = useState('90d');
-  const [twoFactor, setTwoFactor] = useState(false);
-  const [preferences, setPreferences] = useState({
-    promoEmail: true,
-    deliverySms: true,
-    pushNews: false,
-    priceDrop: true,
-    frequency: 'semanal',
-  });
 
-  const visibleWishlist = wishlist.length > 0 ? wishlist : fallbackWishlist;
-  const visibleOrders = orders.length > 0 ? orders : fallbackOrders;
-  const totalSpent = visibleOrders.reduce((sum, order) => sum + order.total, 0);
-  const currentMonthSpent = visibleOrders
-    .filter((order) => new Date(order.createdAt).getMonth() === new Date().getMonth())
-    .reduce((sum, order) => sum + order.total, 0);
-  const level = getClientLevel(totalSpent);
-  const levelProgress = Math.min(100, (totalSpent / level.next) * 100);
   const filteredOrders = useMemo(() => {
-    return visibleOrders.filter((order) => statusFilter === 'Todos' || order.status === statusFilter);
-  }, [statusFilter, visibleOrders]);
+    return orders.filter((order) => statusFilter === 'Todos' || order.status === statusFilter);
+  }, [statusFilter, orders]);
 
-  function handleAvatarChange(file?: File) {
+  const recentOrders = useMemo(() => orders.slice(0, 3), [orders]);
+
+  const level = useMemo(() => getCustomerLevel(orders.length), [orders.length]);
+
+  const initials = useMemo(() => {
+    const n = displayName || user.email || 'U';
+    return n.slice(0, 2).toUpperCase();
+  }, [displayName, user.email]);
+
+  const avatarBg = useMemo(() => nameToBgColor(displayName || user.email || 'U'), [displayName, user.email]);
+  const avatarText = useMemo(() => nameToTextColor(displayName || user.email || 'U'), [displayName, user.email]);
+
+  async function handleAvatarUpload(file?: File) {
     if (!file) return;
-    setAvatarPreview(URL.createObjectURL(file));
+    setAvatarUploading(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch('/api/account/avatar', { method: 'POST', body: formData });
+      const data = (await response.json()) as { success: boolean; url?: string; error?: string };
+      if (data.success && data.url) {
+        setAvatarPreview(data.url);
+        setToast({ message: 'Avatar atualizado com sucesso.', type: 'success' });
+      } else {
+        setToast({ message: data.error ?? 'Erro ao enviar avatar.', type: 'error' });
+      }
+    } catch {
+      setToast({ message: 'Erro ao enviar avatar.', type: 'error' });
+    } finally {
+      setAvatarUploading(false);
+    }
   }
 
-  function handleAddWishlistToCart(item: WishlistItem) {
-    addItem({
-      id: `${item.product.id}-wishlist`,
-      productId: item.product.id,
-      slug: item.product.slug,
-      name: item.product.name,
-      image: item.product.images[0] ?? '/placeholder-product.svg',
-      price: item.product.price,
-      quantity: 1,
-      stock: 10,
-    });
+  async function handleSaveProfile() {
+    const phoneError = validatePhone(phone);
+    if (phoneError) {
+      setProfileError(phoneError);
+      return;
+    }
+    setProfileError(null);
+    setProfileSaving(true);
+    setProfileMessage(null);
+
+    try {
+      const response = await fetch('/api/account/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: displayName, phone }),
+      });
+      const data = (await response.json()) as { success: boolean; error?: string };
+      if (data.success) {
+        setProfileMessage('Perfil atualizado com sucesso.');
+        setToast({ message: 'Perfil atualizado com sucesso.', type: 'success' });
+      } else {
+        setProfileMessage(data.error ?? 'Erro ao salvar.');
+        setToast({ message: data.error ?? 'Erro ao salvar.', type: 'error' });
+      }
+    } catch {
+      setProfileMessage('Erro ao salvar. Tente novamente.');
+      setToast({ message: 'Erro ao salvar. Tente novamente.', type: 'error' });
+    } finally {
+      setProfileSaving(false);
+    }
   }
 
-  function handleBuyAgain(order: OrderItem) {
-    addItem({
-      id: `${order.id}-recompra`,
-      productId: 'prod-camiseta-algodao-preta',
-      slug: 'camiseta-algodao-preta-cafe-store',
-      name: 'Recompra CAFÉ Store',
-      image: '/images/produtos/camisa_normal/preta/banner.png',
-      price: order.total / Math.max(1, order.itemCount),
-      quantity: order.itemCount,
-      stock: 20,
+  async function handleChangePassword() {
+    setPasswordMessage(null);
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setPasswordMessage('Preencha todos os campos.');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setPasswordMessage('A nova senha e a confirmacao nao conferem.');
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setPasswordMessage('A nova senha deve ter no minimo 6 caracteres.');
+      return;
+    }
+
+    setPasswordSaving(true);
+
+    try {
+      const response = await fetch('/api/account/password', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      const data = (await response.json()) as { success: boolean; error?: string };
+      if (data.success) {
+        setPasswordMessage('Senha alterada com sucesso.');
+        setToast({ message: 'Senha alterada com sucesso.', type: 'success' });
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+      } else {
+        setPasswordMessage(data.error ?? 'Erro ao alterar senha.');
+      }
+    } catch {
+      setPasswordMessage('Erro ao alterar senha. Tente novamente.');
+    } finally {
+      setPasswordSaving(false);
+    }
+  }
+
+  function resetForm() {
+    setAddressForm(emptyAddressForm);
+    setEditingAddressId(null);
+    setShowAddressForm(false);
+    setAddressError(null);
+  }
+
+  function handleEditAddress(address: AddressItem) {
+    setEditingAddressId(address.id);
+    setAddressForm({
+      label: address.label ?? '',
+      street: address.street,
+      number: address.number,
+      complement: address.complement ?? '',
+      neighborhood: address.neighborhood,
+      city: address.city,
+      state: address.state,
+      zip: address.zip,
+      isDefault: address.isDefault,
     });
+    setShowAddressForm(true);
+    setAddressError(null);
+  }
+
+  async function handleSaveAddress() {
+    const required = ['street', 'number', 'neighborhood', 'city', 'state', 'zip'] as const;
+    const missing = required.find((f) => !addressForm[f]);
+    if (missing) {
+      setAddressError('Preencha todos os campos obrigatorios.');
+      return;
+    }
+
+    setAddressSaving(true);
+    setAddressError(null);
+
+    try {
+      const url = editingAddressId
+        ? `/api/account/address/${editingAddressId}`
+        : '/api/account/address';
+      const method = editingAddressId ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(addressForm),
+      });
+      const data = (await response.json()) as { success: boolean; address?: AddressItem; error?: string };
+
+      if (data.success && data.address) {
+        if (editingAddressId) {
+          setAddressList((prev) => prev.map((a) => (a.id === editingAddressId ? { ...data.address!, isDefault: data.address!.isDefault } : a)));
+        } else {
+          setAddressList((prev) => [...prev, data.address!]);
+        }
+        setToast({ message: editingAddressId ? 'Endereco atualizado.' : 'Endereco adicionado.', type: 'success' });
+        resetForm();
+      } else {
+        setAddressError(data.error ?? 'Erro ao salvar endereco.');
+      }
+    } catch {
+      setAddressError('Erro ao salvar. Tente novamente.');
+    } finally {
+      setAddressSaving(false);
+    }
+  }
+
+  async function handleDeleteAddress(id: string) {
+    if (!confirm('Tem certeza que deseja excluir este endereco?')) return;
+
+    try {
+      const response = await fetch(`/api/account/address/${id}`, { method: 'DELETE' });
+      const data = (await response.json()) as { success: boolean };
+
+      if (data.success) {
+        setAddressList((prev) => prev.filter((a) => a.id !== id));
+        setToast({ message: 'Endereco excluido.', type: 'success' });
+      }
+    } catch {
+      setToast({ message: 'Erro ao excluir endereco.', type: 'error' });
+    }
   }
 
   return (
-    <div className="grid gap-8">
-      <section className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
-        <div className="rounded-card border border-border-subtle bg-background-card p-6 md:grid md:grid-cols-[auto_1fr] md:gap-5">
-          <div className="grid gap-3 justify-items-center">
-            {avatarPreview ? (
-              <div className="relative">
-                <Image src={avatarPreview} alt={displayName || 'Perfil'} width={96} height={96} className="size-24 rounded-full object-cover ring-2 ring-cafe-orange-500/30" />
-                <label className="absolute bottom-0 right-0 grid size-8 cursor-pointer place-items-center rounded-full bg-cafe-orange-500 text-white shadow-lg transition hover:bg-cafe-orange-400">
-                  <span className="text-xs">📷</span>
-                  <input className="sr-only" type="file" accept="image/*" onChange={(event) => handleAvatarChange(event.target.files?.[0])} />
-                </label>
-              </div>
-            ) : (
-              <div className="relative">
-                <div className="grid size-24 place-items-center rounded-full bg-cafe-orange-500/10 text-3xl font-semibold text-cafe-orange-500 ring-2 ring-cafe-orange-500/30">
-                  {(displayName || user.email || 'U').slice(0, 1).toUpperCase()}
+    <>
+      {toast ? <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} /> : null}
+
+      <div className="grid gap-8">
+        {/* Profile card + Resumo da conta */}
+        <section className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="glass-card p-6 md:grid md:grid-cols-[auto_1fr] md:gap-5">
+            <div className="grid gap-3 justify-items-center">
+              {/* Avatar */}
+              {avatarPreview ? (
+                <div className="relative">
+                  <Image src={avatarPreview} alt={displayName || 'Perfil'} width={96} height={96} className="size-24 rounded-full object-cover ring-2 ring-brand/30" />
+                  <label className="absolute bottom-0 right-0 grid size-8 cursor-pointer place-items-center rounded-full bg-brand text-white shadow-lg transition hover:bg-brand/80">
+                    {avatarUploading ? (
+                      <span className="text-xs animate-pulse">...</span>
+                    ) : (
+                      <span className="text-xs">📷</span>
+                    )}
+                    <input
+                      className="sr-only"
+                      type="file"
+                      accept="image/*"
+                      disabled={avatarUploading}
+                      onChange={(event) => handleAvatarUpload(event.target.files?.[0])}
+                      aria-label="Alterar foto do perfil"
+                    />
+                  </label>
                 </div>
-                <label className="absolute bottom-0 right-0 grid size-8 cursor-pointer place-items-center rounded-full bg-cafe-orange-500 text-white shadow-lg transition hover:bg-cafe-orange-400">
-                  <span className="text-xs">📷</span>
-                  <input className="sr-only" type="file" accept="image/*" onChange={(event) => handleAvatarChange(event.target.files?.[0])} />
-                </label>
-              </div>
-            )}
-          </div>
-          <div className="grid gap-4">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <Badge>{level.label} 🏆</Badge>
-                <h2 className="mt-2 font-display text-2xl font-semibold text-text-primary">{displayName || 'Cliente Cafe Store'}</h2>
-                <p className="mt-1 text-sm text-text-muted">{user.email}</p>
-              </div>
-              <button type="button" className="btn-secondary px-4 py-2 text-sm">
-                Editar perfil
-              </button>
+              ) : (
+                <div className="relative">
+                  <div
+                    className="grid size-24 place-items-center rounded-full text-3xl font-bold ring-2 ring-white/10"
+                    style={{ backgroundColor: avatarBg, color: avatarText }}
+                  >
+                    {initials}
+                  </div>
+                  <label className="absolute bottom-0 right-0 grid size-8 cursor-pointer place-items-center rounded-full bg-brand text-white shadow-lg transition hover:bg-brand/80">
+                    {avatarUploading ? (
+                      <span className="text-xs animate-pulse">...</span>
+                    ) : (
+                      <span className="text-xs">📷</span>
+                    )}
+                    <input
+                      className="sr-only"
+                      type="file"
+                      accept="image/*"
+                      disabled={avatarUploading}
+                      onChange={(event) => handleAvatarUpload(event.target.files?.[0])}
+                      aria-label="Alterar foto do perfil"
+                    />
+                  </label>
+                </div>
+              )}
             </div>
-            <div className="grid gap-3 md:grid-cols-2">
-              <Input label="Nome completo" value={displayName} onChange={(event) => setDisplayName(event.target.value)} />
-              <Input label="Apelido" placeholder="Como quer aparecer na loja" />
-              <Input label="Telefone" value={phone} onChange={(event) => setPhone(maskPhone(event.target.value))} placeholder="(00) 00000-0000" />
-              <Input label="CPF" value={cpf} onChange={(event) => setCpf(maskCpf(event.target.value))} placeholder="000.000.000-00" />
-              <Input label="Data de nascimento" type="date" value={birthDate} onChange={(event) => setBirthDate(event.target.value)} />
-              <Input label="Cliente desde" value={user.createdAt ? new Date(user.createdAt).toLocaleDateString('pt-BR') : 'Conta nova'} readOnly />
-            </div>
-          </div>
-        </div>
 
-        <div className="rounded-card border border-border-subtle bg-background-card p-5">
-          <h2 className="font-display text-xl font-semibold text-text-primary">Dashboard pessoal</h2>
-          <div className="mt-4 grid grid-cols-2 gap-3">
-            <div className="rounded-lg bg-cafe-dark-700 p-3">
-              <p className="text-xs text-text-muted">Gasto histórico</p>
-              <p className="mt-1 text-lg font-bold text-text-primary">{currencyFormatter.format(totalSpent)}</p>
-            </div>
-            <div className="rounded-lg bg-cafe-dark-700 p-3">
-              <p className="text-xs text-text-muted">Mês atual</p>
-              <p className="mt-1 text-lg font-bold text-text-primary">{currencyFormatter.format(currentMonthSpent)}</p>
-            </div>
-            <div className="rounded-lg bg-cafe-dark-700 p-3">
-              <p className="text-xs text-text-muted">Produto favorito</p>
-              <p className="mt-1 text-sm font-semibold text-text-primary">Camiseta CAFÉ</p>
-            </div>
-            <div className="rounded-lg bg-cafe-dark-700 p-3">
-              <p className="text-xs text-text-muted">Categoria</p>
-              <p className="mt-1 text-sm font-semibold text-text-primary">Camisetas</p>
-            </div>
-          </div>
-          <p className="mt-3 text-sm text-cafe-orange-500">Você está no top 10% dos clientes mais fiéis.</p>
-          <div className="mt-3 grid gap-2">
-            <div className="h-2 overflow-hidden rounded-full bg-cafe-dark-700">
-              <div className="h-full rounded-full bg-cafe-orange-500 transition-all" style={{ width: `${levelProgress}%` }} />
-            </div>
-            <p className="text-xs text-text-muted">Faltam {currencyFormatter.format(Math.max(0, level.next - totalSpent))} para o próximo nível.</p>
-          </div>
-        </div>
-      </section>
+            <div className="grid gap-4">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="font-display text-2xl font-semibold text-white">{displayName || 'Cliente'}</h2>
+                    <span
+                      className={cn('inline-flex items-center gap-1.5 rounded-full border border-brand/30 bg-brand/15 px-3 py-1 text-xs font-medium shadow-[0_0_10px_rgba(249,115,22,0.2)] animate-pulse-led')}
+                      title={
+                        orders.length >= 15
+                          ? 'Parabéns! Você atingiu o nível máximo!'
+                          : `Faça ${15 - orders.length} pedido(s) para atingir Premium`
+                      }
+                    >
+                      {level.icon} {level.label}
+                    </span>
+                  </div>
+                  <p className="mt-0.5 text-sm text-zinc-500">{user.email}</p>
+                </div>
+              </div>
 
-      <section className="grid gap-5 lg:grid-cols-2">
-        <div className="card grid gap-5 p-5">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="font-display text-2xl font-semibold text-text-primary">Enderecos</h2>
-            <button className="btn-secondary px-4 py-2 text-sm" type="button">+ Adicionar novo endereco</button>
+              {/* Form */}
+              <div className="grid gap-3 md:grid-cols-2">
+                <div>
+                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                    Nome completo <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    className="w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-sm text-white placeholder:text-zinc-600 transition-colors focus:border-brand/60 focus:outline-none focus:shadow-[0_0_0_3px_rgba(249,115,22,0.1)]"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    placeholder="Seu nome"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                    Telefone
+                  </label>
+                  <input
+                    className={cn(
+                      'w-full rounded-xl border px-4 py-2.5 text-sm text-white placeholder:text-zinc-600 transition-colors focus:outline-none focus:shadow-[0_0_0_3px_rgba(249,115,22,0.1)]',
+                      profileError && profileError.includes('Telefone')
+                        ? 'border-red-500 focus:border-red-500'
+                        : 'border-zinc-700 bg-zinc-800/50 focus:border-brand/60',
+                    )}
+                    value={phone}
+                    onChange={(e) => setPhone(maskPhone(e.target.value))}
+                    placeholder="(00) 00000-0000"
+                  />
+                  {profileError && profileError.includes('Telefone') ? (
+                    <p className="mt-1 text-xs text-red-400">{profileError}</p>
+                  ) : null}
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                    Cliente desde
+                  </label>
+                  <p className="rounded-xl border border-zinc-800 bg-zinc-900/30 px-4 py-2.5 text-sm text-zinc-400">
+                    {user.createdAt ? new Date(user.createdAt).toLocaleDateString('pt-BR') : 'Conta nova'}
+                  </p>
+                </div>
+              </div>
+
+              {profileMessage && !profileMessage.includes('sucesso') ? (
+                <p className="text-sm text-red-400">{profileMessage}</p>
+              ) : null}
+
+              <div className="flex items-center gap-3">
+                <Button
+                  disabled={profileSaving}
+                  onClick={handleSaveProfile}
+                  className="shadow-led-brand hover:shadow-[0_0_20px_4px_#F9731670,0_0_50px_8px_#F9731630]"
+                >
+                  {profileSaving ? (
+                    <span className="flex items-center gap-2">
+                      <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" /></svg>
+                      Salvando...
+                    </span>
+                  ) : 'Salvar perfil'}
+                </Button>
+              </div>
+              <p className="mt-1 text-[11px] text-zinc-600">* Campos obrigatorios</p>
+            </div>
           </div>
-          <div className="grid gap-3 md:grid-cols-2">
-            <Input label="CEP" placeholder="00000-000" />
-            <Input label="Label" placeholder="Casa, Trabalho..." />
-            <Input label="Rua" placeholder="Auto-preenchida pelo CEP" />
-            <Input label="Numero" placeholder="123" />
-            <Input label="Complemento" placeholder="Apto, bloco..." />
-            <Input label="Bairro" placeholder="Auto-preenchido" />
-            <Input label="Cidade" placeholder="Auto-preenchida" />
-            <Input label="Estado" placeholder="UF" maxLength={2} />
+
+          {/* Summary cards */}
+          <div className="glass-card p-5">
+            <h2 className="font-display text-xl font-semibold text-white">Resumo da conta</h2>
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <Link
+                href="/orders"
+                className="group rounded-xl bg-white/[0.04] p-3 transition-all duration-300 hover:border-brand/30 hover:shadow-led-brand/30 border border-glass-border"
+              >
+                <p className="text-xs text-zinc-500">Total de pedidos</p>
+                <div className="mt-1 flex items-center justify-between">
+                  <p className="text-lg font-bold text-white transition-colors duration-200 group-hover:text-brand">{orders.length}</p>
+                  <span className="text-zinc-600 transition-transform group-hover:translate-x-0.5">→</span>
+                </div>
+              </Link>
+              <Link
+                href="/profile?section=enderecos"
+                className="group rounded-xl bg-white/[0.04] p-3 transition-all duration-300 hover:border-brand/30 hover:shadow-led-brand/30 border border-glass-border"
+              >
+                <p className="text-xs text-zinc-500">Enderecos salvos</p>
+                <div className="mt-1 flex items-center justify-between">
+                  <p className="text-lg font-bold text-white transition-colors duration-200 group-hover:text-brand">{addressList.length}</p>
+                  <span className="text-zinc-600 transition-transform group-hover:translate-x-0.5">→</span>
+                </div>
+              </Link>
+              <Link
+                href="/profile?section=favoritos"
+                className="group rounded-xl bg-white/[0.04] p-3 transition-all duration-300 hover:border-brand/30 hover:shadow-led-brand/30 border border-glass-border"
+              >
+                <p className="text-xs text-zinc-500">Favoritos</p>
+                <div className="mt-1 flex items-center justify-between">
+                  <p className="text-lg font-bold text-white transition-colors duration-200 group-hover:text-brand">{wishlist.length}</p>
+                  <span className="text-zinc-600 transition-transform group-hover:translate-x-0.5">→</span>
+                </div>
+              </Link>
+              <Link
+                href="/profile?section=cupons"
+                className="group rounded-xl bg-white/[0.04] p-3 transition-all duration-300 hover:border-brand/30 hover:shadow-led-brand/30 border border-glass-border"
+              >
+                <p className="text-xs text-zinc-500">Cupons disponiveis</p>
+                <div className="mt-1 flex items-center justify-between">
+                  <p className="text-lg font-bold text-white transition-colors duration-200 group-hover:text-brand">{activeCoupons}</p>
+                  <span className="text-zinc-600 transition-transform group-hover:translate-x-0.5">→</span>
+                </div>
+              </Link>
+            </div>
           </div>
-          <div className="grid gap-3">
-            {addresses.length > 0 ? (
-              addresses.map((address) => (
-                <article key={address.id} className="rounded-xl border border-white/10 p-4 text-sm text-text-secondary">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="font-semibold text-text-primary">
-                        {address.isDefault ? '★ ' : null}
-                        {address.label ?? 'Endereco'}
+        </section>
+
+        {/* Ultimos pedidos */}
+        {recentOrders.length > 0 ? (
+          <section className="glass-card p-5">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="font-display text-xl font-semibold text-white">Ultimos pedidos</h2>
+              <Link href="/orders" className="text-sm font-medium text-brand transition hover:brightness-110">
+                Ver todos →
+              </Link>
+            </div>
+            <div className="grid gap-3">
+              {recentOrders.map((order) => {
+                const thumb = order.productImages[0];
+                return (
+                  <Link
+                    key={order.id}
+                    href={`/orders/${order.id}`}
+                    className="flex items-center gap-4 rounded-xl border border-zinc-800 bg-zinc-900/30 p-4 transition-all duration-200 hover:border-brand/20 hover:bg-zinc-900/60"
+                  >
+                    {thumb ? (
+                      <Image
+                        src={thumb}
+                        alt=""
+                        width={48}
+                        height={48}
+                        className="size-12 shrink-0 rounded-lg object-cover"
+                      />
+                    ) : (
+                      <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-zinc-800 text-xs text-zinc-600">
+                        N/A
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="truncate font-mono text-sm text-white">#{order.id.slice(0, 8)}</p>
+                        <StatusBadge status={order.status} />
+                      </div>
+                      <p className="mt-1 text-xs text-zinc-500">
+                        {new Date(order.createdAt).toLocaleDateString('pt-BR')} · {order.itemCount} item(ns) · {currencyFormatter.format(order.total)}
                       </p>
-                      <p className="mt-2">{address.street}, {address.number} - {address.neighborhood}</p>
-                      <p>{address.city}/{address.state} - {address.zip}</p>
                     </div>
-                    <div className="flex gap-2">
-                      <button className="text-accent-glow" type="button">Editar</button>
-                      <button className="text-status-error" type="button">Deletar</button>
-                    </div>
-                  </div>
-                  <div className="mt-3 grid h-24 place-items-center rounded-xl bg-gradient-to-br from-background-surface to-background-card text-xs text-text-muted">
-                    Mapa miniatura: pin em {address.city}
-                  </div>
-                </article>
-              ))
-            ) : (
-              <article className="rounded-xl border border-white/10 p-4 text-sm text-text-secondary">
-                <p className="font-semibold text-text-primary">Casa ★</p>
-                <p className="mt-2">Cadastre seu primeiro endereco para agilizar o checkout.</p>
-                <div className="mt-3 grid h-24 place-items-center rounded-xl bg-gradient-to-br from-background-surface to-background-card text-xs text-text-muted">
-                  Mapa miniatura aparece depois do CEP.
-                </div>
-              </article>
-            )}
-          </div>
-        </div>
+                    <span className="shrink-0 text-sm text-zinc-600">→</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+        ) : (
+          <section className="glass-card p-8 text-center">
+            <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-zinc-800/50">
+              <Package className="size-7 text-zinc-600" />
+            </div>
+            <p className="text-sm text-zinc-500">Nenhum pedido realizado ainda.</p>
+            <p className="mt-1 text-xs text-zinc-600">Seus pedidos aparecerão aqui depois da primeira compra.</p>
+            <Link href="/products" className="mt-4 inline-flex h-10 items-center rounded-xl bg-brand px-6 text-sm font-bold text-white shadow-[0_0_16px_rgba(249,115,22,0.3)] transition hover:brightness-110">
+              Explorar produtos
+            </Link>
+          </section>
+        )}
 
-        <div className="card grid gap-5 p-5">
-          <h2 className="font-display text-2xl font-semibold text-text-primary">Seguranca</h2>
-          <div className="grid gap-3">
-            <Input label="Senha atual" type="password" />
-            <Input label="Nova senha" type="password" />
-            <Input label="Confirmar nova senha" type="password" />
-            <button className="btn-secondary w-fit px-4 py-2 text-sm" type="button">Trocar senha</button>
-          </div>
-          <label className="flex items-center justify-between rounded-xl border border-white/10 p-3 text-sm text-text-secondary">
-            Autenticacao em dois fatores
-            <input type="checkbox" checked={twoFactor} onChange={(event) => setTwoFactor(event.target.checked)} />
-          </label>
-          <div className="grid gap-3 text-sm text-text-secondary">
-            <p className="font-semibold text-text-primary">Sessoes ativas</p>
-            {['Chrome no Windows - Sao Paulo', 'Safari no iPhone - Campinas'].map((session) => (
-              <div key={session} className="flex justify-between gap-3 rounded-xl bg-background-surface p-3">
-                <span>{session}</span>
-                <button className="text-status-error" type="button">Encerrar</button>
-              </div>
-            ))}
-            <button className="btn-ghost w-fit px-4 py-2 text-sm" type="button">Encerrar todas as sessoes</button>
-          </div>
-          <div className="grid gap-2 text-xs text-text-muted">
-            <p>Historico: hoje 09:42 Sao Paulo, ontem 21:10 dispositivo conhecido.</p>
-            <p>Alertas de novo dispositivo ficam ativos por email automaticamente.</p>
-          </div>
-        </div>
-      </section>
-
-      <section className="card grid gap-5 p-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-display text-2xl font-semibold text-text-primary">Historico de pedidos</h2>
-          <div className="flex flex-wrap gap-2">
-            <select className="input-field w-auto" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as typeof statusFilter)}>
-              {statusFilters.map((status) => (
-                <option key={status} value={status}>{status === 'Todos' ? 'Todos' : status}</option>
-              ))}
-            </select>
-            <select className="input-field w-auto" value={periodFilter} onChange={(event) => setPeriodFilter(event.target.value)}>
-              <option value="30d">30 dias</option>
-              <option value="90d">90 dias</option>
-              <option value="all">Todo periodo</option>
-            </select>
-          </div>
-        </div>
-        <div className="grid gap-3">
-          {filteredOrders.map((order) => (
-            <article key={order.id} className="grid gap-4 rounded-xl border border-white/10 p-4 md:grid-cols-[1fr_auto]">
-              <div className="grid gap-2">
-                <div className="flex flex-wrap items-center gap-3">
-                  <p className="font-mono text-sm text-text-primary">Pedido {order.id}</p>
-                  <StatusBadge status={order.status} />
-                </div>
-                <p className="text-sm text-text-secondary">
-                  {new Date(order.createdAt).toLocaleDateString('pt-BR')} · {order.itemCount} itens · {currencyFormatter.format(order.total)}
-                </p>
-                <p className="text-xs text-text-muted">Itens resumidos: produtos oficiais CAFÉ Store.</p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <Link href={`/orders/${order.id}`} className="btn-secondary px-4 py-2 text-sm">Rastrear</Link>
-                <button className="btn-ghost px-4 py-2 text-sm" type="button" onClick={() => handleBuyAgain(order)}>Comprar novamente</button>
-                {order.status === 'DELIVERED' ? <button className="btn-ghost px-4 py-2 text-sm" type="button">Avaliar produtos</button> : null}
-                <button className="btn-ghost px-4 py-2 text-sm" type="button">Nota fiscal</button>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
-        <div className="card grid gap-5 p-5">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="font-display text-2xl font-semibold text-text-primary">Lista de desejos</h2>
-            <button className="btn-secondary px-4 py-2 text-sm" type="button">Compartilhar lista</button>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {['Quero comprar', 'Presentes', 'Comparando'].map((list) => <Badge key={list} variant="muted">{list}</Badge>)}
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {visibleWishlist.map((item, index) => (
-              <article key={item.id} className="rounded-xl border border-white/10 p-3">
-                <Link href={`/products/${item.product.slug}`} className="relative block aspect-square overflow-hidden rounded-xl bg-background-surface">
-                  <Image src={item.product.images[0] ?? '/placeholder-product.svg'} alt={item.product.name} fill sizes="180px" className="object-cover" />
-                </Link>
-                <p className="mt-3 text-sm font-semibold text-text-primary">{item.product.name}</p>
-                <p className="mt-1 text-sm text-accent-glow">{currencyFormatter.format(item.product.price)}</p>
-                {index === 0 ? <p className="mt-1 text-xs text-status-success">Baixou R$ 20 desde que voce favoritou.</p> : null}
-                <button className="btn-secondary mt-3 w-full px-4 py-2 text-sm" type="button" onClick={() => handleAddWishlistToCart(item)}>
-                  Adicionar ao carrinho
+        {/* Enderecos + Segurança */}
+        <section className="grid gap-5 lg:grid-cols-2">
+          <div className="glass-card p-5">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="font-display text-xl font-semibold text-white">Enderecos</h2>
+              {!showAddressForm ? (
+                <button className="rounded-xl border border-brand/30 px-3 py-1.5 text-xs font-semibold text-brand transition hover:bg-brand/10" type="button" onClick={() => { setShowAddressForm(true); setEditingAddressId(null); setAddressForm(emptyAddressForm); setAddressError(null); }}>
+                  + Novo
                 </button>
-              </article>
-            ))}
-          </div>
-        </div>
+              ) : null}
+            </div>
 
-        <div className="grid gap-5">
-          <section className="card grid gap-4 p-5">
-            <h2 className="font-display text-2xl font-semibold text-text-primary">Pagamentos salvos</h2>
-            {['Visa final 4242 · padrao', 'Mastercard final 1881'].map((card) => (
-              <div key={card} className="flex justify-between gap-3 rounded-xl border border-white/10 p-3 text-sm text-text-secondary">
-                <span>{card}</span>
-                <button className="text-status-error" type="button">Remover</button>
+            {showAddressForm ? (
+              <div className="mt-4 grid gap-3 rounded-xl border border-zinc-700/50 bg-zinc-900/80 p-4">
+                <div className="grid gap-3 md:grid-cols-2">
+                  <div>
+                    <label className="mb-1.5 block text-xs font-medium text-zinc-500">Label</label>
+                    <input className="w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:border-brand/60 focus:outline-none" placeholder="Casa, Trabalho..." value={addressForm.label} onChange={(e) => setAddressForm((p) => ({ ...p, label: e.target.value }))} />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-medium text-zinc-500">CEP <span className="text-red-400">*</span></label>
+                    <input className="w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:border-brand/60 focus:outline-none" placeholder="00000-000" value={maskCep(addressForm.zip)} onChange={(e) => setAddressForm((p) => ({ ...p, zip: e.target.value }))} />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-medium text-zinc-500">Rua <span className="text-red-400">*</span></label>
+                    <input className="w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:border-brand/60 focus:outline-none" placeholder="Nome da rua" value={addressForm.street} onChange={(e) => setAddressForm((p) => ({ ...p, street: e.target.value }))} />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-medium text-zinc-500">Numero <span className="text-red-400">*</span></label>
+                    <input className="w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:border-brand/60 focus:outline-none" placeholder="123" value={addressForm.number} onChange={(e) => setAddressForm((p) => ({ ...p, number: e.target.value }))} />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-medium text-zinc-500">Complemento</label>
+                    <input className="w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:border-brand/60 focus:outline-none" placeholder="Apto, bloco..." value={addressForm.complement} onChange={(e) => setAddressForm((p) => ({ ...p, complement: e.target.value }))} />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-medium text-zinc-500">Bairro <span className="text-red-400">*</span></label>
+                    <input className="w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:border-brand/60 focus:outline-none" placeholder="Bairro" value={addressForm.neighborhood} onChange={(e) => setAddressForm((p) => ({ ...p, neighborhood: e.target.value }))} />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-medium text-zinc-500">Cidade <span className="text-red-400">*</span></label>
+                    <input className="w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:border-brand/60 focus:outline-none" placeholder="Cidade" value={addressForm.city} onChange={(e) => setAddressForm((p) => ({ ...p, city: e.target.value }))} />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-medium text-zinc-500">Estado <span className="text-red-400">*</span></label>
+                    <input className="w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:border-brand/60 focus:outline-none" placeholder="UF" maxLength={2} value={addressForm.state} onChange={(e) => setAddressForm((p) => ({ ...p, state: e.target.value }))} />
+                  </div>
+                </div>
+                <label className="flex items-center gap-2 text-sm text-zinc-400">
+                  <input type="checkbox" checked={addressForm.isDefault} onChange={(e) => setAddressForm((p) => ({ ...p, isDefault: e.target.checked }))} />
+                  Endereco padrao
+                </label>
+                {addressError ? <p className="text-sm text-red-400">{addressError}</p> : null}
+                <div className="flex gap-2">
+                  <Button disabled={addressSaving} onClick={handleSaveAddress}>
+                    {addressSaving ? (
+                      <span className="flex items-center gap-2">
+                        <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" /></svg>
+                        Salvando...
+                      </span>
+                    ) : editingAddressId ? 'Atualizar' : 'Adicionar'}
+                  </Button>
+                  <Button variant="ghost" onClick={resetForm}>Cancelar</Button>
+                </div>
               </div>
-            ))}
-            <Input label="Novo cartao" placeholder="Numero do cartao seguro" />
-            <p className="text-sm text-accent-glow">Voce tem R$ 45 de cashback disponivel.</p>
-          </section>
+            ) : null}
 
-          <section className="card grid gap-4 p-5">
-            <h2 className="font-display text-2xl font-semibold text-text-primary">Fidelidade</h2>
-            <p className="text-sm text-text-secondary">1.240 pontos acumulados. Beneficios: frete gratis acima de R$ 99, cupons antecipados e suporte prioritario.</p>
-            <div className="h-3 overflow-hidden rounded-full bg-background-surface">
-              <div className="h-full w-2/3 rounded-full bg-accent-primary" />
+            <div className="mt-4 grid gap-3">
+              {addressList.length > 0 ? (
+                addressList.map((address) => (
+                  <article key={address.id} className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-4 text-sm text-zinc-400">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="font-semibold text-white">
+                          {address.isDefault ? '★ ' : null}
+                          {address.label ?? 'Endereco'}
+                        </p>
+                        <p className="mt-1">{address.street}, {address.number} - {address.neighborhood}</p>
+                        <p>{address.city}/{address.state} - {address.zip}</p>
+                      </div>
+                      <div className="flex shrink-0 gap-2">
+                        <button className="text-xs font-medium text-brand transition hover:brightness-110" type="button" onClick={() => handleEditAddress(address)}>Editar</button>
+                        <button className="text-xs font-medium text-red-400 transition hover:brightness-110" type="button" onClick={() => handleDeleteAddress(address.id)}>Deletar</button>
+                      </div>
+                    </div>
+                  </article>
+                ))
+              ) : (
+                <article className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-4 text-sm text-zinc-500">
+                  <p className="font-medium text-zinc-400">Nenhum endereco cadastrado</p>
+                  <p className="mt-1">Adicione um endereco para agilizar o checkout.</p>
+                </article>
+              )}
             </div>
-            <div className="grid gap-2 text-xs text-text-muted">
-              <p>+120 pontos por compra entregue</p>
-              <p>-300 pontos usados em cupom</p>
-              <p>Cupom VIP20 valido ate 30/06/2026</p>
-            </div>
-          </section>
-        </div>
-      </section>
+          </div>
 
-      <section className="card grid gap-5 p-5">
-        <h2 className="font-display text-2xl font-semibold text-text-primary">Notificacoes e preferencias</h2>
-        <div className="grid gap-3 md:grid-cols-2">
-          {[
-            ['promoEmail', 'Email de promocoes'],
-            ['deliverySms', 'SMS de entrega'],
-            ['pushNews', 'Push de novidades'],
-            ['priceDrop', 'Alerta de favorito com preco baixo'],
-          ].map(([key, label]) => (
-            <label key={key} className="flex items-center justify-between rounded-xl border border-white/10 p-3 text-sm text-text-secondary">
-              {label}
-              <input
-                type="checkbox"
-                checked={Boolean(preferences[key as keyof typeof preferences])}
-                onChange={(event) => setPreferences((current) => ({ ...current, [key]: event.target.checked }))}
-              />
-            </label>
-          ))}
-        </div>
-        <div className="grid gap-3 md:grid-cols-2">
-          <label className="grid gap-2 text-sm text-text-secondary">
-            Frequencia de email
-            <select className="input-field" value={preferences.frequency} onChange={(event) => setPreferences((current) => ({ ...current, frequency: event.target.value }))}>
-              <option value="diario">Diario</option>
-              <option value="semanal">Semanal</option>
-              <option value="essencial">So o essencial</option>
-            </select>
-          </label>
-          <Input label="Categorias preferidas" placeholder="Camisetas, canecas, moletons" />
-        </div>
-      </section>
-    </div>
+          <div className="glass-card p-5">
+            <h2 className="font-display text-xl font-semibold text-white">Segurança</h2>
+            <div className="mt-4 grid gap-3">
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-500">Senha atual</label>
+                <input className="w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:border-brand/60 focus:outline-none" type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-500">Nova senha</label>
+                <input className="w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:border-brand/60 focus:outline-none" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-500">Confirmar nova senha</label>
+                <input className="w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:border-brand/60 focus:outline-none" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+              </div>
+              <div className="flex items-center gap-3">
+                <Button disabled={passwordSaving} onClick={handleChangePassword}>
+                  {passwordSaving ? (
+                    <span className="flex items-center gap-2">
+                      <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" /></svg>
+                      Alterando...
+                    </span>
+                  ) : 'Trocar senha'}
+                </Button>
+                {passwordMessage ? (
+                  <span className={passwordMessage.includes('sucesso') ? 'text-sm text-green-400' : 'text-sm text-red-400'}>
+                    {passwordMessage}
+                  </span>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Notificacoes */}
+        <section className="glass-card p-5">
+          <h2 className="font-display text-xl font-semibold text-white">Notificacoes</h2>
+          <p className="mt-2 text-sm leading-relaxed text-zinc-500">
+            As notificacoes serao enviadas para o email cadastrado: <strong className="text-zinc-300">{user.email}</strong>
+          </p>
+          <p className="mt-1 text-xs text-zinc-600">Em breve: preferencias de notificacao no perfil.</p>
+        </section>
+      </div>
+    </>
   );
 }

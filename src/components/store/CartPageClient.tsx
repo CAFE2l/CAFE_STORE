@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { QuantityStepper } from '@/components/ui/QuantityStepper';
 import { useCartStore } from '@/store/cart';
@@ -13,13 +13,7 @@ const currencyFormatter = new Intl.NumberFormat('pt-BR', {
   currency: 'BRL',
 });
 
-const freeShippingGoal = 299;
-const giftGoal = 220;
 const taxRate = 0;
-const coupons = {
-  CAFE15: { label: 'Cupom CAFE15 aplicado', value: 15 },
-  FIRE10: { label: 'Cupom FIRE10 aplicado', percent: 0.1 },
-};
 
 const deliveryOptions = [
   { id: 'normal', name: 'Normal', eta: '5 a 9 dias uteis', price: 18.9 },
@@ -51,10 +45,6 @@ const recommendations = [
   },
 ];
 
-function getItemSavings(item: CartItem) {
-  return item.price >= 100 ? 20 * item.quantity : 0;
-}
-
 function getStockWarning(item: CartItem) {
   if (!item.stock || item.stock > 3) return null;
   return item.stock === 1 ? 'so 1 resta!' : `so ${item.stock} restam!`;
@@ -78,42 +68,15 @@ export function CartPageClient() {
   const [zip, setZip] = useState('');
   const [shippingCalculated, setShippingCalculated] = useState(false);
   const [deliveryOption, setDeliveryOption] = useState<(typeof deliveryOptions)[number]['id']>('normal');
-  const [coupon, setCoupon] = useState('');
-  const [couponFeedback, setCouponFeedback] = useState<string | null>(null);
-  const [appliedCoupon, setAppliedCoupon] = useState<keyof typeof coupons | null>(null);
   const [savedForLater, setSavedForLater] = useState<CartItem[]>([]);
   const [isGift, setIsGift] = useState(false);
   const [sustainablePackage, setSustainablePackage] = useState(false);
 
   const selectedDelivery = deliveryOptions.find((option) => option.id === deliveryOption) ?? deliveryOptions[0];
-  const itemSavings = items.reduce((sum, item) => sum + getItemSavings(item), 0);
-  const couponDiscount = useMemo(() => {
-    if (!appliedCoupon) return 0;
-    const selectedCoupon = coupons[appliedCoupon];
-    return 'percent' in selectedCoupon ? total * selectedCoupon.percent : selectedCoupon.value;
-  }, [appliedCoupon, total]);
-  const discount = Math.min(total, couponDiscount);
-  const shipping = total >= freeShippingGoal ? 0 : shippingCalculated ? selectedDelivery.price : 0;
+  const shipping = shippingCalculated ? selectedDelivery.price : 0;
   const taxes = total * taxRate;
   const sustainableFee = sustainablePackage ? 2 : 0;
-  const finalTotal = Math.max(0, total - discount + shipping + taxes + sustainableFee);
-  const freeShippingRemaining = Math.max(0, freeShippingGoal - total);
-  const giftRemaining = Math.max(0, giftGoal - total);
-  const freeShippingProgress = Math.min(100, (total / freeShippingGoal) * 100);
-  const cashback = Math.floor(finalTotal / 5);
-
-  function handleApplyCoupon() {
-    const normalizedCoupon = coupon.trim().toUpperCase() as keyof typeof coupons;
-
-    if (normalizedCoupon in coupons) {
-      setAppliedCoupon(normalizedCoupon);
-      setCouponFeedback(coupons[normalizedCoupon].label);
-      return;
-    }
-
-    setAppliedCoupon(null);
-    setCouponFeedback('Cupom invalido ou expirado.');
-  }
+  const finalTotal = Math.max(0, total + shipping + taxes + sustainableFee);
 
   function handleCalculateShipping() {
     const cleanZip = zip.replace(/\D/g, '');
@@ -143,7 +106,7 @@ export function CartPageClient() {
     return (
       <EmptyState
         title="Seu carrinho esta vazio"
-        subtitle="Explore a vitrine e adicione produtos oficiais CAFÉ Store para continuar."
+        subtitle="Explore a vitrine e adicione produtos oficiais CAFÉ STORE para continuar."
         action={{ href: '/products', label: 'Ver produtos' }}
       />
     );
@@ -157,7 +120,6 @@ export function CartPageClient() {
             {items.map((item, index) => {
               const stockWarning = getStockWarning(item);
               const lineTotal = item.price * item.quantity;
-              const hasFreeShipping = item.price * item.quantity >= 120;
 
               return (
                   <article key={item.id} className="card grid gap-4 p-4 sm:grid-cols-[7rem_1fr] xl:grid-cols-[7rem_1fr_auto]">
@@ -167,7 +129,6 @@ export function CartPageClient() {
                   <div className="grid content-start gap-2">
                     <div className="flex flex-wrap gap-2">
                       {index === 0 ? <span className="badge-amber text-[10px]">Mais vendido</span> : null}
-                      {hasFreeShipping ? <span className="inline-flex rounded-badge bg-cafe-orange-500/15 px-2 py-0.5 text-[10px] font-medium text-cafe-orange-500 ring-1 ring-cafe-orange-500/30">Frete grátis</span> : null}
                       {stockWarning ? <span className="inline-flex rounded-badge bg-cafe-red-500/15 px-2 py-0.5 text-[10px] font-semibold text-cafe-red-500">{stockWarning}</span> : null}
                     </div>
                     <Link href={`/products/${item.slug}`} className="font-semibold text-text-primary transition hover:text-cafe-orange-500">
@@ -216,31 +177,6 @@ export function CartPageClient() {
         )}
 
         <section className="grid gap-4 rounded-card border border-border-subtle bg-background-card p-5">
-          <div>
-            <h2 className="font-display text-xl font-semibold text-text-primary">Cupons e benefícios</h2>
-            <p className="mt-1 text-sm text-text-muted">Sugestão: use CAFE15 para economizar R$ 15.</p>
-          </div>
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <input
-              className="input-field flex-1"
-              placeholder="Digite seu cupom"
-              value={coupon}
-              onChange={(event) => setCoupon(event.target.value)}
-            />
-            <button type="button" className="btn-secondary" onClick={handleApplyCoupon}>
-              Aplicar
-            </button>
-          </div>
-          {couponFeedback ? (
-            <p className={appliedCoupon ? 'rounded-lg bg-status-success/10 px-3 py-2 text-sm text-status-success' : 'rounded-lg bg-cafe-red-500/10 px-3 py-2 text-sm text-cafe-red-500'}>{couponFeedback}</p>
-          ) : null}
-          <div className="grid gap-2 text-sm text-text-secondary md:grid-cols-2">
-            <p className="flex items-center gap-1">🪙 Você vai ganhar {cashback} R-Coins</p>
-            <p className="flex items-center gap-1">{giftRemaining > 0 ? `🎁 Adicione ${currencyFormatter.format(giftRemaining)} e ganhe um brinde.` : '🎁 Brinde liberado para este pedido.'}</p>
-          </div>
-        </section>
-
-        <section className="grid gap-4 rounded-card border border-border-subtle bg-background-card p-5">
           <h2 className="font-display text-xl font-semibold text-text-primary">Entrega e presente</h2>
           <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
             <input
@@ -276,7 +212,7 @@ export function CartPageClient() {
                     </span>
                   </span>
                   <span className="font-semibold text-text-primary">
-                    {option.price === 0 || total >= freeShippingGoal ? 'Grátis' : currencyFormatter.format(option.price)}
+                    {option.price === 0 ? 'Grátis' : currencyFormatter.format(option.price)}
                   </span>
                 </label>
               ))}
@@ -348,24 +284,10 @@ export function CartPageClient() {
       <aside className="sticky top-28 h-fit rounded-card border border-border-subtle bg-background-card p-5">
         <h2 className="font-display text-xl font-semibold text-text-primary">Resumo do pedido</h2>
         <div className="mt-5 grid gap-3">
-          <div className="grid gap-2">
-            <div className="h-2 overflow-hidden rounded-full bg-cafe-dark-700">
-              <div className="h-full rounded-full bg-cafe-orange-500 transition-all duration-500" style={{ width: `${freeShippingProgress}%` }} />
-            </div>
-            <p className="text-xs text-text-muted">
-              {freeShippingRemaining > 0
-                ? `Falta ${currencyFormatter.format(freeShippingRemaining)} para frete grátis`
-                : '🎉 Frete grátis desbloqueado!'}
-            </p>
-          </div>
           <dl className="grid gap-2 text-sm">
             <div className="flex justify-between gap-4 text-text-secondary">
               <dt>Subtotal</dt>
               <dd>{currencyFormatter.format(total)}</dd>
-            </div>
-            <div className="flex justify-between gap-4 text-status-success">
-              <dt>Desconto</dt>
-              <dd>-{currencyFormatter.format(discount)}</dd>
             </div>
             <div className="flex justify-between gap-4 text-text-secondary">
               <dt>Frete</dt>
@@ -388,7 +310,6 @@ export function CartPageClient() {
           </dl>
           <div className="grid gap-1 text-sm text-text-muted">
             <p>ou 10x de {currencyFormatter.format(finalTotal / 10)}</p>
-            <p className="text-status-success">Economizando {currencyFormatter.format(discount + itemSavings)}</p>
           </div>
           <Link href="/checkout" className="btn-primary mt-2 w-full h-12 text-base">
             Finalizar compra

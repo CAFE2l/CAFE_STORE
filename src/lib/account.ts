@@ -8,6 +8,7 @@ export type AccountOrderListItem = {
   paymentMethod: string;
   createdAt: Date;
   itemCount: number;
+  productImages: string[];
 };
 
 export type AccountOrderDetail = AccountOrderListItem & {
@@ -86,6 +87,11 @@ export async function getUserOrders(userId: string): Promise<AccountOrderListIte
       items: {
         select: {
           quantity: true,
+          product: {
+            select: {
+              images: true,
+            },
+          },
         },
       },
     },
@@ -98,6 +104,9 @@ export async function getUserOrders(userId: string): Promise<AccountOrderListIte
     paymentMethod: order.paymentMethod,
     createdAt: order.createdAt,
     itemCount: order.items.reduce((sum, item) => sum + item.quantity, 0),
+    productImages: order.items
+      .flatMap((item) => item.product.images)
+      .filter((img): img is string => !!img),
   }));
 }
 
@@ -151,6 +160,9 @@ export async function getUserOrderById(userId: string, orderId: string): Promise
     address: order.address,
     createdAt: order.createdAt,
     itemCount: order.items.reduce((sum, item) => sum + item.quantity, 0),
+    productImages: order.items
+      .flatMap((item) => item.product.images)
+      .filter((img): img is string => !!img),
     items: order.items.map((item) => ({
       ...item,
       price: item.price.toNumber(),

@@ -6,7 +6,7 @@ import { getAdminDashboard } from '@/lib/admin';
 
 export const metadata: Metadata = {
   title: 'Dashboard | CAFÉ Admin',
-  description: 'Dashboard administrativo da CAFÉ Store.',
+  description: 'Dashboard administrativo da CAFÉ STORE.',
 };
 
 export const dynamic = 'force-dynamic';

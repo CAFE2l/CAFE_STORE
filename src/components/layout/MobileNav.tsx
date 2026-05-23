@@ -15,7 +15,7 @@ export function MobileNav({ navItems }: MobileNavProps) {
     <>
       <button
         type="button"
-        className="grid size-10 place-items-center rounded-button text-text-secondary transition hover:bg-white/10 hover:text-text-primary md:hidden"
+        className="grid size-10 place-items-center rounded-lg text-zinc-400 transition hover:bg-surface-3 hover:text-white md:hidden"
         aria-label="Abrir menu"
         onClick={() => setOpen(true)}
       >
@@ -28,15 +28,15 @@ export function MobileNav({ navItems }: MobileNavProps) {
             className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in"
             onClick={() => setOpen(false)}
           />
-          <div className="absolute left-0 top-0 h-full w-72 animate-slide-up bg-cafe-dark-900 p-6 shadow-2xl">
+          <div className="absolute left-0 top-0 h-full w-72 animate-slide-up bg-surface-1 p-6 shadow-2xl">
             <div className="mb-6 flex items-center justify-between">
               <span className="flex items-center gap-2 font-display text-lg font-bold">
-                <Flame className="h-5 w-5 text-cafe-orange-500" />
-                <span className="text-gradient-fire">CAFÉ Store</span>
+                <Flame className="h-5 w-5 text-brand" />
+                <span className="text-gradient-fire">CAFÉ STORE</span>
               </span>
               <button
                 type="button"
-                className="grid size-8 place-items-center rounded-button text-text-muted transition hover:text-text-primary"
+                className="grid size-8 place-items-center rounded-lg text-zinc-500 transition hover:text-white"
                 aria-label="Fechar menu"
                 onClick={() => setOpen(false)}
               >
@@ -48,7 +48,7 @@ export function MobileNav({ navItems }: MobileNavProps) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="rounded-button px-4 py-3 text-sm font-medium text-text-secondary transition hover:bg-white/5 hover:text-text-primary"
+                  className="rounded-lg px-4 py-3 text-sm font-medium text-zinc-400 transition hover:bg-surface-3 hover:text-white"
                   onClick={() => setOpen(false)}
                 >
                   {item.label}

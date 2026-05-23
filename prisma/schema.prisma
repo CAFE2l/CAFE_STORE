@@ -18,6 +18,7 @@ model User {
   role          Role       @default(CUSTOMER)
   cpf           String?    @unique
   phone         String?
+  cart          Json?
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
   accounts      Account[]
@@ -99,6 +100,8 @@ model Order {
   total         Decimal     @db.Decimal(10, 2)
   paymentMethod String
   paymentId     String?
+  couponCode    String?
+  couponDiscount Decimal?   @db.Decimal(10, 2)
   phone         String
   address       Json
   items         OrderItem[]
@@ -172,4 +175,28 @@ enum ProductStatus {
   ACTIVE
   INACTIVE
   OUT_OF_STOCK
+}
+
+model Coupon {
+  id         String   @id @default(cuid())
+  code       String   @unique
+  discount   Decimal  @db.Decimal(10, 2)
+  type       String   @default("PERCENTAGE")
+  minAmount  Decimal? @db.Decimal(10, 2)
+  maxUses    Int      @default(0)
+  usedCount  Int      @default(0)
+  expiresAt  DateTime?
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+}
+
+model Banner {
+  id        String   @id @default(cuid())
+  title     String
+  subtitle  String?
+  imageUrl  String
+  linkUrl   String?
+  position  Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
 }

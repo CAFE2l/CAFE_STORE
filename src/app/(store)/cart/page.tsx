@@ -3,7 +3,7 @@ import { CartPageClient } from '@/components/store/CartPageClient';
 
 export const metadata: Metadata = {
   title: 'Carrinho | Cafe Store',
-  description: 'Carrinho de compras da CAFÉ Store com frete, cupons, upsells e checkout rapido.',
+  description: 'Carrinho de compras da CAFÉ STORE com frete, cupons, upsells e checkout rapido.',
 };
 
 export default function CartPage() {

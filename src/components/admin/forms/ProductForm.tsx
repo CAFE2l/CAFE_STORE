@@ -13,7 +13,6 @@ type ProductFormValue = {
   slug: string;
   description?: string | null;
   price: number;
-  oldPrice?: number | null;
   stock: number;
   images: string[];
   categoryId: string;
@@ -59,7 +58,6 @@ export function ProductForm({ categories, product }: ProductFormProps) {
       slug,
       description: String(formData.get('description') ?? ''),
       price: Number(formData.get('price')),
-      oldPrice: formData.get('oldPrice') ? Number(formData.get('oldPrice')) : null,
       stock: Number(formData.get('stock')),
       images,
       categoryId: String(formData.get('categoryId') ?? ''),

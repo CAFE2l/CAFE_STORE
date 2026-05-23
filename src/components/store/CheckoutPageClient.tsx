@@ -16,7 +16,11 @@ type CheckoutResponse = {
     pix?: {
       payload: string;
       qrCodeUrl: string;
+      key?: string;
+      keyQrCodeUrl?: string;
     };
+    mpInitPoint?: string;
+    paypalApprovalUrl?: string;
   };
   error?: string;
 };
@@ -33,6 +37,7 @@ type CheckoutForm = {
   state: string;
   zip: string;
   paymentMethod: 'pix' | 'mercadopago' | 'paypal';
+  couponCode: string;
 };
 
 const initialForm: CheckoutForm = {
@@ -47,6 +52,7 @@ const initialForm: CheckoutForm = {
   state: '',
   zip: '',
   paymentMethod: 'pix',
+  couponCode: '',
 };
 
 const currencyFormatter = new Intl.NumberFormat('pt-BR', {
@@ -125,6 +131,7 @@ export function CheckoutPageClient() {
           zip: form.zip,
         },
         paymentMethod: form.paymentMethod,
+        couponCode: form.couponCode || undefined,
         items: items.map((item) => ({
           productId: item.productId,
           quantity: item.quantity,
@@ -141,6 +148,17 @@ export function CheckoutPageClient() {
     }
 
     clearCart();
+
+    if (result.data.paymentMethod === 'mercadopago' && result.data.mpInitPoint) {
+      window.location.href = result.data.mpInitPoint;
+      return;
+    }
+
+    if (result.data.paymentMethod === 'paypal' && result.data.paypalApprovalUrl) {
+      window.location.href = result.data.paypalApprovalUrl;
+      return;
+    }
+
     const params = new URLSearchParams({
       orderId: result.data.orderId,
       method: result.data.paymentMethod,
@@ -149,6 +167,8 @@ export function CheckoutPageClient() {
     if (result.data.pix?.payload) {
       params.set('pix', result.data.pix.payload);
       params.set('qr', result.data.pix.qrCodeUrl);
+      if (result.data.pix.key) params.set('pixKey', result.data.pix.key);
+      if (result.data.pix.keyQrCodeUrl) params.set('pixKeyQr', result.data.pix.keyQrCodeUrl);
     }
 
     router.push(`/checkout/confirmation?${params.toString()}`);
@@ -330,6 +350,14 @@ export function CheckoutPageClient() {
               <p className="text-sm text-text-secondary">{currencyFormatter.format(item.price * item.quantity)}</p>
             </div>
           ))}
+        </div>
+        <div className="mt-4 flex gap-2">
+          <input
+            className="flex-1 rounded-xl border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-white placeholder:text-zinc-600 transition-colors focus:border-brand/60 focus:outline-none"
+            placeholder="Cupom de desconto"
+            value={form.couponCode}
+            onChange={(e) => updateForm('couponCode', e.target.value.toUpperCase())}
+          />
         </div>
         <dl className="mt-4 grid gap-2 border-t border-border-subtle pt-4 text-sm">
           <div className="flex justify-between text-text-secondary">

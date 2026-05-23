@@ -2,10 +2,10 @@ import { Flame } from 'lucide-react';
 
 export function AnnouncementBar() {
   return (
-    <div className="gradient-fire relative overflow-hidden px-4 py-2 text-center text-xs font-medium text-white sm:text-sm">
+    <div className="relative w-full border-b border-brand/20 bg-gradient-to-r from-brand/10 via-brand/20 to-brand/10 py-2.5 text-center text-sm font-medium tracking-wide text-brand/90">
       <div className="flex items-center justify-center gap-2">
-        <Flame className="h-4 w-4 shrink-0" />
-        <span className="truncate">FRETE GRÁTIS acima de R$ 150 | Use o cupom CAFE10</span>
+        <Flame className="h-4 w-4 shrink-0 text-brand animate-pulse-led" />
+        <span>CAFÉ STORE — Produtos digitais para quem vive o digital</span>
       </div>
     </div>
   );

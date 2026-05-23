@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { ShoppingBag } from 'lucide-react';
 import { useCartStore } from '@/store/cart';
+import { cn } from '@/lib/utils';
 
 export function CartCount() {
   const count = useCartStore((state) => state.count);
@@ -16,11 +17,16 @@ export function CartCount() {
   return (
     <Link
       href="/cart"
-      className="relative grid size-9 place-items-center rounded-button text-text-muted transition hover:bg-white/5 hover:text-text-primary"
+      className="relative cursor-pointer text-zinc-400 transition-colors duration-200 hover:text-white"
       aria-label="Abrir carrinho"
     >
       <ShoppingBag className="h-5 w-5" />
-      <span className="absolute -right-1 -top-1 flex min-w-[18px] items-center justify-center rounded-full bg-cafe-red-500 px-1 text-[10px] font-bold leading-4 text-white">
+      <span
+        className={cn(
+          'absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-brand text-[10px] font-bold text-white shadow-glow-sm',
+          (mounted ? count : 0) > 0 ? 'animate-pulse-led' : 'animate-bounce-badge',
+        )}
+      >
         {mounted ? count : 0}
       </span>
     </Link>

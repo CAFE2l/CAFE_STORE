@@ -18,7 +18,10 @@ type AuthMenuProps = {
 export function AuthMenu({ user }: AuthMenuProps) {
   if (!user) {
     return (
-      <Link href="/login" className="btn-primary h-9 px-4 text-sm">
+      <Link
+        href="/login"
+        className="glass-button bg-brand hover:bg-brand-light text-white shadow-led-brand hover:shadow-[0_0_20px_4px_#F9731670,0_0_50px_8px_#F9731630] px-4 py-2 text-sm"
+      >
         Entrar
       </Link>
     );
@@ -28,7 +31,7 @@ export function AuthMenu({ user }: AuthMenuProps) {
     <div className="flex items-center gap-2">
       <Link
         href="/profile"
-        className="flex items-center gap-2 rounded-button border border-border-subtle px-2.5 py-1.5 text-sm text-text-secondary transition hover:border-cafe-orange-500/40 hover:text-text-primary"
+        className="flex cursor-pointer items-center gap-2 rounded-xl border border-glass-border bg-white/[0.04] backdrop-blur-sm px-3 py-1.5 text-sm transition-all duration-200 hover:border-brand/40 hover:bg-white/[0.08]"
       >
         {user.image ? (
           <Image
@@ -39,15 +42,15 @@ export function AuthMenu({ user }: AuthMenuProps) {
             className="rounded-full"
           />
         ) : (
-          <span className="flex size-6 items-center justify-center rounded-full bg-cafe-orange-500/15 text-[10px] font-semibold text-cafe-orange-500">
+          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand text-xs font-bold text-white shadow-glow-sm">
             {(user.name ?? user.email ?? 'U').slice(0, 1).toUpperCase()}
           </span>
         )}
-        <span className="hidden max-w-24 truncate md:inline">{user.name ?? user.email}</span>
+        <span className="hidden max-w-24 truncate md:inline text-zinc-400">{user.name ?? user.email}</span>
       </Link>
       <button
         type="button"
-        className="grid size-8 place-items-center rounded-button text-text-muted transition hover:bg-white/5 hover:text-cafe-red-500"
+        className="cursor-pointer text-zinc-500 transition-colors duration-200 hover:text-brand"
         aria-label="Sair"
         onClick={() => {
           void signOut({ callbackUrl: '/' });

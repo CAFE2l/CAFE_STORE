@@ -12,6 +12,8 @@ type CartState = {
   removeItem: (id: string) => void;
   updateQty: (id: string, quantity: number) => void;
   clearCart: () => void;
+  syncWithBackend: () => Promise<void>;
+  fetchFromBackend: (merge?: boolean) => Promise<void>;
 };
 
 function calculateTotals(items: CartItem[]) {
@@ -23,7 +25,7 @@ function calculateTotals(items: CartItem[]) {
 
 export const useCartStore = create<CartState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       items: [],
       total: 0,
       count: 0,
@@ -72,11 +74,53 @@ export const useCartStore = create<CartState>()(
             ...calculateTotals(items),
           };
         }),
-      clearCart: () => ({
-        items: [],
-        total: 0,
-        count: 0,
-      }),
+      clearCart: () => {
+        set({ items: [], total: 0, count: 0 });
+        get().syncWithBackend();
+      },
+      syncWithBackend: async () => {
+        try {
+          await fetch('/api/cart', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ items: get().items }),
+          });
+        } catch {
+          // silent fail
+        }
+      },
+      fetchFromBackend: async (merge = true) => {
+        try {
+          const res = await fetch('/api/cart');
+          if (!res.ok) return;
+          const data = await res.json();
+          const serverItems = (data.data?.items ?? []) as CartItem[];
+
+          if (!merge || serverItems.length === 0) {
+            if (serverItems.length > 0) {
+              set({ items: serverItems, ...calculateTotals(serverItems) });
+            }
+            return;
+          }
+
+          const localItems = get().items;
+          const merged = [...serverItems];
+
+          for (const local of localItems) {
+            const existing = merged.find((m) => m.id === local.id);
+            if (existing) {
+              existing.quantity = Math.max(existing.quantity, local.quantity);
+            } else {
+              merged.push(local);
+            }
+          }
+
+          set({ items: merged, ...calculateTotals(merged) });
+          get().syncWithBackend();
+        } catch {
+          // silent fail
+        }
+      },
     }),
     {
       name: 'cafe-store-cart',

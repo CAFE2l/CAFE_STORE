@@ -25,25 +25,25 @@ export function QuantityStepper({
   return (
     <div
       className={cn(
-        'inline-grid h-11 grid-cols-[2.75rem_3rem_2.75rem] overflow-hidden rounded-button border border-border-subtle bg-background-card',
+        'inline-flex items-center gap-3',
         className,
       )}
     >
       <button
         type="button"
-        className="grid place-items-center text-lg text-text-secondary transition duration-200 hover:bg-cafe-red-500/10 hover:text-cafe-red-500 disabled:cursor-not-allowed disabled:opacity-40"
+        className="flex size-10 items-center justify-center rounded-lg border border-zinc-700 bg-zinc-800 text-zinc-400 transition-all duration-200 hover:border-cafe-orange-500/50 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
         aria-label="Diminuir quantidade"
         disabled={!canDecrease}
         onClick={() => onChange(currentValue - 1)}
       >
         <Minus className="h-4 w-4" />
       </button>
-      <output className="grid place-items-center border-x border-border-subtle text-sm font-semibold text-text-primary">
+      <span className="w-8 text-center text-lg font-semibold text-white">
         {currentValue}
-      </output>
+      </span>
       <button
         type="button"
-        className="grid place-items-center text-lg text-text-secondary transition duration-200 hover:bg-cafe-red-500/10 hover:text-cafe-red-500 disabled:cursor-not-allowed disabled:opacity-40"
+        className="flex size-10 items-center justify-center rounded-lg border border-zinc-700 bg-zinc-800 text-zinc-400 transition-all duration-200 hover:border-cafe-orange-500/50 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
         aria-label="Aumentar quantidade"
         disabled={!canIncrease}
         onClick={() => onChange(currentValue + 1)}
