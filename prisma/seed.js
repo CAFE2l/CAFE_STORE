@@ -11,13 +11,13 @@ const categories = [
 
 const products = [
   {
-    name: 'Camiseta Algodao Preta Cafe Store',
-    slug: 'camiseta-algodao-preta-cafe-store',
+    name: 'Camiseta Algodao Cafe Store',
+    slug: 'camiseta-algodao-cafe-store',
     description:
-      'Camiseta preta 100% algodao com mascote CAFÉ em destaque, estampa traseira Create Build Inspire e acabamento premium.',
+      'Camiseta 100% algodao com mascote CAFÉ em destaque, estampa traseira Create Build Inspire e acabamento premium. Disponivel nas cores preta e branca.',
     price: 89.9,
     oldPrice: 109.9,
-    stock: 40,
+    stock: 74,
     categorySlug: 'camisetas',
     featured: true,
     images: [
@@ -25,23 +25,6 @@ const products = [
       '/images/produtos/camisa_normal/preta/design.jpeg',
       '/images/produtos/camisa_normal/preta/camisaVtirine.png',
       '/images/produtos/camisa_normal/preta/camisa_tras.png',
-    ],
-    variants: [
-      { name: 'Tamanho', values: ['P', 'M', 'G', 'GG', 'XG'] },
-      { name: 'Cor', values: ['Preta'] },
-    ],
-  },
-  {
-    name: 'Camiseta Algodao Branca Cafe Store',
-    slug: 'camiseta-algodao-branca-cafe-store',
-    description:
-      'Camiseta branca 100% algodao com identidade CAFÉ, mascote em alta definicao e detalhes laranja.',
-    price: 89.9,
-    oldPrice: 109.9,
-    stock: 34,
-    categorySlug: 'camisetas',
-    featured: true,
-    images: [
       '/images/produtos/camisa_normal/branca/banner.png',
       '/images/produtos/camisa_normal/branca/design.jpeg',
       '/images/produtos/camisa_normal/branca/frente.jpeg',
@@ -49,17 +32,17 @@ const products = [
     ],
     variants: [
       { name: 'Tamanho', values: ['P', 'M', 'G', 'GG', 'XG'] },
-      { name: 'Cor', values: ['Branca'] },
+      { name: 'Cor', values: ['Preta', 'Branca'] },
     ],
   },
   {
-    name: 'Tech Tee Dry Pro Preta Cafe Store',
-    slug: 'tech-tee-dry-pro-preta-cafe-store',
+    name: 'Tech Tee Dry Pro Cafe Store',
+    slug: 'tech-tee-dry-pro-cafe-store',
     description:
-      'Camiseta performance preta com tecnologia Dry Pro, tecido leve, respiravel e visual tech para quem vive o digital.',
+      'Camiseta performance com tecnologia Dry Pro, tecido leve, respiravel e visual tech para quem vive o digital. Disponivel nas cores preta e branca.',
     price: 119.9,
     oldPrice: 139.9,
-    stock: 28,
+    stock: 54,
     categorySlug: 'camisetas',
     featured: true,
     images: [
@@ -67,22 +50,6 @@ const products = [
       '/images/produtos/poliester/preta/design.png',
       '/images/produtos/poliester/preta/frente.jpeg',
       '/images/produtos/poliester/preta/tras.png',
-    ],
-    variants: [
-      { name: 'Tamanho', values: ['P', 'M', 'G', 'GG', 'XG'] },
-      { name: 'Cor', values: ['Preta'] },
-    ],
-  },
-  {
-    name: 'Tech Tee Dry Pro Branca Cafe Store',
-    slug: 'tech-tee-dry-pro-branca-cafe-store',
-    description:
-      'Camiseta performance branca com protecao UV, secagem rapida e grafismos CAFÉ em laranja.',
-    price: 119.9,
-    stock: 26,
-    categorySlug: 'camisetas',
-    featured: true,
-    images: [
       '/images/produtos/poliester/branca/banner.jpeg',
       '/images/produtos/poliester/branca/design.jpeg',
       '/images/produtos/poliester/branca/frente.jpeg',
@@ -90,7 +57,7 @@ const products = [
     ],
     variants: [
       { name: 'Tamanho', values: ['P', 'M', 'G', 'GG', 'XG'] },
-      { name: 'Cor', values: ['Branca'] },
+      { name: 'Cor', values: ['Preta', 'Branca'] },
     ],
   },
   {
@@ -110,13 +77,13 @@ const products = [
     ],
   },
   {
-    name: 'Caneca Preta Cafe Store',
-    slug: 'caneca-preta-cafe-store',
+    name: 'Caneca Cafe Store',
+    slug: 'caneca-cafe-store',
     description:
-      'Caneca preta com interior laranja, ceramica resistente, acabamento brilhante e arte exclusiva CAFÉ Store.',
+      'Caneca com interior laranja, ceramica resistente, acabamento brilhante e arte exclusiva CAFÉ Store. Disponivel nas cores preta e branca.',
     price: 49.9,
     oldPrice: 59.9,
-    stock: 50,
+    stock: 95,
     categorySlug: 'canecas',
     featured: true,
     images: [
@@ -125,25 +92,15 @@ const products = [
       '/images/produtos/caneca/preta/design.png',
       '/images/produtos/caneca/preta/frente.png',
       '/images/produtos/caneca/preta/tras.png',
-    ],
-    variants: [{ name: 'Capacidade', values: ['325ml'] }],
-  },
-  {
-    name: 'Caneca Branca Cafe Store',
-    slug: 'caneca-branca-cafe-store',
-    description:
-      'Caneca branca com interior laranja, estampa do mascote oficial e verso Create Build Inspire.',
-    price: 49.9,
-    stock: 45,
-    categorySlug: 'canecas',
-    featured: false,
-    images: [
       '/images/produtos/caneca/branca/banner.png',
       '/images/produtos/caneca/branca/design.jpeg',
       '/images/produtos/caneca/branca/frente.jpeg',
       '/images/produtos/caneca/branca/tras.jpeg',
     ],
-    variants: [{ name: 'Capacidade', values: ['325ml'] }],
+    variants: [
+      { name: 'Capacidade', values: ['325ml'] },
+      { name: 'Cor', values: ['Preta', 'Branca'] },
+    ],
   },
   {
     name: 'Chaveiro Mascote Cafe Store',
@@ -164,6 +121,18 @@ const products = [
   },
 ];
 
+const deprecatedSlugs = [
+  'cafe-bourbon-amarelo',
+  'cafe-catucai-vermelho',
+  'kit-ritual-v60',
+  'camiseta-algodao-preta-cafe-store',
+  'camiseta-algodao-branca-cafe-store',
+  'tech-tee-dry-pro-preta-cafe-store',
+  'tech-tee-dry-pro-branca-cafe-store',
+  'caneca-preta-cafe-store',
+  'caneca-branca-cafe-store',
+];
+
 async function main() {
   for (const category of categories) {
     await prisma.category.upsert({
@@ -174,11 +143,7 @@ async function main() {
   }
 
   await prisma.product.updateMany({
-    where: {
-      slug: {
-        in: ['cafe-bourbon-amarelo', 'cafe-catucai-vermelho', 'kit-ritual-v60'],
-      },
-    },
+    where: { slug: { in: deprecatedSlugs } },
     data: {
       status: 'INACTIVE',
       featured: false,

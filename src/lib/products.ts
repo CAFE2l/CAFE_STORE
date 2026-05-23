@@ -64,7 +64,7 @@ const fallbackCategories = [
 
 const fallbackProducts: ProductListItem[] = [
   {
-    id: 'prod-camiseta-algodao-preta',
+    id: 'prod-camiseta-algodao',
     name: 'Camiseta Algodao',
     slug: 'camiseta-algodao',
     description:
@@ -77,6 +77,10 @@ const fallbackProducts: ProductListItem[] = [
       '/images/produtos/camisa_normal/preta/design.jpeg',
       '/images/produtos/camisa_normal/preta/camisaVtirine.png',
       '/images/produtos/camisa_normal/preta/camisa_tras.png',
+      '/images/produtos/camisa_normal/branca/banner.png',
+      '/images/produtos/camisa_normal/branca/design.jpeg',
+      '/images/produtos/camisa_normal/branca/frente.jpeg',
+      '/images/produtos/camisa_normal/branca/tras.jpeg',
     ],
     status: ProductStatus.ACTIVE,
     featured: true,
@@ -85,7 +89,7 @@ const fallbackProducts: ProductListItem[] = [
     averageRating: 0,
   },
   {
-    id: 'prod-tech-tee-preta',
+    id: 'prod-tech-tee',
     name: 'Tech Tee Dry Pro',
     slug: 'tech-tee-dry-pro',
     description:
@@ -98,6 +102,10 @@ const fallbackProducts: ProductListItem[] = [
       '/images/produtos/poliester/preta/design.png',
       '/images/produtos/poliester/preta/frente.jpeg',
       '/images/produtos/poliester/preta/tras.png',
+      '/images/produtos/poliester/branca/banner.jpeg',
+      '/images/produtos/poliester/branca/design.jpeg',
+      '/images/produtos/poliester/branca/frente.jpeg',
+      '/images/produtos/poliester/branca/tras.jpeg',
     ],
     status: ProductStatus.ACTIVE,
     featured: true,
@@ -122,7 +130,7 @@ const fallbackProducts: ProductListItem[] = [
     averageRating: 0,
   },
   {
-    id: 'prod-caneca-preta',
+    id: 'prod-caneca',
     name: 'Caneca Ceramica',
     slug: 'caneca-ceramica',
     description:
@@ -136,6 +144,10 @@ const fallbackProducts: ProductListItem[] = [
       '/images/produtos/caneca/preta/design.png',
       '/images/produtos/caneca/preta/frente.png',
       '/images/produtos/caneca/preta/tras.png',
+      '/images/produtos/caneca/branca/banner.png',
+      '/images/produtos/caneca/branca/design.jpeg',
+      '/images/produtos/caneca/branca/frente.jpeg',
+      '/images/produtos/caneca/branca/tras.jpeg',
     ],
     status: ProductStatus.ACTIVE,
     featured: true,
@@ -345,9 +357,11 @@ export async function getFeaturedProducts(limit = 8) {
 }
 
 const fallbackProductVariants: Record<string, Prisma.JsonValue> = {
-  'prod-camiseta-algodao-preta': JSON.parse('[{"name":"Cor","values":["Preta","Branca"]}]'),
-  'prod-tech-tee-preta': JSON.parse('[{"name":"Cor","values":["Preta","Branca"]}]'),
-  'prod-caneca-preta': JSON.parse('[{"name":"Cor","values":["Preta","Branca"]}]'),
+  'prod-camiseta-algodao': JSON.parse('[{"name":"Tamanho","values":["P","M","G","GG","XG"]},{"name":"Cor","values":["Preta","Branca"]}]'),
+  'prod-tech-tee': JSON.parse('[{"name":"Tamanho","values":["P","M","G","GG","XG"]},{"name":"Cor","values":["Preta","Branca"]}]'),
+  'prod-moletom-limited': JSON.parse('[{"name":"Tamanho","values":["P","M","G","GG","XG"]},{"name":"Cor","values":["Preta"]}]'),
+  'prod-caneca': JSON.parse('[{"name":"Capacidade","values":["325ml"]},{"name":"Cor","values":["Preta","Branca"]}]'),
+  'prod-chaveiro-mascote': JSON.parse('[{"name":"Modelo","values":["Frente colorida + verso preto"]}]'),
 };
 
 export async function getProductBySlug(slug: string): Promise<ProductDetail | null> {
@@ -460,7 +474,11 @@ export async function getCategories() {
       image: true,
       _count: {
         select: {
-          products: true,
+          products: {
+            where: {
+              status: ProductStatus.ACTIVE,
+            },
+          },
         },
       },
     },

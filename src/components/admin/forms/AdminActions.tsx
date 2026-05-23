@@ -46,3 +46,49 @@ export function ReviewModerationButtons({ reviewId }: { reviewId: string }) {
     </div>
   );
 }
+
+export function FeedbackModerationButtons({
+  feedbackId,
+  isApproved,
+  isVerified,
+  isFeatured,
+}: {
+  feedbackId: string;
+  isApproved: boolean;
+  isVerified: boolean;
+  isFeatured: boolean;
+}) {
+  const router = useRouter();
+
+  async function update(body: Record<string, boolean>) {
+    await fetch(`/api/admin/feedbacks/${feedbackId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    router.refresh();
+  }
+
+  async function remove() {
+    if (!confirm('Remover este feedback?')) return;
+    await fetch(`/api/admin/feedbacks/${feedbackId}`, { method: 'DELETE' });
+    router.refresh();
+  }
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      <button type="button" className="btn-primary px-3 py-2 text-xs" onClick={() => update({ isApproved: !isApproved })}>
+        {isApproved ? 'Desaprovar' : 'Aprovar'}
+      </button>
+      <button type="button" className="btn-secondary px-3 py-2 text-xs" onClick={() => update({ isVerified: !isVerified })}>
+        {isVerified ? 'Remover verificado' : 'Verificar'}
+      </button>
+      <button type="button" className="btn-secondary px-3 py-2 text-xs" onClick={() => update({ isFeatured: !isFeatured })}>
+        {isFeatured ? 'Remover destaque' : 'Destacar'}
+      </button>
+      <button type="button" className="rounded-button border border-red-500/40 px-3 py-2 text-xs font-semibold text-red-300 transition hover:bg-red-500/10" onClick={remove}>
+        Rejeitar
+      </button>
+    </div>
+  );
+}

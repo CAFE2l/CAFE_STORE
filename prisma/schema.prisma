@@ -93,20 +93,20 @@ model Category {
 }
 
 model Order {
-  id            String      @id @default(cuid())
-  userId        String
-  user          User        @relation(fields: [userId], references: [id])
-  status        OrderStatus @default(PENDING)
-  total         Decimal     @db.Decimal(10, 2)
-  paymentMethod String
-  paymentId     String?
-  couponCode    String?
-  couponDiscount Decimal?   @db.Decimal(10, 2)
-  phone         String
-  address       Json
-  items         OrderItem[]
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  id             String      @id @default(cuid())
+  userId         String
+  user           User        @relation(fields: [userId], references: [id])
+  status         OrderStatus @default(PENDING)
+  total          Decimal     @db.Decimal(10, 2)
+  paymentMethod  String
+  paymentId      String?
+  couponCode     String?
+  couponDiscount Decimal?    @db.Decimal(10, 2)
+  phone          String
+  address        Json
+  items          OrderItem[]
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
 }
 
 model OrderItem {
@@ -178,16 +178,16 @@ enum ProductStatus {
 }
 
 model Coupon {
-  id         String   @id @default(cuid())
-  code       String   @unique
-  discount   Decimal  @db.Decimal(10, 2)
-  type       String   @default("PERCENTAGE")
-  minAmount  Decimal? @db.Decimal(10, 2)
-  maxUses    Int      @default(0)
-  usedCount  Int      @default(0)
-  expiresAt  DateTime?
-  active     Boolean  @default(true)
-  createdAt  DateTime @default(now())
+  id        String    @id @default(cuid())
+  code      String    @unique
+  discount  Decimal   @db.Decimal(10, 2)
+  type      String    @default("PERCENTAGE")
+  minAmount Decimal?  @db.Decimal(10, 2)
+  maxUses   Int       @default(0)
+  usedCount Int       @default(0)
+  expiresAt DateTime?
+  active    Boolean   @default(true)
+  createdAt DateTime  @default(now())
 }
 
 model Banner {
@@ -199,4 +199,52 @@ model Banner {
   position  Int      @default(0)
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
+}
+
+model Feedback {
+  id                String            @id @default(uuid()) @db.Uuid
+  authorName        String            @map("author_name") @db.VarChar(100)
+  authorEmail       String            @map("author_email") @db.VarChar(255)
+  authorAvatarUrl   String?           @map("author_avatar_url") @db.Text
+  authorCompany     String?           @map("author_company") @db.VarChar(100)
+  authorRole        String?           @map("author_role") @db.VarChar(100)
+  authorLinkedinUrl String?           @map("author_linkedin_url") @db.Text
+  serviceType       FeedbackService   @map("service_type")
+  rating            Int
+  title             String            @db.VarChar(150)
+  body              String            @db.Text
+  resultMetric      String?           @map("result_metric") @db.VarChar(200)
+  projectUrl        String?           @map("project_url") @db.Text
+  videoUrl          String?           @map("video_url") @db.Text
+  isVerified        Boolean           @default(false) @map("is_verified")
+  isFeatured        Boolean           @default(false) @map("is_featured")
+  isApproved        Boolean           @default(false) @map("is_approved")
+  helpfulCount      Int               @default(0) @map("helpful_count")
+  createdAt         DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+  helpfulVotes      FeedbackHelpful[]
+
+  @@index([isApproved, createdAt], map: "idx_feedbacks_approved")
+  @@index([serviceType], map: "idx_feedbacks_service")
+  @@index([isFeatured], map: "idx_feedbacks_featured")
+  @@map("feedbacks")
+}
+
+model FeedbackHelpful {
+  id          String   @id @default(uuid()) @db.Uuid
+  feedbackId  String   @map("feedback_id") @db.Uuid
+  fingerprint String   @db.VarChar(255)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  feedback    Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+
+  @@unique([feedbackId, fingerprint])
+  @@map("feedback_helpful")
+}
+
+enum FeedbackService {
+  landing_page
+  site
+  saas
+  pacote_completo
+  outro
 }

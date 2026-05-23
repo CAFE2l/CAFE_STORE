@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Flame, LayoutDashboard, Package, ShoppingCart, Users, Tag, Star, ArrowLeft } from 'lucide-react';
+import { Flame, LayoutDashboard, Package, ShoppingCart, Users, Tag, Star, ArrowLeft, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const adminLinks = [
@@ -12,6 +12,7 @@ const adminLinks = [
   { href: '/admin/users', label: 'Usuários', icon: Users },
   { href: '/admin/categories', label: 'Categorias', icon: Tag },
   { href: '/admin/reviews', label: 'Avaliações', icon: Star },
+  { href: '/admin/feedbacks', label: 'Feedbacks', icon: MessageSquare },
 ];
 
 export function Sidebar() {

@@ -1,4 +1,4 @@
-import { OrderStatus, ProductStatus, Role } from '@prisma/client';
+import { OrderStatus, ProductStatus, Role, type Feedback } from '@prisma/client';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
@@ -171,6 +171,19 @@ export async function getAdminReviews() {
       user: { select: { name: true, email: true } },
       product: { select: { name: true, slug: true } },
     },
+  });
+}
+
+export async function getAdminFeedbacks(status?: string): Promise<Feedback[]> {
+  if (!process.env.DATABASE_URL) return [];
+
+  return prisma.feedback.findMany({
+    where: {
+      ...(status === 'pending' ? { isApproved: false } : {}),
+      ...(status === 'approved' ? { isApproved: true } : {}),
+      ...(status === 'featured' ? { isFeatured: true } : {}),
+    },
+    orderBy: { createdAt: 'desc' },
   });
 }
 

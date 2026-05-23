@@ -11,3 +11,4 @@
 - Implementado FAQ com 3 perguntas e animação de abertura por `max-height`.
 - Configurados CTAs para WhatsApp com o número `+55 (41) 99671-3782`.
 - Revisados textos da página e dados de serviços para corrigir acentuação e termos sem acento.
+- Reintroduzidas seções de prova: projetos realizados, processo de trabalho e depoimentos de clientes.

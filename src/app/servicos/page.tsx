@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Check, ChevronDown, Menu, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { WHATSAPP, deliverables, faqs, services } from '@/lib/servicos-data';
+import { WHATSAPP, deliverables, faqs, processSteps, projects, services, testimonials } from '@/lib/servicos-data';
 
 export default function ServicesPage() {
   const [openFaq, setOpenFaq] = useState<string | null>(faqs[0]?.q ?? null);
@@ -15,6 +15,8 @@ export default function ServicesPage() {
     { href: '/', label: '← Loja' },
     { href: '#servicos', label: 'Serviços' },
     { href: '#pacote', label: 'Pacote Completo' },
+    { href: '#provas', label: 'Projetos' },
+    { href: '/feedbacks', label: 'Feedbacks' },
     { href: '#faq', label: 'FAQ' },
     { href: '#contato', label: 'Contato' },
   ];
@@ -153,6 +155,11 @@ export default function ServicesPage() {
               >
                 <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand/50 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                 <div aria-hidden className="absolute right-0 top-0 h-28 w-28 translate-x-10 -translate-y-10 bg-brand/10 blur-3xl" />
+                {service.badge ? (
+                  <span className="absolute right-5 top-5 rounded-full border border-brand/30 bg-brand/15 px-3 py-1.5 text-[10px] font-bold uppercase leading-none tracking-wide text-brand shadow-[0_0_16px_rgba(249,115,22,0.18)]">
+                    {service.badge}
+                  </span>
+                ) : null}
                 <span className="mb-5 text-xs font-semibold uppercase tracking-[0.3em] text-white/25">
                   Plano {String(index + 1).padStart(2, '0')}
                 </span>
@@ -161,13 +168,10 @@ export default function ServicesPage() {
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand/15 ring-1 ring-brand/20 transition group-hover:shadow-led-brand">
                       <Icon className="h-5 w-5 text-brand" />
                     </div>
-                    <h2 className="text-xl font-bold text-white">{service.title}</h2>
+                    <h2 className={cn('text-xl font-bold leading-tight text-white', featured && 'pr-24')}>
+                      {service.title}
+                    </h2>
                   </div>
-                  {service.badge ? (
-                    <span className="rounded-full border border-brand/30 bg-brand/15 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-brand">
-                      {service.badge}
-                    </span>
-                  ) : null}
                 </div>
 
                 <p className="mb-4 text-sm italic text-white/40">&ldquo;{service.tagline}&rdquo;</p>
@@ -260,6 +264,87 @@ export default function ServicesPage() {
             </div>
           </div>
         </section>
+      </section>
+
+      <section id="provas" className="mx-auto max-w-7xl scroll-mt-28 px-4 pb-20 sm:px-6 lg:px-8">
+        <div className="mb-10 text-center">
+          <span className="text-xs font-semibold uppercase tracking-[0.32em] text-brand">Prova real</span>
+          <h2 className="mt-3 text-3xl font-black text-white md:text-4xl">Projetos realizados e processo claro</h2>
+          <p className="mx-auto mt-3 max-w-2xl text-white/45">
+            Antes de fechar qualquer serviço, você consegue ver o tipo de entrega,
+            o cuidado visual e a forma como o projeto anda do briefing ao deploy.
+          </p>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-3">
+          {projects.map((project) => (
+            <a
+              key={project.name}
+              href={project.href}
+              className="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.045] p-5 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-brand/35 hover:shadow-[0_0_34px_rgba(249,115,22,0.12)]"
+            >
+              <div className="mb-5 flex aspect-[16/9] items-center justify-center rounded-xl border border-white/[0.06] bg-[radial-gradient(circle_at_center,rgba(249,115,22,0.18),rgba(255,255,255,0.035)_48%,rgba(0,0,0,0.18))]">
+                <span className="bg-gradient-to-r from-brand via-[#FFD000] to-[#FF3C38] bg-clip-text text-3xl font-black text-transparent">
+                  CAFÉ
+                </span>
+              </div>
+              <div className="mb-3 flex flex-wrap gap-2">
+                {project.tags.map((tag) => (
+                  <span key={tag} className="rounded-md border border-white/[0.08] bg-white/[0.04] px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-white/45">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              <h3 className="text-lg font-bold text-white transition-colors group-hover:text-brand">{project.name}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-white/55">{project.desc}</p>
+              <p className="mt-4 text-sm font-semibold text-brand">{project.metric}</p>
+            </a>
+          ))}
+        </div>
+
+        <div className="mt-8 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+          <div className="rounded-2xl border border-white/[0.08] bg-white/[0.045] p-6 backdrop-blur-xl">
+            <span className="text-xs font-semibold uppercase tracking-[0.28em] text-white/30">Como funciona</span>
+            <div className="mt-6 grid gap-5">
+              {processSteps.map((step, index) => (
+                <div key={step.num} className="relative flex gap-4">
+                  <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border border-brand/35 bg-brand/15 text-sm font-black text-brand">
+                    {step.num}
+                  </div>
+                  {index < processSteps.length - 1 ? (
+                    <div className="absolute left-[17px] top-10 h-[calc(100%-18px)] w-px bg-gradient-to-b from-brand/30 to-transparent" />
+                  ) : null}
+                  <div>
+                    <h3 className="font-bold text-white">{step.title}</h3>
+                    <p className="mt-1 text-sm leading-relaxed text-white/45">{step.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid gap-4">
+            {testimonials.map((testimonial) => (
+              <figure key={testimonial.name} className="rounded-2xl border border-white/[0.08] bg-white/[0.045] p-6 backdrop-blur-xl">
+                <div className="mb-3 flex gap-1 text-[#FFD000]">
+                  {Array.from({ length: testimonial.stars }).map((_, index) => (
+                    <span key={index}>★</span>
+                  ))}
+                </div>
+                <blockquote className="text-sm leading-relaxed text-white/60">&ldquo;{testimonial.text}&rdquo;</blockquote>
+                <figcaption className="mt-4 flex items-center gap-3">
+                  <span className="grid size-10 place-items-center rounded-full bg-brand/15 text-sm font-bold text-brand">
+                    {testimonial.name.charAt(0)}
+                  </span>
+                  <span>
+                    <span className="block text-sm font-semibold text-white">{testimonial.name}</span>
+                    <span className="block text-xs text-white/35">{testimonial.role}</span>
+                  </span>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </div>
       </section>
 
       <section id="faq" className="mx-auto max-w-3xl scroll-mt-28 px-4 pb-20 sm:px-6 lg:px-8">

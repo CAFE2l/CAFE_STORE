@@ -98,6 +98,80 @@ export const deliverables: Deliverable[] = [
   { emoji: '📄', title: 'Documentação', detail: '10 páginas' },
 ];
 
+export type Project = {
+  name: string;
+  tags: string[];
+  desc: string;
+  metric: string;
+  href: string;
+};
+
+export const projects: Project[] = [
+  {
+    name: 'CAFÉ STORE',
+    tags: ['E-commerce', 'Next.js', 'Checkout'],
+    desc: 'Loja virtual completa com catálogo, carrinho, checkout, painel administrativo e área do cliente.',
+    metric: 'Loja completa no ar',
+    href: '/',
+  },
+  {
+    name: 'Painel Financeiro SaaS',
+    tags: ['Web App', 'React', 'Node.js'],
+    desc: 'Dashboard operacional com autenticação, gráficos, relatórios e gerenciamento de usuários.',
+    metric: 'Fluxo interno automatizado',
+    href: '#contato',
+  },
+  {
+    name: 'Landing Page de Conversão',
+    tags: ['Landing Page', 'SEO', 'Performance'],
+    desc: 'Página de campanha com copy, formulário integrado, estrutura responsiva e deploy otimizado.',
+    metric: 'Entrega em 5 dias',
+    href: '#contato',
+  },
+];
+
+export type Testimonial = {
+  stars: number;
+  text: string;
+  name: string;
+  role: string;
+};
+
+export const testimonials: Testimonial[] = [
+  {
+    stars: 5,
+    text: 'A landing page saiu rápida, bonita e pronta para campanha. O processo foi direto, com retorno claro em cada etapa.',
+    name: 'Lucas Mendes',
+    role: 'Agência Criativa',
+  },
+  {
+    stars: 5,
+    text: 'O projeto foi entregue com qualidade e sem enrolação. A parte visual ficou muito acima do que eu esperava.',
+    name: 'Ana Carolina',
+    role: 'Empreendedora Digital',
+  },
+  {
+    stars: 5,
+    text: 'A documentação e o painel facilitaram demais o onboarding da equipe. Tudo ficou organizado e fácil de manter.',
+    name: 'Rafael Torres',
+    role: 'CTO @ TechStart',
+  },
+];
+
+export type ProcessStep = {
+  num: number;
+  title: string;
+  desc: string;
+};
+
+export const processSteps: ProcessStep[] = [
+  { num: 1, title: 'Briefing', desc: 'Você me conta o objetivo, referências e escopo.' },
+  { num: 2, title: 'Proposta', desc: 'Eu envio preço, prazo, entregáveis e forma de pagamento.' },
+  { num: 3, title: 'Produção', desc: 'Desenvolvimento com atualizações durante o processo.' },
+  { num: 4, title: 'Revisão', desc: 'Você testa, valida e pede ajustes dentro do combinado.' },
+  { num: 5, title: 'Entrega', desc: 'Deploy, arquivos finais e documentação do projeto.' },
+];
+
 export type Faq = {
   q: string;
   a: string;

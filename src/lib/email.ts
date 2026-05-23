@@ -59,3 +59,44 @@ export async function sendPasswordChangedEmail(to: string) {
     html: '<p>Sua senha foi alterada com sucesso. Se nao foi voce, entre em contato imediatamente.</p>',
   });
 }
+
+type FeedbackEmailInput = {
+  authorName: string;
+  authorEmail: string;
+  serviceLabel: string;
+  rating: number;
+  title: string;
+  body: string;
+};
+
+export async function sendFeedbackAdminEmail(input: FeedbackEmailInput) {
+  const adminEmail = process.env.ADMIN_EMAIL ?? process.env.RESEND_ADMIN_EMAIL;
+  if (!adminEmail) return { skipped: true };
+
+  return sendEmail({
+    to: adminEmail,
+    subject: `Novo feedback recebido: ${input.rating}/5`,
+    html: `
+      <h2>Novo feedback recebido</h2>
+      <p><strong>Cliente:</strong> ${input.authorName} (${input.authorEmail})</p>
+      <p><strong>Serviço:</strong> ${input.serviceLabel}</p>
+      <p><strong>Nota:</strong> ${input.rating}/5</p>
+      <p><strong>Título:</strong> ${input.title}</p>
+      <p>${input.body}</p>
+      <p>Acesse o painel admin para aprovar, verificar ou destacar.</p>
+    `,
+  });
+}
+
+export async function sendFeedbackReceivedEmail(input: Pick<FeedbackEmailInput, 'authorEmail' | 'authorName'>) {
+  return sendEmail({
+    to: input.authorEmail,
+    subject: 'Recebemos seu feedback na CAFÉ Store',
+    html: `
+      <p>Olá, ${input.authorName}.</p>
+      <p>Seu feedback foi recebido e será publicado após verificação manual.</p>
+      <p>Isso leva no máximo 24h. Você receberá um e-mail quando o depoimento estiver no ar.</p>
+      <p>Obrigado por ajudar outras pessoas a conhecerem o trabalho da CAFÉ.</p>
+    `,
+  });
+}
