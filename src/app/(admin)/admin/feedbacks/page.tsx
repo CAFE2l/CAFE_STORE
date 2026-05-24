@@ -1,6 +1,10 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { FeedbackModerationButtons, FeaturedServicesToggle } from '@/components/admin/forms/AdminActions';
+import dynamic from 'next/dynamic'
+const FeaturedServicesDnd = dynamic(() => import('@/components/admin/FeaturedServicesDnd').then(m => m.FeaturedServicesDnd), { ssr: false })
+
+
 import { Badge } from '@/components/ui/Badge';
 import { getAdminFeedbacks } from '@/lib/admin';
 import { feedbackServiceLabels } from '@/lib/feedbacks';
@@ -15,6 +19,8 @@ export const dynamic = 'force-dynamic';
 export default async function AdminFeedbacksPage({ searchParams }: { searchParams?: { status?: string } }) {
   const status = searchParams?.status;
   const feedbacks = await getAdminFeedbacks(status);
+
+  // Note: DnD UI is client-only. We'll render a placeholder server-side and the client component will handle drag-and-drop.
 
   return (
     <main className="container-page grid gap-6 py-8">
@@ -38,6 +44,9 @@ export default async function AdminFeedbacksPage({ searchParams }: { searchParam
       </div>
 
       <section className="grid gap-4">
+        {/* Client-side DnD: show featured items at top */}
+        <FeaturedServicesDnd initial={feedbacks.filter(f => f.isFeaturedServices).sort((a,b) => (a.featuredServicesOrder ?? 0) - (b.featuredServicesOrder ?? 0)).map(f => ({ id: f.id, authorName: f.authorName, authorAvatarUrl: f.authorAvatarUrl, rating: f.rating, title: f.title }))} />
+
         {feedbacks.map((feedback) => (
           <article key={feedback.id} className="card grid gap-4 p-5 xl:grid-cols-[1fr_auto]">
             <div>

@@ -38,6 +38,9 @@
     "resend": "^6.12.3",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^4.4.3",
-    "zustand": "^5.0.13"
+    "zustand": "^5.0.13",
+    "@dnd-kit/core": "^8.0.0",
+    "@dnd-kit/sortable": "^8.0.0",
+    "@dnd-kit/utilities": "^8.0.0"
   }
 }
