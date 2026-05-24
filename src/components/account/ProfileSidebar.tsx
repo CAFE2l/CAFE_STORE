@@ -55,7 +55,7 @@ export function ProfileSidebar() {
 
           {isAdmin ? (
             <Link
-              href="/admin"
+              href="/admin/dashboard"
               className={cn(
                 'flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200 text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200',
               )}
@@ -100,7 +100,7 @@ export function ProfileSidebar() {
 
           {isAdmin ? (
             <Link
-              href="/admin"
+              href="/admin/dashboard"
               className="flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl bg-zinc-900/60 px-4 py-2 text-xs font-medium text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-300"
             >
               <Shield className="size-3.5" />
