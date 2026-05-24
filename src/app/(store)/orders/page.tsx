@@ -5,6 +5,8 @@ import { StatusBadge } from '@/components/account/StatusBadge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { auth } from '@/lib/auth';
 import { getUserOrders } from '@/lib/account';
+import dynamic from 'next/dynamic'
+const OrderActionsClient = dynamic(() => import('@/components/account/OrderActionsClient').then(m => m.default), { ssr: false })
 
 export const metadata: Metadata = {
   title: 'Meus pedidos | Cafe Store',
@@ -36,8 +38,9 @@ export default async function OrdersPage() {
       {orders.length > 0 ? (
         <div className="grid gap-3">
           {orders.map((order) => (
-            <Link key={order.id} href={`/orders/${order.id}`} className="rounded-card border border-border-subtle bg-background-card p-5 transition hover:border-cafe-orange-500/40 md:flex md:items-center md:justify-between">
-              <div className="grid gap-2 md:flex md:items-center md:gap-8">
+            <div key={order.id} className="rounded-card border border-border-subtle bg-background-card p-5 transition hover:border-cafe-orange-500/40 md:flex md:items-center md:justify-between">
+              <Link href={`/orders/${order.id}`} className="flex-1 md:flex md:items-center md:gap-8">
+                <div className="grid gap-2 md:flex md:items-center md:gap-8">
                 <div>
                   <p className="text-xs text-text-muted">Pedido</p>
                   <p className="font-mono text-sm text-text-primary">#{order.id.slice(0, 10)}</p>
@@ -49,11 +52,18 @@ export default async function OrdersPage() {
                   <p className="text-xs text-text-muted">Itens</p>
                   <p className="text-sm text-text-primary">{order.itemCount}</p>
                 </div>
-              </div>
-              <div className="mt-3 md:mt-0">
-                <p className="text-sm font-bold text-cafe-orange-500">{currencyFormatter.format(order.total)}</p>
-              </div>
-            </Link>
+               </div>
+               <div className="mt-3 md:mt-0">
+                 <p className="text-sm font-bold text-cafe-orange-500">{currencyFormatter.format(order.total)}</p>
+               </div>
+             </Link>
+
+             <div className="mt-3 md:mt-0 md:ml-4">
+               {/* Order actions */}
+               {/* @ts-ignore */}
+               <OrderActionsClient orderId={order.id} status={order.status} />
+             </div>
+           </div>
           ))}
         </div>
       ) : (

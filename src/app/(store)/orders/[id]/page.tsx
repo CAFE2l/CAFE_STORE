@@ -6,6 +6,8 @@ import { OrderTimeline } from '@/components/account/OrderTimeline';
 import { StatusBadge } from '@/components/account/StatusBadge';
 import { auth } from '@/lib/auth';
 import { getUserOrderById } from '@/lib/account';
+import dynamic from 'next/dynamic'
+const OrderActionsClient = dynamic(() => import('@/components/account/OrderActionsClient').then(m => m.default), { ssr: false })
 
 type OrderPageProps = {
   params: {
@@ -74,7 +76,11 @@ export default async function OrderPage({ params }: OrderPageProps) {
           <h1 className="mt-3 font-display text-4xl font-semibold text-text-primary">Pedido</h1>
           <p className="mt-2 font-mono text-sm text-text-muted">{order.id}</p>
         </div>
+      <div className="flex items-center gap-4">
         <StatusBadge status={order.status} />
+        {/* @ts-ignore */}
+        <OrderActionsClient orderId={order.id} status={order.status} />
+      </div>
       </div>
 
       <section className="card p-5">

@@ -7,7 +7,7 @@ import { ProductPageWrapper } from '@/components/store/ProductPageWrapper';
 import { ProductTabs } from '@/components/store/ProductTabs';
 import { RecentlyViewed } from '@/components/store/RecentlyViewed';
 import { FloatingWhatsApp } from '@/components/ui/FloatingWhatsApp';
-import { ImageGallery } from '@/components/ui/ImageGallery';
+import ProductGalleryClient from '@/components/store/ProductGalleryClient';
 import { PriceBlock } from '@/components/ui/PriceBlock';
 import { getProductBySlug, getRelatedProducts } from '@/lib/products';
 
@@ -141,7 +141,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
         <section className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16">
           {/* Left: Gallery */}
           <div className="relative">
-            <ImageGallery images={images} priority />
+            {/* client gallery that updates with selected variants */}
+            {/* @ts-ignore */}
+            <ProductGalleryClient productId={product.id} images={images} variants={product.variants} priority />
           </div>
 
           {/* Right: Info */}

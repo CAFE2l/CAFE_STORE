@@ -9,6 +9,7 @@ import { useCartStore } from '@/store/cart';
 import type { ProductDetail } from '@/lib/products';
 import type { CartVariant } from '@/types';
 import { cn } from '@/lib/utils';
+import { useVariantStore } from '@/lib/variantStore'
 
 type ProductPurchasePanelProps = {
   product: ProductDetail;
@@ -57,6 +58,13 @@ export function ProductPurchasePanel({ product, selectedVariants: externalVarian
   const [internalVariants, setInternalVariants] = useState<Record<string, string>>(() =>
     Object.fromEntries(variantOptions.map((v) => [v.name, v.values[0] ?? ''])),
   );
+
+  // sync selected variants to global store so gallery and other client parts can react
+  const setSelected = useVariantStore((s) => s.setSelected);
+
+  useEffect(() => {
+    setSelected(product.id, selectedVariants);
+  }, [selectedVariants, product.id, setSelected]);
   const variantRefs = useRef<Record<string, HTMLFieldSetElement | null>>({});
 
   const isExternal = externalVariants !== undefined;
@@ -72,24 +80,6 @@ export function ProductPurchasePanel({ product, selectedVariants: externalVarian
   const stockMessage = product.stock <= 0 ? 'Indisponivel' : 'Apoio simbolico disponivel';
   const stockType = product.stock <= 0 ? 'empty' : product.stock <= 3 ? 'low' : 'normal';
 
-  const [countdown, setCountdown] = useState<string | null>(null);
-  const [countdownEnded, setCountdownEnded] = useState(false);
-
-  useEffect(() => {
-    if (!hasDiscount) return;
-    const end = Date.now() + 4 * 60 * 60 * 1000;
-    function tick() {
-      const diff = end - Date.now();
-      if (diff <= 0) { setCountdown(null); setCountdownEnded(true); return; }
-      const h = Math.floor(diff / 3600000);
-      const m = Math.floor((diff % 3600000) / 60000);
-      const s = Math.floor((diff % 60000) / 1000);
-      setCountdown(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`);
-    }
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, [hasDiscount]);
 
   useEffect(() => {
     setPageUrl(window.location.href);
@@ -217,13 +207,6 @@ export function ProductPurchasePanel({ product, selectedVariants: externalVarian
         </p>
       </div>
 
-      {/* Countdown */}
-      {countdown ? (
-        <div className="flex items-center gap-2 rounded-xl border border-[#FF3C38]/20 bg-[#FF3C38]/10 px-4 py-2.5">
-          <span className="text-sm text-zinc-300">⏰ Oferta termina em:</span>
-          <span className="font-mono text-lg font-bold text-[#FF3C38]">{countdown}</span>
-        </div>
-      ) : null}
 
       {/* Stock */}
       <div className={cn(
