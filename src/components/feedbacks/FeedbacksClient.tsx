@@ -1,9 +1,11 @@
 'use client';
 
 import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
-import { Check, ExternalLink, Loader2, Star, ThumbsUp } from 'lucide-react';
+import { Check, ExternalLink, Loader2, Menu, Star, ThumbsUp, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { WHATSAPP } from '@/lib/servicos-data';
 
 type FeedbackService = 'landing_page' | 'site' | 'saas' | 'pacote_completo' | 'outro';
 
@@ -450,8 +452,16 @@ export function FeedbacksClient() {
   const [sort, setSort] = useState('recent');
   const [loading, setLoading] = useState(true);
   const [submitted, setSubmitted] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const featuredVideoFeedback = useMemo(() => feedbacks.find((feedback) => feedback.video_url), [feedbacks]);
+  const navItems = [
+    { href: '/', label: '← Loja' },
+    { href: '/servicos', label: 'Serviços' },
+    { href: '/servicos#provas', label: 'Projetos' },
+    { href: '/feedbacks', label: 'Feedbacks' },
+    { href: '#enviar', label: 'Enviar feedback' },
+  ];
 
   const loadFeedbacks = useCallback(async ({ append = false, cursor = null }: { append?: boolean; cursor?: string | null } = {}) => {
     setLoading(true);
@@ -486,15 +496,82 @@ export function FeedbacksClient() {
         <div className="absolute inset-x-0 top-0 h-[620px] bg-gradient-radial from-brand/10 via-transparent to-transparent" />
       </div>
 
-      <header className="mx-auto flex max-w-7xl items-center justify-between px-4 py-6 sm:px-6 lg:px-8">
-        <Link href="/" className="text-sm font-semibold text-white/50 transition hover:text-white">← Loja</Link>
-        <div className="flex items-center gap-4 text-sm">
-          <Link href="/servicos" className="text-white/50 transition hover:text-white">Serviços</Link>
-          <a href="#enviar" className="rounded-xl border border-brand/40 px-4 py-2 font-semibold text-brand transition hover:bg-brand hover:text-white">Deixar feedback</a>
+      <header className="fixed inset-x-0 top-0 z-50 border-b border-white/[0.08] bg-[#050505]/75 backdrop-blur-2xl">
+        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+          <Link href="/" className="group flex items-center gap-3">
+            <div className="relative flex size-11 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-brand/25 to-brand/5 ring-1 ring-brand/25 shadow-led-brand transition-all duration-500 group-hover:scale-105 group-hover:ring-brand/50">
+              <Image
+                src="/favicon.png"
+                alt="CAFÉ STORE"
+                width={40}
+                height={40}
+                className="size-10 rounded-full object-cover drop-shadow-[0_0_8px_rgba(249,115,22,0.45)]"
+                priority
+              />
+            </div>
+            <div>
+              <span className="block bg-gradient-to-r from-brand via-[#FFD000] to-[#FF3C38] bg-clip-text text-lg font-black leading-none text-transparent">
+                CAFÉ STORE
+              </span>
+              <span className="text-[10px] font-semibold uppercase tracking-[0.28em] text-white/35">Feedbacks</span>
+            </div>
+          </Link>
+
+          <nav className="hidden items-center gap-6 md:flex">
+            {navItems.map((item) => (
+              <a key={item.href} href={item.href} className="text-sm font-medium text-white/45 transition-colors hover:text-white">
+                {item.label}
+              </a>
+            ))}
+          </nav>
+
+          <a
+            href={WHATSAPP}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden rounded-xl border border-brand/40 bg-brand/10 px-4 py-2 text-sm font-semibold text-brand shadow-[0_0_18px_rgba(249,115,22,0.12)] transition-all duration-300 hover:bg-brand hover:text-white hover:shadow-led-brand md:inline-flex"
+          >
+            Falar comigo
+          </a>
+
+          <button
+            type="button"
+            className="grid size-10 place-items-center rounded-xl border border-white/[0.08] bg-white/[0.04] text-white/70 md:hidden"
+            aria-label="Abrir menu"
+            onClick={() => setMobileOpen((open) => !open)}
+          >
+            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
         </div>
+
+        {mobileOpen ? (
+          <div className="border-t border-white/[0.08] bg-[#080808] px-4 py-4 md:hidden">
+            <div className="mx-auto grid max-w-7xl gap-2">
+              {navItems.map((item) => (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  className="rounded-xl px-3 py-2.5 text-sm font-medium text-white/55 transition hover:bg-white/[0.04] hover:text-white"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  {item.label}
+                </a>
+              ))}
+              <a
+                href={WHATSAPP}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 rounded-xl bg-brand px-4 py-3 text-center text-sm font-bold text-white shadow-led-brand"
+                onClick={() => setMobileOpen(false)}
+              >
+                Falar comigo
+              </a>
+            </div>
+          </div>
+        ) : null}
       </header>
 
-      <section className="relative overflow-hidden px-4 py-20 text-center">
+      <section className="relative overflow-hidden px-4 pb-20 pt-36 text-center md:pt-44">
         <span className="mb-4 inline-block text-xs font-semibold uppercase tracking-widest text-brand">
           O que dizem sobre o meu trabalho
         </span>

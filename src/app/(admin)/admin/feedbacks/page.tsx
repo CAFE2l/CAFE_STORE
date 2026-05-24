@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { FeedbackModerationButtons } from '@/components/admin/forms/AdminActions';
+import { FeedbackModerationButtons, FeaturedServicesToggle } from '@/components/admin/forms/AdminActions';
 import { Badge } from '@/components/ui/Badge';
 import { getAdminFeedbacks } from '@/lib/admin';
 import { feedbackServiceLabels } from '@/lib/feedbacks';
@@ -56,12 +56,15 @@ export default async function AdminFeedbacksPage({ searchParams }: { searchParam
                 {feedback.authorEmail} · {feedback.createdAt.toLocaleDateString('pt-BR')}
               </p>
             </div>
-            <FeedbackModerationButtons
-              feedbackId={feedback.id}
-              isApproved={feedback.isApproved}
-              isVerified={feedback.isVerified}
-              isFeatured={feedback.isFeatured}
-            />
+            <div className="flex flex-col items-end justify-between gap-3">
+              <FeaturedServicesToggle id={feedback.id} isFeaturedServices={feedback.isFeaturedServices} order={feedback.featuredServicesOrder} />
+              <FeedbackModerationButtons
+                feedbackId={feedback.id}
+                isApproved={feedback.isApproved}
+                isVerified={feedback.isVerified}
+                isFeatured={feedback.isFeatured}
+              />
+            </div>
           </article>
         ))}
         {feedbacks.length === 0 ? <p className="text-sm text-text-secondary">Nenhum feedback encontrado.</p> : null}

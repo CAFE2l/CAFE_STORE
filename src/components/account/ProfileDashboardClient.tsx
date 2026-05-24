@@ -469,7 +469,7 @@ export function ProfileDashboardClient({ addresses, orders, user, wishlist, acti
             <h2 className="font-display text-xl font-semibold text-white">Resumo da conta</h2>
             <div className="mt-4 grid grid-cols-2 gap-3">
               <Link
-                href="/orders"
+                href="/perfil/pedidos"
                 className="group rounded-xl bg-white/[0.04] p-3 transition-all duration-300 hover:border-brand/30 hover:shadow-led-brand/30 border border-glass-border"
               >
                 <p className="text-xs text-zinc-500">Total de pedidos</p>
@@ -479,7 +479,7 @@ export function ProfileDashboardClient({ addresses, orders, user, wishlist, acti
                 </div>
               </Link>
               <Link
-                href="/profile?section=enderecos"
+                href="/perfil/enderecos"
                 className="group rounded-xl bg-white/[0.04] p-3 transition-all duration-300 hover:border-brand/30 hover:shadow-led-brand/30 border border-glass-border"
               >
                 <p className="text-xs text-zinc-500">Enderecos salvos</p>
@@ -489,7 +489,7 @@ export function ProfileDashboardClient({ addresses, orders, user, wishlist, acti
                 </div>
               </Link>
               <Link
-                href="/profile?section=favoritos"
+                href="/perfil/favoritos"
                 className="group rounded-xl bg-white/[0.04] p-3 transition-all duration-300 hover:border-brand/30 hover:shadow-led-brand/30 border border-glass-border"
               >
                 <p className="text-xs text-zinc-500">Favoritos</p>
@@ -499,7 +499,7 @@ export function ProfileDashboardClient({ addresses, orders, user, wishlist, acti
                 </div>
               </Link>
               <Link
-                href="/profile?section=cupons"
+                href="/perfil/cupons"
                 className="group rounded-xl bg-white/[0.04] p-3 transition-all duration-300 hover:border-brand/30 hover:shadow-led-brand/30 border border-glass-border"
               >
                 <p className="text-xs text-zinc-500">Cupons disponiveis</p>
@@ -517,7 +517,7 @@ export function ProfileDashboardClient({ addresses, orders, user, wishlist, acti
           <section className="glass-card p-5">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="font-display text-xl font-semibold text-white">Ultimos pedidos</h2>
-              <Link href="/orders" className="text-sm font-medium text-brand transition hover:brightness-110">
+              <Link href="/perfil/pedidos" className="text-sm font-medium text-brand transition hover:brightness-110">
                 Ver todos →
               </Link>
             </div>

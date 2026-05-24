@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { requireAdmin } from '@/lib/admin';
 import { serializeFeedback } from '@/lib/feedbacks';
 import { prisma } from '@/lib/prisma';
+import { revalidatePath } from 'next/cache';
 
 const updateSchema = z.object({
   isApproved: z.boolean().optional(),
@@ -25,7 +26,68 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     },
   });
 
+  // revalidate pages that depend on feedbacks
+  try {
+    revalidatePath('/servicos');
+    revalidatePath('/api/feedbacks/featured-services');
+  } catch (err) {
+    // ignore if not running in Next environment
+    console.warn('revalidatePath failed', err);
+  }
+
   return Response.json({ success: true, data: serializeFeedback(feedback) });
+}
+
+export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+  const session = await requireAdmin();
+  if (!session) return Response.json({ success: false, error: 'Acesso negado.' }, { status: 403 });
+
+  const body = await request.json().catch(() => ({}));
+  const isFeaturedServices = body.isFeaturedServices ?? body.is_featured_services;
+
+  if (typeof isFeaturedServices !== 'boolean') {
+    return Response.json({ success: false, error: 'Dados inválidos.' }, { status: 400 });
+  }
+
+  if (isFeaturedServices) {
+    // compute next order
+    const count = await prisma.feedback.count({ where: { isFeaturedServices: true } });
+    const updated = await prisma.feedback.update({
+      where: { id: params.id },
+      data: { isFeaturedServices: true, featuredServicesOrder: count + 1 },
+    });
+
+    try {
+      revalidatePath('/servicos');
+      revalidatePath('/api/feedbacks/featured-services');
+    } catch (err) {
+      console.warn('revalidatePath failed', err);
+    }
+
+    return Response.json({ success: true, data: serializeFeedback(updated) });
+  }
+
+  // disabling: remove and reorder
+  const current = await prisma.feedback.findUnique({ where: { id: params.id }, select: { featuredServicesOrder: true } });
+  await prisma.feedback.update({ where: { id: params.id }, data: { isFeaturedServices: false, featuredServicesOrder: 0 } });
+
+  if (current?.featuredServicesOrder) {
+    await prisma.$executeRaw`
+      UPDATE feedbacks
+      SET featured_services_order = featured_services_order - 1
+      WHERE is_featured_services = true
+        AND featured_services_order > ${current.featuredServicesOrder}
+    `;
+  }
+
+  try {
+    revalidatePath('/servicos');
+    revalidatePath('/api/feedbacks/featured-services');
+  } catch (err) {
+    console.warn('revalidatePath failed', err);
+  }
+
+  return Response.json({ success: true });
 }
 
 export async function DELETE(_request: Request, { params }: { params: { id: string } }) {
@@ -33,5 +95,13 @@ export async function DELETE(_request: Request, { params }: { params: { id: stri
   if (!session) return Response.json({ success: false, error: 'Acesso negado.' }, { status: 403 });
 
   await prisma.feedback.delete({ where: { id: params.id } });
+
+  try {
+    revalidatePath('/servicos');
+    revalidatePath('/api/feedbacks/featured-services');
+  } catch (err) {
+    console.warn('revalidatePath failed', err);
+  }
+
   return Response.json({ success: true });
 }

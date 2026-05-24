@@ -19,6 +19,7 @@ model User {
   cpf           String?    @unique
   phone         String?
   cart          Json?
+  deletedAt     DateTime?  @map("deleted_at")
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
   accounts      Account[]
@@ -202,31 +203,35 @@ model Banner {
 }
 
 model Feedback {
-  id                String            @id @default(uuid()) @db.Uuid
-  authorName        String            @map("author_name") @db.VarChar(100)
-  authorEmail       String            @map("author_email") @db.VarChar(255)
-  authorAvatarUrl   String?           @map("author_avatar_url") @db.Text
-  authorCompany     String?           @map("author_company") @db.VarChar(100)
-  authorRole        String?           @map("author_role") @db.VarChar(100)
-  authorLinkedinUrl String?           @map("author_linkedin_url") @db.Text
-  serviceType       FeedbackService   @map("service_type")
-  rating            Int
-  title             String            @db.VarChar(150)
-  body              String            @db.Text
-  resultMetric      String?           @map("result_metric") @db.VarChar(200)
-  projectUrl        String?           @map("project_url") @db.Text
-  videoUrl          String?           @map("video_url") @db.Text
-  isVerified        Boolean           @default(false) @map("is_verified")
-  isFeatured        Boolean           @default(false) @map("is_featured")
-  isApproved        Boolean           @default(false) @map("is_approved")
-  helpfulCount      Int               @default(0) @map("helpful_count")
-  createdAt         DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt         DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
-  helpfulVotes      FeedbackHelpful[]
+  id                      String            @id @default(uuid()) @db.Uuid
+  authorName              String            @map("author_name") @db.VarChar(100)
+  authorEmail             String            @map("author_email") @db.VarChar(255)
+  authorAvatarUrl         String?           @map("author_avatar_url") @db.Text
+  authorCompany           String?           @map("author_company") @db.VarChar(100)
+  authorRole              String?           @map("author_role") @db.VarChar(100)
+  authorLinkedinUrl       String?           @map("author_linkedin_url") @db.Text
+  serviceType             FeedbackService   @map("service_type")
+  rating                  Int
+  title                   String            @db.VarChar(150)
+  body                    String            @db.Text
+  resultMetric            String?           @map("result_metric") @db.VarChar(200)
+  projectUrl              String?           @map("project_url") @db.Text
+  videoUrl                String?           @map("video_url") @db.Text
+  isVerified              Boolean           @default(false) @map("is_verified")
+  isFeatured              Boolean           @default(false) @map("is_featured")
+  // NEW: destaque específico na página de serviços
+  isFeaturedServices      Boolean           @default(false) @map("is_featured_services")
+  featuredServicesOrder   Int               @default(0)     @map("featured_services_order")
+  isApproved              Boolean           @default(false) @map("is_approved")
+  helpfulCount            Int               @default(0) @map("helpful_count")
+  createdAt               DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt               DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+  helpfulVotes            FeedbackHelpful[]
 
   @@index([isApproved, createdAt], map: "idx_feedbacks_approved")
   @@index([serviceType], map: "idx_feedbacks_service")
   @@index([isFeatured], map: "idx_feedbacks_featured")
+  @@index([isFeaturedServices, featuredServicesOrder], map: "idx_feedbacks_featured_services")
   @@map("feedbacks")
 }
 

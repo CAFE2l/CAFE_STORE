@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Check, ChevronDown, Menu, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { WHATSAPP, deliverables, faqs, processSteps, projects, services, testimonials } from '@/lib/servicos-data';
+import { TestimonialsSection } from '@/components/sections/TestimonialsSection';
 
 export default function ServicesPage() {
   const [openFaq, setOpenFaq] = useState<string | null>(faqs[0]?.q ?? null);
@@ -324,25 +325,9 @@ export default function ServicesPage() {
           </div>
 
           <div className="grid gap-4">
-            {testimonials.map((testimonial) => (
-              <figure key={testimonial.name} className="rounded-2xl border border-white/[0.08] bg-white/[0.045] p-6 backdrop-blur-xl">
-                <div className="mb-3 flex gap-1 text-[#FFD000]">
-                  {Array.from({ length: testimonial.stars }).map((_, index) => (
-                    <span key={index}>★</span>
-                  ))}
-                </div>
-                <blockquote className="text-sm leading-relaxed text-white/60">&ldquo;{testimonial.text}&rdquo;</blockquote>
-                <figcaption className="mt-4 flex items-center gap-3">
-                  <span className="grid size-10 place-items-center rounded-full bg-brand/15 text-sm font-bold text-brand">
-                    {testimonial.name.charAt(0)}
-                  </span>
-                  <span>
-                    <span className="block text-sm font-semibold text-white">{testimonial.name}</span>
-                    <span className="block text-xs text-white/35">{testimonial.role}</span>
-                  </span>
-                </figcaption>
-              </figure>
-            ))}
+            {/* Testimonials dynamically loaded from admin highlights */}
+            {/* @ts-ignore */}
+            <TestimonialsSection />
           </div>
         </div>
       </section>

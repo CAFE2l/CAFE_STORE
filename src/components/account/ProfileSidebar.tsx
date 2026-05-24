@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { User, Package, Heart, MapPin, Tag, Lock, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -9,33 +9,27 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 
 const links = [
-  { href: '/profile', label: 'Meu Perfil', icon: User, matchExact: true },
-  { href: '/orders', label: 'Meus Pedidos', icon: Package },
-  { href: '/profile?section=favoritos', label: 'Favoritos', icon: Heart },
-  { href: '/profile?section=enderecos', label: 'Endereços', icon: MapPin },
-  { href: '/profile?section=cupons', label: 'Cupons', icon: Tag },
-  { href: '/profile?section=seguranca', label: 'Segurança', icon: Lock },
+  { href: '/perfil', label: 'Meu Perfil', icon: User },
+  { href: '/perfil/pedidos', label: 'Meus Pedidos', icon: Package },
+  { href: '/perfil/favoritos', label: 'Favoritos', icon: Heart },
+  { href: '/perfil/enderecos', label: 'Endereços', icon: MapPin },
+  { href: '/perfil/cupons', label: 'Cupons', icon: Tag },
+  { href: '/perfil/seguranca', label: 'Segurança', icon: Lock },
 ];
 
 export function ProfileSidebar() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const section = searchParams.get('section');
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   function isActive(link: (typeof links)[number]) {
-    if (link.matchExact) return pathname === link.href;
-    if (link.href.includes('section=')) {
-      const linkSection = link.href.split('section=')[1];
-      return pathname === '/profile' && section === linkSection;
-    }
+    if (link.href === '/perfil') return pathname === '/perfil';
     return pathname === link.href || pathname.startsWith(link.href + '/');
   }
 
   return (
     <>
       <aside className="w-full shrink-0 animate-slide-in-left lg:w-56">
-        <div className="sticky top-28 flex flex-col gap-1 rounded-2xl border border-white/[0.06] bg-zinc-900/40 p-2 backdrop-blur">
+        <div className="sticky top-24 flex flex-col gap-1 rounded-2xl border border-white/[0.06] bg-zinc-900/40 p-2 backdrop-blur">
           {links.map((link) => {
             const Icon = link.icon;
             const active = isActive(link);
@@ -46,7 +40,7 @@ export function ProfileSidebar() {
                 className={cn(
                   'flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200',
                   active
-                    ? 'bg-brand/15 text-brand ring-1 ring-brand/30'
+                    ? 'bg-brand text-white shadow-[0_0_14px_rgba(249,115,22,0.35)]'
                     : 'text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200',
                 )}
               >

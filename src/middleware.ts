@@ -1,7 +1,7 @@
 import { getToken } from 'next-auth/jwt';
 import { NextResponse, type NextRequest } from 'next/server';
 
-const protectedRoutes = ['/orders', '/profile', '/checkout'];
+const protectedRoutes = ['/orders', '/profile', '/perfil', '/checkout'];
 const adminRoutePrefix = '/admin';
 
 export async function middleware(request: NextRequest) {
@@ -29,5 +29,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/orders/:path*', '/profile/:path*', '/checkout/:path*', '/admin/:path*'],
+  matcher: ['/orders/:path*', '/profile/:path*', '/perfil/:path*', '/checkout/:path*', '/admin/:path*'],
 };

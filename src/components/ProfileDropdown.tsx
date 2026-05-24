@@ -89,7 +89,7 @@ export function ProfileDropdown({ userName, userEmail, avatarUrl, onLogout }: Pr
 
           <div className="py-1.5">
             <DropdownItem href="/perfil" icon={<UserIcon />} label="Meu Perfil" onClick={() => setOpen(false)} />
-            <DropdownItem href="/configuracoes" icon={<SettingsIcon />} label="Configurações" onClick={() => setOpen(false)} />
+            <DropdownItem href="/perfil/seguranca" icon={<SettingsIcon />} label="Configurações" onClick={() => setOpen(false)} />
           </div>
 
           <div className="border-t border-white/[0.06] py-1.5">

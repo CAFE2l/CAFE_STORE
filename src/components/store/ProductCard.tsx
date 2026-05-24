@@ -99,13 +99,13 @@ export function ProductCard({ product, index = 0, onCartOpen }: ProductCardProps
         className={cn(
           'absolute right-3 top-3 z-10 grid size-8 place-items-center rounded-full border bg-black/40 text-zinc-500 backdrop-blur-sm transition-all duration-200',
           favorite
-            ? 'scale-110 border-brand/50 text-brand shadow-[0_0_12px_rgba(255,122,0,0.25)]'
+            ? 'scale-110 border-brand/60 bg-brand/15 text-brand shadow-[0_0_16px_rgba(255,122,0,0.35)]'
             : 'border-glass-border hover:border-brand/40 hover:text-brand',
         )}
         aria-label={favorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
         onClick={handleFavorite}
       >
-        <Heart className={cn('h-4 w-4 transition-transform', favorite && 'scale-110 fill-current')} />
+        <Heart className={cn('h-4 w-4 transition-transform', favorite && 'scale-110 fill-brand stroke-brand')} />
       </button>
 
       {/* image */}

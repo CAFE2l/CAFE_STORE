@@ -135,7 +135,7 @@ export function CheckoutConfirmationClient() {
       ) : null}
 
       <div className="flex flex-wrap justify-center gap-3">
-        <Link href="/orders" className="btn-primary">
+        <Link href="/perfil/pedidos" className="btn-primary">
           Acompanhar apoio
         </Link>
         <Link href="/products" className="btn-secondary">

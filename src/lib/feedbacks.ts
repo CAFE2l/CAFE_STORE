@@ -29,34 +29,40 @@ export function serializeFeedback<T extends {
   videoUrl: string | null;
   isVerified: boolean;
   isFeatured: boolean;
-  isApproved: boolean;
-  helpfulCount: number;
-  createdAt: Date;
-  updatedAt: Date;
+ // new fields for services highlights
+ isFeaturedServices?: boolean;
+ featuredServicesOrder?: number;
+ isApproved: boolean;
+ helpfulCount: number;
+ createdAt: Date;
+ updatedAt: Date;
 }>(feedback: T) {
-  return {
-    id: feedback.id,
-    author_name: feedback.authorName,
-    author_email: feedback.authorEmail,
-    author_avatar_url: feedback.authorAvatarUrl,
-    author_company: feedback.authorCompany,
-    author_role: feedback.authorRole,
-    author_linkedin_url: feedback.authorLinkedinUrl,
-    service_type: feedback.serviceType,
-    service_label: feedbackServiceLabels[feedback.serviceType],
-    rating: feedback.rating,
-    title: feedback.title,
-    body: feedback.body,
-    result_metric: feedback.resultMetric,
-    project_url: feedback.projectUrl,
-    video_url: feedback.videoUrl,
-    is_verified: feedback.isVerified,
-    is_featured: feedback.isFeatured,
-    is_approved: feedback.isApproved,
-    helpful_count: feedback.helpfulCount,
-    created_at: feedback.createdAt.toISOString(),
-    updated_at: feedback.updatedAt.toISOString(),
-  };
+ return {
+   id: feedback.id,
+   author_name: feedback.authorName,
+   author_email: feedback.authorEmail,
+   author_avatar_url: feedback.authorAvatarUrl,
+   author_company: feedback.authorCompany,
+   author_role: feedback.authorRole,
+   author_linkedin_url: feedback.authorLinkedinUrl,
+   service_type: feedback.serviceType,
+   service_label: feedbackServiceLabels[feedback.serviceType],
+   rating: feedback.rating,
+   title: feedback.title,
+   body: feedback.body,
+   result_metric: feedback.resultMetric,
+   project_url: feedback.projectUrl,
+   video_url: feedback.videoUrl,
+   is_verified: feedback.isVerified,
+   is_featured: feedback.isFeatured,
+   // new serialized fields
+   is_featured_services: Boolean((feedback as any).isFeaturedServices),
+   featured_services_order: (feedback as any).featuredServicesOrder ?? 0,
+   is_approved: feedback.isApproved,
+   helpful_count: feedback.helpfulCount,
+   created_at: feedback.createdAt.toISOString(),
+   updated_at: feedback.updatedAt.toISOString(),
+ };
 }
 
 export function getFingerprint(request: Request) {

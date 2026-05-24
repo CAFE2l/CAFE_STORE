@@ -1,5 +1,6 @@
+import Image from 'next/image';
 import Link from 'next/link';
-import { ExternalLink, Flame, Globe2, Layers, Link as LinkIcon } from 'lucide-react';
+import { ExternalLink, Flame } from 'lucide-react';
 import { WHATSAPP } from '@/lib/servicos-data';
 
 export function Footer() {
@@ -8,19 +9,19 @@ export function Footer() {
       title: 'Meu portfólio',
       description: 'Projetos, cases e aplicações web que mostram meu trabalho na prática.',
       href: '/servicos#provas',
-      icon: Layers,
+      image: '/images/icons/portfolio.png',
     },
     {
       title: 'Minha landing page',
       description: 'Veja meus serviços de sites, landing pages e web aplicações sob medida.',
       href: '/servicos',
-      icon: Globe2,
+      image: '/images/icons/landing-page.png',
     },
     {
       title: 'Meu Linktree',
       description: 'Acesse meus links principais, contato e canais oficiais em um só lugar.',
       href: WHATSAPP,
-      icon: LinkIcon,
+      image: '/images/icons/linktree.jpg',
       external: true,
     },
   ];
@@ -44,12 +45,17 @@ export function Footer() {
 
           <div className="grid gap-4 md:grid-cols-3">
             {footerCards.map((card) => {
-              const Icon = card.icon;
               const className = 'group rounded-card border border-border-subtle bg-background-card p-5 transition hover:border-cafe-orange-500/40 hover:bg-cafe-dark-800';
               const content = (
                 <>
-                  <div className="mb-4 flex size-10 items-center justify-center rounded-xl bg-cafe-orange-500/10 text-cafe-orange-500">
-                    <Icon className="h-5 w-5" />
+                  <div className="mb-4 flex size-11 items-center justify-center overflow-hidden rounded-xl border border-cafe-orange-500/20 bg-cafe-orange-500/10 p-1">
+                    <Image
+                      src={card.image}
+                      alt=""
+                      width={36}
+                      height={36}
+                      className="h-9 w-9 rounded-lg object-cover transition duration-300 group-hover:scale-105"
+                    />
                   </div>
                   <div className="flex items-center gap-2">
                     <h3 className="text-sm font-semibold text-text-primary">{card.title}</h3>

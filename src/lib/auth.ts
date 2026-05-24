@@ -78,6 +78,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           },
         });
 
+        if (user?.deletedAt) {
+          recordFailedLogin(parsedCredentials.data.email);
+          return null;
+        }
+
         if (!user?.password) {
           recordFailedLogin(parsedCredentials.data.email);
           return null;
@@ -108,6 +113,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
+    async signIn({ user }) {
+      if (!user.email) return true;
+
+      const existing = await prisma.user.findUnique({
+        where: { email: user.email },
+        select: { deletedAt: true },
+      });
+
+      return !existing?.deletedAt;
+    },
     async jwt({ token, user }) {
       if (user?.id) {
         token.id = user.id;

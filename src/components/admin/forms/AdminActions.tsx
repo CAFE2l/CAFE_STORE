@@ -2,7 +2,7 @@
 
 import { OrderStatus } from '@prisma/client';
 import { useRouter } from 'next/navigation';
-import { ChangeEvent } from 'react';
+import { ChangeEvent, useState } from 'react';
 
 export function OrderStatusSelect({ orderId, status }: { orderId: string; status: OrderStatus }) {
   const router = useRouter();
@@ -89,6 +89,37 @@ export function FeedbackModerationButtons({
       <button type="button" className="rounded-button border border-red-500/40 px-3 py-2 text-xs font-semibold text-red-300 transition hover:bg-red-500/10" onClick={remove}>
         Rejeitar
       </button>
+    </div>
+  );
+}
+
+// NEW: toggle for "Na página de serviços"
+export function FeaturedServicesToggle({ id, isFeaturedServices, order } : { id: string; isFeaturedServices: boolean; order: number }) {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  async function toggle(v: boolean) {
+    setLoading(true);
+    await fetch(`/api/admin/feedbacks/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ isFeaturedServices: v }),
+    }).catch(() => null);
+    setLoading(false);
+    router.refresh();
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <button
+        onClick={() => toggle(!isFeaturedServices)}
+        disabled={loading}
+        className={`relative w-10 h-5 rounded-full transition-all duration-300 border ${isFeaturedServices ? 'bg-brand border-brand shadow-[0_0_8px_rgba(249,115,22,0.4)]' : 'bg-white/[0.06] border-white/10'}`}
+        aria-label={isFeaturedServices ? 'Remover da página de serviços' : 'Destacar na página de serviços'}
+      >
+        <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all duration-300 ${isFeaturedServices ? 'left-5' : 'left-0.5'}`} />
+      </button>
+      {isFeaturedServices && <span className="text-xs text-brand font-mono">#{order}</span>}
     </div>
   );
 }
