@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { signOut } from 'next-auth/react';
-import { User, Package, Heart, MapPin, Tag, Lock, LogOut } from 'lucide-react';
+import { signOut, useSession } from 'next-auth/react';
+import { User, Package, Heart, MapPin, Tag, Lock, LogOut, Shield } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
@@ -20,11 +20,14 @@ const links = [
 export function ProfileSidebar() {
   const pathname = usePathname();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const { data: session } = useSession();
 
   function isActive(link: (typeof links)[number]) {
     if (link.href === '/perfil') return pathname === '/perfil';
     return pathname === link.href || pathname.startsWith(link.href + '/');
   }
+
+  const isAdmin = session?.user?.role === 'ADMIN';
 
   return (
     <>
@@ -49,6 +52,19 @@ export function ProfileSidebar() {
               </Link>
             );
           })}
+
+          {isAdmin ? (
+            <Link
+              href="/admin"
+              className={cn(
+                'flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200 text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200',
+              )}
+            >
+              <Shield className="size-4 shrink-0" />
+              Admin
+            </Link>
+          ) : null}
+
           <hr className="my-1 border-white/[0.06]" />
           <button
             type="button"
@@ -81,6 +97,17 @@ export function ProfileSidebar() {
               </Link>
             );
           })}
+
+          {isAdmin ? (
+            <Link
+              href="/admin"
+              className="flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl bg-zinc-900/60 px-4 py-2 text-xs font-medium text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-300"
+            >
+              <Shield className="size-3.5" />
+              Admin
+            </Link>
+          ) : null}
+
           <button
             type="button"
             onClick={() => setShowLogoutConfirm(true)}
