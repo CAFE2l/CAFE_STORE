@@ -166,6 +166,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
             <p className="text-xs font-medium uppercase tracking-wider text-brand">{product.category.name}</p>
             <h1 className="text-2xl font-bold leading-snug text-white lg:text-3xl">{product.name}</h1>
             <p className="text-sm leading-relaxed text-zinc-400">{product.description ?? 'Produto oficial CAFÉ STORE.'}</p>
+            <div className="rounded-xl border border-brand/30 bg-brand/10 p-4 text-sm leading-6 text-zinc-300">
+              <strong className="text-white">Apoio simbolico:</strong> as imagens sao ilustrativas. Este item nao e um produto real
+              para entrega; o valor funciona como doacao para apoiar o projeto CAFÉ STORE.
+            </div>
 
             <div className="h-px bg-zinc-800" />
 
@@ -178,8 +182,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {[
               { icon: '🔒', title: 'Pagamento seguro', desc: 'Pix, cartao, Mercado Pago e PayPal.' },
-              { icon: '🛡️', title: 'Garantia CAFÉ STORE', desc: 'Troca ou devolucao em ate 7 dias.' },
-              { icon: '📦', title: 'Frete rapido', desc: 'Enviamos para todo o Brasil.' },
+              { icon: '💛', title: 'Doacao simbolica', desc: 'O valor apoia o projeto CAFÉ STORE.' },
+              { icon: 'ℹ', title: 'Sem envio fisico', desc: 'As imagens sao ilustrativas e nao ha entrega.' },
             ].map((item) => (
               <div key={item.title} className="flex flex-col gap-1.5 rounded-xl border border-zinc-800 bg-surface-2/50 p-5 transition-all duration-300 hover:border-brand/20 hover:bg-surface-2">
                 <span className="mb-1 text-xl">{item.icon}</span>
@@ -201,8 +205,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
         {/* Related Products */}
         <section className="mx-auto mt-14 max-w-7xl px-6">
           <div>
-            <h2 className="text-2xl font-bold text-white font-display">Voce tambem pode gostar</h2>
-            <p className="mt-1 text-sm text-zinc-500">Produtos relacionados para completar seu pedido.</p>
+            <h2 className="text-2xl font-bold text-white font-display">Outras formas de apoiar</h2>
+            <p className="mt-1 text-sm text-zinc-500">Itens simbolicos relacionados para contribuir com o projeto.</p>
           </div>
           <div className="mt-6">
             <ProductGrid products={relatedProducts} />

@@ -3,8 +3,9 @@
 import { OrderStatus } from '@prisma/client';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
-import { Package } from 'lucide-react';
+import { Camera, Loader2, Package } from 'lucide-react';
 import { StatusBadge } from '@/components/account/StatusBadge';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -112,6 +113,7 @@ const emptyAddressForm: AddressFormData = {
 };
 
 export function ProfileDashboardClient({ addresses, orders, user, wishlist, activeCoupons = 0 }: ProfileDashboardClientProps) {
+  const router = useRouter();
   const [avatarPreview, setAvatarPreview] = useState(user.image ?? '');
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [displayName, setDisplayName] = useState(user.name ?? '');
@@ -164,6 +166,7 @@ export function ProfileDashboardClient({ addresses, orders, user, wishlist, acti
       if (data.success && data.url) {
         setAvatarPreview(data.url);
         setToast({ message: 'Avatar atualizado com sucesso.', type: 'success' });
+        router.refresh();
       } else {
         setToast({ message: data.error ?? 'Erro ao enviar avatar.', type: 'error' });
       }
@@ -342,49 +345,39 @@ export function ProfileDashboardClient({ addresses, orders, user, wishlist, acti
             <div className="grid gap-3 justify-items-center">
               {/* Avatar */}
               {avatarPreview ? (
-                <div className="relative">
+                <div className="grid gap-2 justify-items-center">
                   <Image src={avatarPreview} alt={displayName || 'Perfil'} width={96} height={96} className="size-24 rounded-full object-cover ring-2 ring-brand/30" />
-                  <label className="absolute bottom-0 right-0 grid size-8 cursor-pointer place-items-center rounded-full bg-brand text-white shadow-lg transition hover:bg-brand/80">
-                    {avatarUploading ? (
-                      <span className="text-xs animate-pulse">...</span>
-                    ) : (
-                      <span className="text-xs">📷</span>
-                    )}
-                    <input
-                      className="sr-only"
-                      type="file"
-                      accept="image/*"
-                      disabled={avatarUploading}
-                      onChange={(event) => handleAvatarUpload(event.target.files?.[0])}
-                      aria-label="Alterar foto do perfil"
-                    />
-                  </label>
                 </div>
               ) : (
-                <div className="relative">
+                <div className="grid gap-2 justify-items-center">
                   <div
                     className="grid size-24 place-items-center rounded-full text-3xl font-bold ring-2 ring-white/10"
                     style={{ backgroundColor: avatarBg, color: avatarText }}
                   >
                     {initials}
                   </div>
-                  <label className="absolute bottom-0 right-0 grid size-8 cursor-pointer place-items-center rounded-full bg-brand text-white shadow-lg transition hover:bg-brand/80">
-                    {avatarUploading ? (
-                      <span className="text-xs animate-pulse">...</span>
-                    ) : (
-                      <span className="text-xs">📷</span>
-                    )}
-                    <input
-                      className="sr-only"
-                      type="file"
-                      accept="image/*"
-                      disabled={avatarUploading}
-                      onChange={(event) => handleAvatarUpload(event.target.files?.[0])}
-                      aria-label="Alterar foto do perfil"
-                    />
-                  </label>
                 </div>
               )}
+              <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-brand/30 bg-brand/15 px-3 py-2 text-xs font-semibold text-brand transition hover:bg-brand/25">
+                {avatarUploading ? (
+                  <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                ) : (
+                  <Camera className="size-3.5" aria-hidden="true" />
+                )}
+                {avatarUploading ? 'Enviando...' : 'Alterar foto'}
+                <input
+                  className="sr-only"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  disabled={avatarUploading}
+                  onChange={(event) => {
+                    void handleAvatarUpload(event.target.files?.[0]);
+                    event.currentTarget.value = '';
+                  }}
+                  aria-label="Alterar foto do perfil"
+                />
+              </label>
+              <p className="text-center text-[11px] text-zinc-600">JPG, PNG, WEBP ou GIF ate 5MB</p>
             </div>
 
             <div className="grid gap-4">

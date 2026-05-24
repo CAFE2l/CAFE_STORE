@@ -7,7 +7,7 @@ import { sendPixNotification } from '@/lib/notifications';
 import { prisma } from '@/lib/prisma';
 import { checkoutSchema } from '@/lib/validations';
 
-const shipping = 18.9;
+const shipping = 0;
 
 export async function POST(request: Request) {
   const session = await auth();
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     return Response.json(
       {
         success: false,
-        error: 'Faca login para finalizar a compra.',
+        error: 'Faca login para finalizar o apoio.',
       },
       { status: 401 },
     );
@@ -196,7 +196,7 @@ export async function POST(request: Request) {
           merchantCity: process.env.PIX_MERCHANT_CITY ?? 'CURITIBA',
           amount: total,
           txid: order.id,
-          description: `Pedido ${order.id}`,
+          description: `Apoio ${order.id}`,
         })
       : null;
 

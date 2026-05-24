@@ -49,7 +49,7 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Nome do produto"
+            placeholder="Nome do apoio"
           />
         </div>
         <div>

@@ -33,7 +33,7 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
             <div className="flex items-center justify-between border-b border-white/[0.06] px-6 py-5">
               <span className="flex items-center gap-2 text-lg font-bold text-white">
                 <ShoppingBag className="h-5 w-5 text-[#FF7A00]" />
-                Seu Carrinho
+                Apoios no carrinho
               </span>
               <button type="button" className="grid size-8 place-items-center rounded-lg text-zinc-500 transition hover:text-white" onClick={onClose} aria-label="Fechar">
                 <X className="h-5 w-5" />
@@ -45,7 +45,7 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
                 <div className="flex h-full flex-col items-center justify-center text-center">
                   <ShoppingBag className="mb-4 h-12 w-12 text-zinc-700" />
                   <p className="text-sm font-medium text-zinc-400">Carrinho vazio</p>
-                  <p className="mt-1 text-xs text-zinc-600">Adicione produtos para continuar</p>
+                  <p className="mt-1 text-xs text-zinc-600">Adicione apoios simbolicos para continuar</p>
                 </div>
               ) : (
                 <div className="grid gap-4">
@@ -101,7 +101,7 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
                   <span className="text-zinc-500">Subtotal</span>
                   <span className="font-bold text-white">{total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
                 </div>
-                <p className="text-xs text-zinc-600">Frete calculado no checkout</p>
+                <p className="text-xs text-zinc-600">Apoio simbolico: nao ha entrega fisica.</p>
                 <Link
                   href="/checkout"
                   className={cn(
@@ -110,10 +110,10 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
                   )}
                   onClick={onClose}
                 >
-                  Finalizar Compra
+                  Finalizar apoio
                 </Link>
                 <button type="button" className="mt-2 w-full py-2 text-center text-xs font-medium text-zinc-500 transition hover:text-zinc-300" onClick={onClose}>
-                  Continuar Comprando
+                  Continuar apoiando
                 </button>
               </div>
             ) : null}

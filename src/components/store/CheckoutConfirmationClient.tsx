@@ -51,7 +51,7 @@ export function CheckoutConfirmationClient() {
         </div>
         <h1 className="mt-5 font-display text-3xl font-bold text-text-primary">
           {isApproved
-            ? 'Pedido confirmado! 🎉'
+            ? 'Apoio confirmado!'
             : isPending
               ? 'Pagamento pendente'
               : 'Pagamento nao aprovado'}
@@ -59,14 +59,14 @@ export function CheckoutConfirmationClient() {
         <p className="mt-3 text-sm leading-6 text-text-muted">
           {isApproved
             ? orderId
-              ? `Pedido #${orderId} foi criado e esta sendo processado.`
-              : 'Seu pedido foi criado e esta aguardando processamento.'
+              ? `Apoio #${orderId} foi criado e esta sendo processado.`
+              : 'Seu apoio foi criado e esta aguardando processamento.'
             : isPending
-              ? 'Seu pagamento esta sendo processado. Assim que for confirmado, seu pedido sera atualizado.'
+              ? 'Seu pagamento esta sendo processado. Assim que for confirmado, seu apoio sera atualizado.'
               : 'Nao foi possivel confirmar seu pagamento. Tente novamente ou escolha outra forma de pagamento.'}
         </p>
         {isApproved ? (
-          <p className="mt-1 text-xs text-text-muted">Voce recebera um e-mail de confirmacao em breve.</p>
+          <p className="mt-1 text-xs text-text-muted">Este apoio e simbolico e nao gera envio de produto fisico.</p>
         ) : null}
       </section>
 
@@ -136,10 +136,10 @@ export function CheckoutConfirmationClient() {
 
       <div className="flex flex-wrap justify-center gap-3">
         <Link href="/orders" className="btn-primary">
-          Acompanhar pedido
+          Acompanhar apoio
         </Link>
         <Link href="/products" className="btn-secondary">
-          Continuar comprando
+          Continuar apoiando
         </Link>
       </div>
     </div>

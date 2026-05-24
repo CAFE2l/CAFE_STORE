@@ -59,8 +59,8 @@ export default async function OrdersPage() {
       ) : (
         <EmptyState
           title="Nenhum pedido ainda"
-          subtitle="Quando voce finalizar uma compra, ela aparecera aqui."
-          action={{ href: '/products', label: 'Comprar agora' }}
+          subtitle="Quando voce finalizar um apoio, ele aparecera aqui."
+          action={{ href: '/products', label: 'Apoiar agora' }}
         />
       )}
     </main>

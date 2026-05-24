@@ -60,7 +60,7 @@ const currencyFormatter = new Intl.NumberFormat('pt-BR', {
   currency: 'BRL',
 });
 
-const shipping = 18.9;
+const shipping = 0;
 
 export function CheckoutPageClient() {
   const router = useRouter();
@@ -87,7 +87,7 @@ export function CheckoutPageClient() {
       step === 2 &&
       (!form.street || !form.number || !form.neighborhood || !form.city || !form.state || !form.zip)
     ) {
-      return 'Preencha os dados obrigatorios do endereco.';
+      return 'Preencha os dados de contato obrigatorios.';
     }
 
     return null;
@@ -178,8 +178,8 @@ export function CheckoutPageClient() {
     return (
       <EmptyState
         title="Nada para finalizar"
-        subtitle="Adicione produtos ao carrinho antes de abrir o checkout."
-        action={{ href: '/products', label: 'Ver produtos' }}
+        subtitle="Adicione um apoio simbolico ao carrinho antes de continuar."
+        action={{ href: '/products', label: 'Ver apoios' }}
       />
     );
   }
@@ -190,7 +190,7 @@ export function CheckoutPageClient() {
         <div className="mb-6 flex items-center gap-2">
           {[
             { label: 'Dados', step: 1 },
-            { label: 'Endereço', step: 2 },
+            { label: 'Contato', step: 2 },
             { label: 'Pagamento', step: 3 },
             { label: 'Confirmação', step: 4 },
           ].map((item, index) => (
@@ -237,7 +237,7 @@ export function CheckoutPageClient() {
         {step === 2 ? (
           <div className="grid gap-4 sm:grid-cols-2">
             <Input
-              label="Rua"
+              label="Endereco de contato"
               className="sm:col-span-2"
               value={form.street}
               onChange={(event) => updateForm('street', event.target.value)}
@@ -296,6 +296,13 @@ export function CheckoutPageClient() {
 
         {step === 4 ? (
           <div className="grid gap-4">
+            <div className="rounded-lg border border-cafe-orange-500/30 bg-cafe-orange-500/10 p-4 text-sm leading-6 text-text-secondary">
+              <p className="mb-1 font-semibold text-text-primary">Aviso sobre o apoio</p>
+              <p>
+                As imagens dos itens sao ilustrativas. Este pedido representa uma doacao simbolica para apoiar
+                o projeto CAFÉ STORE e nao gera envio de produto fisico.
+              </p>
+            </div>
             <div className="rounded-lg bg-cafe-dark-700 p-4 text-sm text-text-secondary">
               <p className="mb-2 font-semibold text-text-primary">Dados pessoais</p>
               <p>{form.name}</p>
@@ -303,7 +310,7 @@ export function CheckoutPageClient() {
               <p>{form.phone}</p>
             </div>
             <div className="rounded-lg bg-cafe-dark-700 p-4 text-sm text-text-secondary">
-              <p className="mb-2 font-semibold text-text-primary">Endereço de entrega</p>
+              <p className="mb-2 font-semibold text-text-primary">Contato informado</p>
               <p>{form.street}, {form.number} {form.complement ? `- ${form.complement}` : ''}</p>
               <p>{form.neighborhood} - {form.city}/{form.state.toUpperCase()}</p>
               <p>CEP: {form.zip}</p>
@@ -329,14 +336,14 @@ export function CheckoutPageClient() {
             </Button>
           ) : (
             <Button type="submit" loading={loading}>
-              Confirmar pedido
+              Confirmar apoio
             </Button>
           )}
         </div>
       </section>
 
       <aside className="sticky top-28 h-fit rounded-card border border-border-subtle bg-background-card p-5">
-        <h2 className="font-display text-xl font-semibold text-text-primary">Seu pedido</h2>
+        <h2 className="font-display text-xl font-semibold text-text-primary">Seu apoio</h2>
         <div className="mt-5 grid gap-3">
           {items.map((item) => (
             <div key={item.id} className="grid grid-cols-[3rem_1fr_auto] gap-3">
@@ -365,8 +372,8 @@ export function CheckoutPageClient() {
             <dd>{currencyFormatter.format(total)}</dd>
           </div>
           <div className="flex justify-between text-text-secondary">
-            <dt>Frete</dt>
-            <dd>{currencyFormatter.format(shipping)}</dd>
+            <dt>Entrega</dt>
+            <dd>Nao se aplica</dd>
           </div>
           <div className="flex justify-between border-t border-border-subtle pt-2 text-base font-bold text-text-primary">
             <dt>Total</dt>

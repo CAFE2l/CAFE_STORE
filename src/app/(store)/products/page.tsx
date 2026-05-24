@@ -3,8 +3,8 @@ import { getCategories, getProducts } from '@/lib/products';
 import { ProductsPageClient } from '@/components/store/ProductsPageClient';
 
 export const metadata: Metadata = {
-  title: 'Produtos | CAFÉ STORE',
-  description: 'Confira nossa seleção de produtos digitais e físicos da marca CAFÉ.',
+  title: 'Apoios | CAFÉ STORE',
+  description: 'Apoios simbolicos da marca CAFÉ. Itens ilustrativos sem entrega fisica.',
 };
 
 export const dynamic = 'force-dynamic';

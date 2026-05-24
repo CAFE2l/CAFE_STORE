@@ -9,7 +9,7 @@ import { MobileNav } from '@/components/layout/MobileNav';
 import { cn } from '@/lib/utils';
 
 const navItems = [
-  { href: '/products', label: 'Produtos' },
+  { href: '/products', label: 'Apoios' },
   { href: '/servicos', label: 'Serviços' },
   { href: '/orders', label: 'Pedidos' },
 ];

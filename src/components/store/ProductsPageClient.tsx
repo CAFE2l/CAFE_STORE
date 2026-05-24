@@ -82,7 +82,7 @@ export function ProductsPageClient({ categories, products, total, totalPages, pa
         <nav className="mb-8 flex animate-fade-in items-center gap-2 text-sm text-zinc-500">
           <Link href="/" className="transition-colors duration-200 hover:text-zinc-300">Home</Link>
           <span className="text-zinc-700">&gt;</span>
-          <span className="text-zinc-300">Produtos</span>
+          <span className="text-zinc-300">Apoios</span>
           {params.category ? (
             <>
               <span className="text-zinc-700">&gt;</span>
@@ -94,9 +94,11 @@ export function ProductsPageClient({ categories, products, total, totalPages, pa
         {/* header */}
         <div className="mb-8 animate-fade-up">
           <h1 className="mb-1 text-3xl font-bold text-white">
-            {params.category ? params.category.replace(/-/g, ' ') : 'Todos os Produtos'}
+            {params.category ? params.category.replace(/-/g, ' ') : 'Apoios simbolicos'}
           </h1>
-          <p className="text-sm text-zinc-500">{total} produtos encontrados</p>
+          <p className="text-sm text-zinc-500">
+            {total} apoios encontrados. Itens ilustrativos, sem envio fisico.
+          </p>
         </div>
 
         {/* cart button mobile */}

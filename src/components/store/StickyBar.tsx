@@ -40,7 +40,7 @@ export function StickyBar({ product, selectedVariants = {}, variantOptions = [] 
   function handleBuy() {
     const missing = variantOptions.find((v) => !selectedVariants[v.name]);
     if (missing) {
-      setError(`Selecione ${missing.name.toLowerCase()} antes de comprar.`);
+      setError(`Selecione ${missing.name.toLowerCase()} antes de apoiar.`);
       return;
     }
     setError(null);
@@ -93,7 +93,7 @@ export function StickyBar({ product, selectedVariants = {}, variantOptions = [] 
                   error ? 'bg-red-500' : 'bg-brand',
                 )}
               >
-                {product.stock > 0 ? 'Comprar Agora' : 'Indisponivel'}
+                {product.stock > 0 ? 'Apoiar agora' : 'Indisponivel'}
               </button>
               {error ? <span className="text-[11px] font-medium text-red-400 whitespace-nowrap">{error}</span> : null}
             </div>

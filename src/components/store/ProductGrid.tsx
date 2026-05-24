@@ -13,7 +13,7 @@ export function ProductGrid({ products, onCartOpen }: ProductGridProps) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <div className="mb-6 animate-float text-6xl">😔</div>
-        <h2 className="text-2xl font-bold text-white">Nenhum produto encontrado</h2>
+        <h2 className="text-2xl font-bold text-white">Nenhum apoio encontrado</h2>
         <p className="mt-2 max-w-md text-sm leading-relaxed text-zinc-500">
           Tente ajustar os filtros ou explorar todas as categorias.
         </p>

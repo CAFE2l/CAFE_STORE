@@ -68,9 +68,9 @@ const fallbackProducts: ProductListItem[] = [
     name: 'Camiseta Algodao',
     slug: 'camiseta-algodao',
     description:
-      'Camiseta 100% algodao com mascote CAFÉ em destaque, estampa traseira Create Build Inspire e acabamento premium.',
-    price: 89.9,
-    oldPrice: 109.9,
+      'Apoio simbolico com imagem ilustrativa de camiseta CAFÉ. Nao e produto fisico, nao gera envio e funciona apenas como doacao ao projeto.',
+    price: 9.9,
+    oldPrice: 19.9,
     stock: 40,
     images: [
       '/images/produtos/camisa_normal/preta/banner.png',
@@ -93,9 +93,9 @@ const fallbackProducts: ProductListItem[] = [
     name: 'Tech Tee Dry Pro',
     slug: 'tech-tee-dry-pro',
     description:
-      'Camiseta com tecnologia Dry Pro, tecido leve, respiravel e visual tech para quem vive o digital.',
-    price: 119.9,
-    oldPrice: 139.9,
+      'Apoio simbolico com imagem ilustrativa de tech tee CAFÉ. Nao e produto fisico, nao gera envio e funciona apenas como doacao ao projeto.',
+    price: 12.9,
+    oldPrice: 24.9,
     stock: 28,
     images: [
       '/images/produtos/poliester/preta/camisa_poliester.png',
@@ -118,9 +118,9 @@ const fallbackProducts: ProductListItem[] = [
     name: 'Moletom Limited Edition',
     slug: 'moletom-limited-edition',
     description:
-      'Moletom limited edition com arte flame, mascote oficial e estampa traseira Create Build Inspire.',
-    price: 199.9,
-    oldPrice: 239.9,
+      'Apoio simbolico com imagem ilustrativa de moletom CAFÉ. Nao e produto fisico, nao gera envio e funciona apenas como doacao ao projeto.',
+    price: 19.9,
+    oldPrice: 39.9,
     stock: 18,
     images: ['/images/produtos/moletons/banner.png', '/images/produtos/moletons/design.png'],
     status: ProductStatus.ACTIVE,
@@ -134,9 +134,9 @@ const fallbackProducts: ProductListItem[] = [
     name: 'Caneca Ceramica',
     slug: 'caneca-ceramica',
     description:
-      'Caneca em ceramica resistente, acabamento brilhante e arte exclusiva CAFÉ Store.',
-    price: 49.9,
-    oldPrice: 59.9,
+      'Apoio simbolico com imagem ilustrativa de caneca CAFÉ. Nao e produto fisico, nao gera envio e funciona apenas como doacao ao projeto.',
+    price: 7.9,
+    oldPrice: 14.9,
     stock: 50,
     images: [
       '/images/produtos/caneca/preta/banner.png',
@@ -160,9 +160,9 @@ const fallbackProducts: ProductListItem[] = [
     name: 'Chaveiro Mascote',
     slug: 'chaveiro-mascote',
     description:
-      'Chaveiro do mascote oficial em formato de fogo estilizado, com frente colorida e verso texturizado.',
-    price: 24.9,
-    oldPrice: 29.9,
+      'Apoio simbolico com imagem ilustrativa de chaveiro CAFÉ. Nao e produto fisico, nao gera envio e funciona apenas como doacao ao projeto.',
+    price: 4.9,
+    oldPrice: 9.9,
     stock: 80,
     images: [
       '/images/produtos/chaveiro/design.png',

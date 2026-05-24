@@ -68,8 +68,7 @@ export function ProductPurchasePanel({ product, selectedVariants: externalVarian
   const hasDiscount = product.oldPrice && product.oldPrice > product.price;
   const discountPercent = hasDiscount ? Math.round((1 - product.price / product.oldPrice!) * 100) : 0;
   const pixPrice = product.price * 0.95;
-  const installmentPrice = product.price / 12;
-  const stockMessage = product.stock <= 0 ? 'Sem estoque' : product.stock <= 3 ? `Restam ${product.stock} unidades` : `${product.stock} unidades disponiveis`;
+  const stockMessage = product.stock <= 0 ? 'Indisponivel' : 'Apoio simbolico disponivel';
   const stockType = product.stock <= 0 ? 'empty' : product.stock <= 3 ? 'low' : 'normal';
 
   const [countdown, setCountdown] = useState<string | null>(null);
@@ -134,15 +133,10 @@ export function ProductPurchasePanel({ product, selectedVariants: externalVarian
   }
 
   async function handleShippingQuote() {
-    const cleanZip = zip.replace(/\D/g, '');
-    if (cleanZip.length !== 8) {
-      setShippingResult('Digite um CEP com 8 numeros.');
-      return;
-    }
     setShippingLoading(true);
     await new Promise((r) => setTimeout(r, 800));
     setShippingLoading(false);
-    setShippingResult(`📦 Sedex — R$ 18,90 (2 dias) • 📦 PAC — R$ 9,90 (7 dias) • ✓ Frete gratis acima de R$ 299`);
+    setShippingResult('Este apoio nao possui frete: as imagens sao ilustrativas e nao ha envio de produto fisico.');
   }
 
   function handleCopyLink() {
@@ -203,11 +197,19 @@ export function ProductPurchasePanel({ product, selectedVariants: externalVarian
           ) : null}
         </div>
         <span className="text-sm text-zinc-400">
-          ou 12x de {installmentPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} sem juros
+          doacao simbolica de {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
         </span>
         <span className="text-sm text-blue-400">
-          🟦 à vista no Pix: {pixPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} (5% off)
+          Pix: {pixPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} (5% off)
         </span>
+      </div>
+
+      <div className="rounded-xl border border-brand/30 bg-brand/10 p-4 text-sm leading-6 text-zinc-300">
+        <p className="font-semibold text-white">Aviso importante</p>
+        <p className="mt-1">
+          Este item e apenas uma doacao simbolica ao projeto CAFÉ STORE. A imagem e ilustrativa,
+          nao representa um produto real e nao havera envio fisico.
+        </p>
       </div>
 
       {/* Countdown */}
@@ -301,19 +303,19 @@ export function ProductPurchasePanel({ product, selectedVariants: externalVarian
           {addLoading ? (
             <span className="flex items-center gap-2">
               <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" /></svg>
-              Adicionando...
+              Adicionando apoio...
             </span>
           ) : addedSuccess ? (
-            <span className="flex items-center gap-2">✓ Adicionado ao Carrinho</span>
+            <span className="flex items-center gap-2">✓ Apoio no carrinho</span>
           ) : inStock ? (
-            '🛒 Adicionar ao Carrinho'
+            'Adicionar apoio ao carrinho'
           ) : (
             '✕ Indisponivel'
           )}
         </Button>
         {inStock ? (
           <Button variant="secondary" className="w-full py-4 text-base" onClick={handleBuyNow}>
-            ⚡ Comprar Agora
+            Apoiar agora
           </Button>
         ) : null}
       </div>
@@ -388,16 +390,16 @@ export function ProductPurchasePanel({ product, selectedVariants: externalVarian
 
       <div className="h-px bg-zinc-800" />
 
-      {/* Frete */}
+      {/* Entrega */}
       <div className="flex flex-col gap-3">
-        <h4 className="text-sm font-semibold text-zinc-300">Calcular frete e prazo</h4>
+        <h4 className="text-sm font-semibold text-zinc-300">Entrega</h4>
         <div className="flex gap-2">
           <div className="relative flex-1">
             <input
               className="w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 py-3 text-sm text-white placeholder:text-zinc-600 transition-colors focus:border-brand/60 focus:outline-none"
               inputMode="numeric"
               maxLength={9}
-              placeholder="00000-000"
+              placeholder="CEP opcional"
               value={zip}
               onChange={handleZipMask}
             />
@@ -405,7 +407,7 @@ export function ProductPurchasePanel({ product, selectedVariants: externalVarian
           <Button type="button" variant="secondary" onClick={handleShippingQuote} disabled={shippingLoading}>
             {shippingLoading ? (
               <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" /></svg>
-            ) : 'Calcular'}
+            ) : 'Ver aviso'}
           </Button>
         </div>
         {shippingResult ? (
@@ -417,16 +419,16 @@ export function ProductPurchasePanel({ product, selectedVariants: externalVarian
           rel="noopener noreferrer"
           className="text-xs text-zinc-600 underline underline-offset-2 transition hover:text-zinc-400"
         >
-          Não sei meu CEP
+          Este apoio nao gera frete
         </a>
       </div>
 
       {/* Trust signals */}
       <div className="grid grid-cols-3 gap-2">
         {[
-          { icon: '🔒', label: 'Pagamento seguro', sub: 'Pix · Cartão · PayPal' },
-          { icon: '🛡️', label: 'Garantia CAFÉ', sub: 'Troca em 7 dias' },
-          { icon: '📦', label: 'Frete rápido', sub: 'Todo o Brasil' },
+          { icon: '🔒', label: 'Pagamento seguro', sub: 'Pix · Cartao · PayPal' },
+          { icon: '💛', label: 'Doacao', sub: 'Apoio ao projeto' },
+          { icon: 'ℹ', label: 'Sem envio', sub: 'Imagem ilustrativa' },
         ].map((item) => (
           <div key={item.label} className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-3 text-center transition-colors hover:border-brand/20">
             <span className="text-lg">{item.icon}</span>

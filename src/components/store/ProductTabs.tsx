@@ -117,16 +117,16 @@ export function ProductTabs({ category, description, productName, reviews = [] }
               'relative text-sm leading-7 text-zinc-400',
               !expandedDesc && 'max-h-[320px] overflow-hidden',
             )}>
-              <p>{description ?? `${productName ?? 'Produto CAFÉ STORE'} oficial, criado para levar a identidade da comunidade para o dia a dia.`}</p>
+              <p>{description ?? `${productName ?? 'Apoio CAFÉ STORE'} simbolico para apoiar o projeto.`}</p>
               <p className="mt-4">
-                Cada peca e produzida com materiais selecionados para garantir durabilidade, conforto e um acabamento
-                que reflete o cuidado e a paixao da CAFÉ STORE por produtos de qualidade.
+                As imagens sao demonstrativas e ajudam a visualizar a identidade da marca, mas este item nao e
+                vendido como produto fisico. O valor representa uma doacao voluntaria ao projeto CAFÉ STORE.
               </p>
               <ul className="mt-4 grid gap-2">
                 <li className="flex items-start gap-2"><span className="mt-0.5 text-brand">✓</span> Design exclusivo CAFÉ STORE</li>
-                <li className="flex items-start gap-2"><span className="mt-0.5 text-brand">✓</span> Materiais premium selecionados</li>
-                <li className="flex items-start gap-2"><span className="mt-0.5 text-brand">✓</span> Acabamento de alta qualidade</li>
-                <li className="flex items-start gap-2"><span className="mt-0.5 text-brand">✓</span> Garantia e suporte CAFÉ</li>
+                <li className="flex items-start gap-2"><span className="mt-0.5 text-brand">✓</span> Apoio simbolico ao projeto</li>
+                <li className="flex items-start gap-2"><span className="mt-0.5 text-brand">✓</span> Imagens ilustrativas</li>
+                <li className="flex items-start gap-2"><span className="mt-0.5 text-brand">✓</span> Sem envio de produto fisico</li>
               </ul>
               {!expandedDesc ? (
                 <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-zinc-900/50 to-transparent" />
@@ -235,7 +235,7 @@ export function ProductTabs({ category, description, productName, reviews = [] }
                           <div>
                             <p className="text-sm font-semibold text-white">{review.user.name ?? 'Cliente'}</p>
                             <p className="text-xs text-zinc-500">
-                              {review.verifiedPurchase ? '✓ Compra verificada' : 'Avaliacao'}
+                              {review.verifiedPurchase ? '✓ Apoio verificado' : 'Avaliacao'}
                             </p>
                           </div>
                         </div>
@@ -245,7 +245,7 @@ export function ProductTabs({ category, description, productName, reviews = [] }
                           ))}
                         </div>
                       </div>
-                      <p className="mt-3 text-sm leading-6 text-zinc-400">{review.comment ?? 'Produto avaliado pelo cliente.'}</p>
+                      <p className="mt-3 text-sm leading-6 text-zinc-400">{review.comment ?? 'Apoio avaliado pelo cliente.'}</p>
                       <div className="mt-3 flex items-center gap-4 text-xs text-zinc-600">
                         <button type="button" className="transition hover:text-zinc-400">👍 Util ({Math.floor(Math.random() * 15)})</button>
                       </div>
@@ -255,7 +255,7 @@ export function ProductTabs({ category, description, productName, reviews = [] }
               ) : (
                 <div className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-8 text-center text-sm text-zinc-500">
                   {reviews.length === 0
-                    ? 'Este produto ainda nao recebeu avaliacoes. Seja o primeiro!'
+                    ? 'Este apoio ainda nao recebeu avaliacoes. Seja o primeiro!'
                     : 'Nenhuma avaliacao com esse filtro.'}
                 </div>
               )}
@@ -263,7 +263,7 @@ export function ProductTabs({ category, description, productName, reviews = [] }
               {/* Review form */}
               <div className="mt-6 rounded-xl border border-zinc-800 bg-zinc-900/30 p-5">
                 <h4 className="text-sm font-semibold text-white">Deixe sua avaliacao</h4>
-                <p className="mt-1 text-xs text-zinc-500">Compre o produto para poder avalia-lo.</p>
+                <p className="mt-1 text-xs text-zinc-500">Faça um apoio para poder avalia-lo.</p>
                 <div className="mt-3 flex items-center gap-1 text-2xl text-zinc-700">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <span key={i} className="transition hover:text-[#FFD000] cursor-pointer">★</span>
@@ -294,7 +294,7 @@ export function ProductTabs({ category, description, productName, reviews = [] }
               <p className="text-sm text-zinc-500">Nenhuma pergunta ainda. Seja o primeiro a perguntar!</p>
             </div>
             <div className="mt-6 rounded-xl border border-zinc-800 bg-zinc-900/30 p-5">
-              <h4 className="text-sm font-semibold text-white">Tem duvidas sobre este produto?</h4>
+              <h4 className="text-sm font-semibold text-white">Tem duvidas sobre este apoio?</h4>
               <textarea
                 disabled
                 className="mt-3 w-full rounded-lg border border-zinc-700 bg-zinc-800/50 p-3 text-sm text-white placeholder:text-zinc-600 resize-none"

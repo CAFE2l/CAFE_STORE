@@ -10,8 +10,8 @@ const WHATSAPP_NUMBER = '5541996713782';
 
 export function FloatingWhatsApp({ productName }: FloatingWhatsAppProps) {
   const message = productName
-    ? `Olá! Tenho dúvidas sobre: ${productName}`
-    : 'Olá! Tenho interesse nos produtos CAFÉ!';
+    ? `Olá! Tenho dúvidas sobre o apoio simbólico: ${productName}`
+    : 'Olá! Tenho interesse nos serviços digitais da CAFÉ!';
 
   return (
     <a

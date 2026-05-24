@@ -19,7 +19,7 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: 'CAFÉ STORE',
-  description: 'E-commerce de produtos personalizados da marca CAFÉ.',
+  description: 'Sites, landing pages, web aplicacoes e apoios simbolicos da marca CAFÉ.',
   icons: {
     icon: '/favicon.png',
     apple: '/favicon.png',

@@ -44,7 +44,7 @@ export function ProductCard({ product, index = 0, onCartOpen }: ProductCardProps
       quantity: 1,
     });
     showToast({
-      message: `${product.name} adicionado ao carrinho!`,
+      message: `${product.name} adicionado como apoio simbolico.`,
       action: { label: 'Ver carrinho', onClick: () => onCartOpen?.() },
     });
     setClickAnim(true);
@@ -172,7 +172,7 @@ export function ProductCard({ product, index = 0, onCartOpen }: ProductCardProps
             )}
           >
             <ShoppingCart className={cn('h-4 w-4 transition-transform', clickAnim && 'animate-bounce')} />
-            {inStock ? '+ Adicionar ao Carrinho' : 'Indisponível'}
+            {inStock ? '+ Apoiar projeto' : 'Indisponível'}
           </button>
         </div>
       </div>
