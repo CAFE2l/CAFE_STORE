@@ -61,15 +61,15 @@ export function ProductPurchasePanel({ product, selectedVariants: externalVarian
 
   // sync selected variants to global store so gallery and other client parts can react
   const setSelected = useVariantStore((s) => s.setSelected);
-
-  useEffect(() => {
-    setSelected(product.id, selectedVariants);
-  }, [selectedVariants, product.id, setSelected]);
   const variantRefs = useRef<Record<string, HTMLFieldSetElement | null>>({});
 
   const isExternal = externalVariants !== undefined;
   const selectedVariants = isExternal ? externalVariants : internalVariants;
   const setSelectedVariants = isExternal ? (onVariantsChange ?? (() => {})) : setInternalVariants;
+
+  useEffect(() => {
+    setSelected(product.id, selectedVariants);
+  }, [selectedVariants, product.id, setSelected]);
 
   const image = product.images[0] ?? '/placeholder-product.svg';
   const inStock = product.stock > 0;
