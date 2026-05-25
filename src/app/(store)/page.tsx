@@ -34,7 +34,7 @@ export default async function HomePage() {
         </div>
         <div className="relative flex items-center justify-center">
           <div className="relative w-[420px] h-[420px] lg:w-[520px] lg:h-[520px]">
-            <Image src="/images/mascote.png" alt="Mascote" fill className="object-contain drop-shadow-[0_20px_60px_rgba(230,126,34,0.45)]" />
+            <Image src="/images/mascote.png" alt="Mascote" fill priority sizes="(max-width: 1024px) 420px, 520px" className="object-contain drop-shadow-[0_20px_60px_rgba(230,126,34,0.45)]" />
           </div>
         </div>
       </section>
