@@ -63,7 +63,7 @@ export function Footer() {
                       alt=""
                       width={36}
                       height={36}
-                      className="h-9 w-9 rounded-lg object-cover transition duration-300 group-hover:scale-105"
+                      className="rounded-lg object-cover transition duration-300 group-hover:scale-105"
                     />
                   </div>
                   <div className="flex items-center gap-2">
