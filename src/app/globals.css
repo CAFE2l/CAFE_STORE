@@ -58,6 +58,31 @@
 }
 
 @layer components {
+  /* Surface helpers used across the app (utility-like classes) */
+  .bg-surface-base { background: #0D0D0D; }
+  .bg-surface-1 { background: rgba(255,255,255,0.02); }
+  .bg-surface-1\/60 { background: rgba(255,255,255,0.012); }
+  .bg-surface-1\/80 { background: rgba(255,255,255,0.016); }
+  .bg-surface-1\/50 { background: rgba(255,255,255,0.01); }
+  .bg-surface-2 { background: rgba(255,255,255,0.03); }
+  .bg-surface-2\/50 { background: rgba(255,255,255,0.015); }
+  .bg-surface-3 { background: rgba(255,255,255,0.04); }
+  .bg-surface-4 { background: rgba(255,255,255,0.06); }
+
+  /* Compatibility helpers for legacy utility names used across components */
+  .rounded-card { border-radius: 16px; }
+  .border-border-subtle { border-color: rgba(255,255,255,0.06); }
+  .bg-background-card { background: rgba(255,255,255,0.02); }
+  .border-border-highlight { border-color: rgba(249,115,22,0.12); }
+  .rounded-badge { border-radius: 9999px; }
+  .rounded-button { border-radius: 12px; }
+  .text-text-primary { color: #ffffff; }
+  .text-text-muted { color: rgba(255,255,255,0.45); }
+  .text-text-secondary { color: rgba(255,255,255,0.65); }
+  .bg-cafe-dark-700 { background: var(--cafe-dark-700); }
+  .text-accent-glow { color: #FFD000; }
+  .text-accent-primary { color: #F97316; }
+
   .glass {
     background: rgba(27, 27, 27, 0.92);
     border: 1px solid rgba(255, 255, 255, 0.08);
@@ -156,7 +181,7 @@
   }
 
   .btn-primary {
-    @apply relative overflow-hidden inline-flex items-center justify-center bg-brand hover:bg-brand-light text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200 ease-out hover:shadow-glow-md active:scale-[0.97] cursor-pointer;
+    @apply relative overflow-hidden inline-flex items-center justify-center bg-brand hover:bg-brand-light text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200 ease-out hover:shadow-led-sm active:scale-[0.97] cursor-pointer;
   }
 
   .btn-primary::before {
@@ -173,32 +198,56 @@
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center bg-surface-3 hover:bg-surface-4 text-white font-semibold px-6 py-3 rounded-xl border border-zinc-700 hover:border-brand/50 transition-all duration-200 ease-out active:scale-[0.97] cursor-pointer;
+    @apply inline-flex items-center justify-center text-white font-semibold px-6 py-3 rounded-xl border border-zinc-700 transition-all duration-200 ease-out active:scale-[0.97] cursor-pointer;
+    background: rgba(18,18,18,0.6);
+  }
+  .btn-secondary:hover {
+    background: rgba(18,18,18,0.72);
+    border-color: rgba(249,115,22,0.12);
   }
 
   .btn-ghost {
-    @apply inline-flex items-center justify-center text-zinc-400 hover:text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 hover:bg-surface-3 cursor-pointer;
+    @apply inline-flex items-center justify-center text-zinc-400 hover:text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 cursor-pointer;
+    background: transparent;
   }
+  .btn-ghost:hover { background: rgba(255,255,255,0.03); }
 
   .card {
-    @apply rounded-card border border-border-subtle bg-background-card transition-all duration-200 ease-out hover:border-border-highlight hover:-translate-y-0.5;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.02);
+    transition: all 0.2s ease-out;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+  }
+  .card:hover {
+    border-color: rgba(255,255,255,0.12);
+    transform: translateY(-4px);
   }
 
   .input-field {
-    @apply rounded-lg border border-border-subtle bg-background-card px-4 py-3 text-text-primary placeholder:text-text-muted transition-all duration-200 ease-out focus:border-cafe-orange-500 focus:outline-none focus:ring-2 focus:ring-cafe-orange-500/20;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.02);
+    padding: 0.75rem 1rem;
+    color: #fff;
+    transition: all 0.2s;
   }
+  .input-field::placeholder { color: rgba(255,255,255,0.45); }
+  .input-field:focus { border-color: rgba(249,115,22,0.6); box-shadow: 0 0 0 3px rgba(249,115,22,0.12); }
 
   .badge-amber {
-    @apply inline-flex rounded-badge bg-cafe-yellow-500/15 px-3 py-1 text-xs font-medium text-cafe-yellow-500 ring-1 ring-cafe-yellow-500/30;
+    display:inline-flex; align-items:center; gap:0.5rem; padding:0.25rem 0.625rem; border-radius:9999px;
+    background: rgba(255, 209, 102, 0.08); color: #FFD000; font-size: 0.75rem; font-weight:600; border:1px solid rgba(255,209,102,0.08);
   }
 
   .input-base {
-    @apply w-full bg-surface-2/50 border border-zinc-700 text-white placeholder:text-zinc-600 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-brand/60 focus:shadow-[0_0_0_3px_rgba(249,115,22,0.1)] transition-all duration-200;
+    @apply w-full border border-zinc-700 text-white placeholder:text-zinc-600 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-brand/60 focus:shadow-[0_0_0_3px_rgba(249,115,22,0.1)] transition-all duration-200;
+    background: rgba(255,255,255,0.03);
   }
 
   .select-base {
-    @apply bg-surface-2/50 border border-zinc-700 text-white px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-brand/60 transition-all duration-200 cursor-pointer;
+    @apply border border-zinc-700 text-white px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-brand/60 transition-all duration-200 cursor-pointer;
+    background: rgba(255,255,255,0.03);
   }
 
   /* Custom cursor (desktop only) */
@@ -230,6 +279,29 @@
     }
   }
 }
+
+  /* Admin design system helpers */
+  .admin-card {
+    @apply bg-[#111] border border-white/[0.06] rounded-2xl shadow-card transition-all duration-300 ease-smooth;
+  }
+  .admin-card-hover {
+    @apply admin-card hover:border-white/[0.1] hover:shadow-card-hover hover:-translate-y-0.5;
+  }
+  .admin-input {
+    @apply w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2.5 text-white text-sm placeholder-white/25 outline-none focus:border-brand/50 focus:bg-white/[0.06] focus:shadow-[0_0_0_3px_rgba(249,115,22,0.12)] transition-all duration-200;
+  }
+  .admin-btn-primary {
+    @apply px-5 py-2.5 rounded-xl bg-brand text-white text-sm font-medium shadow-led-sm hover:shadow-led-brand hover:bg-brand-light active:scale-[0.97] transition-all duration-200;
+  }
+  .admin-btn-ghost {
+    @apply px-4 py-2 rounded-xl border border-white/[0.08] text-white/50 text-sm hover:border-white/20 hover:text-white hover:bg-white/[0.04] transition-all duration-200;
+  }
+  .admin-badge {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium;
+  }
+  .admin-table-row {
+    @apply border-b border-white/[0.04] hover:bg-white/[0.025] transition-colors duration-150;
+  }
 
 @layer utilities {
   .container-page {

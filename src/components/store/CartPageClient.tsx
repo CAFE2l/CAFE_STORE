@@ -150,7 +150,7 @@ export function CartPageClient() {
             <h2 className="font-display text-2xl font-semibold text-text-primary">Salvos pra depois</h2>
             <div className="grid gap-3">
               {savedForLater.map((item) => (
-                <article key={item.id} className="flex items-center gap-4 rounded-2xl border border-white/10 bg-background-card/70 p-3">
+                <article key={item.id} className="flex items-center gap-4 rounded-2xl border border-white/10 bg-background-card p-3">
                   <Image src={item.image} alt={item.name} width={64} height={64} className="size-16 rounded-xl object-cover" />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold text-text-primary">{item.name}</p>

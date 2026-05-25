@@ -78,18 +78,6 @@ export function ProductsPageClient({ categories, products, total, totalPages, pa
       </div>
 
       <div className="mx-auto max-w-7xl">
-        {/* breadcrumb */}
-        <nav className="mb-8 flex animate-fade-in items-center gap-2 text-sm text-zinc-500">
-          <Link href="/" className="transition-colors duration-200 hover:text-zinc-300">Home</Link>
-          <span className="text-zinc-700">&gt;</span>
-          <span className="text-zinc-300">Apoios</span>
-          {params.category ? (
-            <>
-              <span className="text-zinc-700">&gt;</span>
-              <span className="text-zinc-300 capitalize">{params.category.replace(/-/g, ' ')}</span>
-            </>
-          ) : null}
-        </nav>
 
         {/* header */}
         <div className="mb-8 animate-fade-up">

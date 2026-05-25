@@ -133,16 +133,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
       <FloatingWhatsApp productName={product.name} />
 
       <div className="mx-auto max-w-7xl">
-        {/* Breadcrumb */}
-        <nav className="mb-8 flex animate-fade-in flex-wrap items-center gap-2 text-sm text-zinc-500">
-          <Link href="/" className="transition-colors hover:text-zinc-300">Home</Link>
-          <span className="text-zinc-700">&gt;</span>
-          <Link href="/products" className="transition-colors hover:text-zinc-300">Produtos</Link>
-          <span className="text-zinc-700">&gt;</span>
-          <Link href={`/products?category=${product.category.slug}`} className="transition-colors hover:text-zinc-300">{product.category.name}</Link>
-          <span className="text-zinc-700">&gt;</span>
-          <span className="text-zinc-300">{product.name}</span>
-        </nav>
 
         {/* Main Grid */}
         <section className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16">
