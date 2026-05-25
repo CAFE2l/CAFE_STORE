@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { FeedbackModerationButtons, FeaturedServicesToggle } from '@/components/admin/forms/AdminActions';
-import dynamic from 'next/dynamic'
-const FeaturedServicesDnd = dynamic(() => import('@/components/admin/FeaturedServicesDnd').then(m => m.FeaturedServicesDnd), { ssr: false })
+import dynamicImport from 'next/dynamic'
+const FeaturedServicesDnd = dynamicImport(() => import('@/components/admin/FeaturedServicesDnd').then(m => m.FeaturedServicesDnd), { ssr: false })
 
 
 import { Badge } from '@/components/ui/Badge';

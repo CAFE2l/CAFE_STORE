@@ -15,17 +15,24 @@ export function getBaseUrl() {
 
 export async function sendEmail({ html, subject, to }: SendEmailInput) {
   if (!resend) {
+    console.info('sendEmail: Resend not configured; skipping send to', to);
     return { skipped: true };
   }
 
-  await resend.emails.send({
-    from: fromEmail,
-    to,
-    subject,
-    html,
-  });
-
-  return { skipped: false };
+  try {
+    const res = await resend.emails.send({
+      from: fromEmail,
+      to,
+      subject,
+      html,
+    });
+    // Log minimal info to help debugging
+    console.info('sendEmail: sent', { to, id: (res as any)?.id });
+    return { skipped: false };
+  } catch (err) {
+    console.error('sendEmail: error sending email to', to, err);
+    throw err;
+  }
 }
 
 export async function sendWelcomeEmail(to: string, name?: string | null) {

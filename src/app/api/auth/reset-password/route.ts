@@ -3,6 +3,23 @@ import { prisma } from '@/lib/prisma';
 import { sendPasswordChangedEmail } from '@/lib/email';
 import { passwordResetSchema } from '@/lib/validations';
 
+export async function GET(request: Request) {
+  try {
+    const url = new URL(request.url);
+    const token = url.searchParams.get('token');
+    if (!token) return Response.json({ valid: false }, { status: 400 });
+
+    const resetToken = await prisma.verificationToken.findUnique({ where: { token } });
+    if (!resetToken) return Response.json({ valid: false, reason: 'not_found' });
+    if (resetToken.expires < new Date()) return Response.json({ valid: false, reason: 'expired' });
+
+    return Response.json({ valid: true });
+  } catch (err) {
+    console.error('Error validating reset token', err);
+    return Response.json({ valid: false, reason: 'error' }, { status: 500 });
+  }
+}
+
 export async function POST(request: Request) {
   const body: unknown = await request.json();
   const parsed = passwordResetSchema.safeParse(body);

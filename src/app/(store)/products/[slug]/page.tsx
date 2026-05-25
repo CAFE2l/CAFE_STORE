@@ -79,8 +79,15 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
-  const product = await getProductBySlug(params.slug);
-  if (!product) notFound();
+  let product;
+  try {
+    product = await getProductBySlug(params.slug);
+    if (!product) notFound();
+  } catch (err) {
+    // If fetching fails for any reason, show the not-found page (which displays the 404 image)
+    console.error('Error fetching product:', err);
+    notFound();
+  }
 
   const relatedProducts = await getRelatedProducts(product);
   const images = getProductMedia(product);
