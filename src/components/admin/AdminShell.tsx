@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Menu, Search, ShieldCheck, X } from 'lucide-react'
 import Sidebar from './Sidebar'
+import { BrandLogo } from './BrandLogo'
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false)
@@ -47,13 +48,11 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
                   <ShieldCheck className="h-3.5 w-3.5" />
                   Admin seguro
                 </span>
-                <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-red-600 via-orange-500 to-yellow-400 text-xs font-black text-black shadow-led-brand">
-                  CS
-                </div>
+                <BrandLogo size={40} />
               </div>
             </div>
           </header>
-          <main className="px-4 py-6 lg:px-8 lg:py-8">{children}</main>
+          <main className="mx-auto w-full max-w-7xl px-4 py-6 lg:px-8 lg:py-8">{children}</main>
         </div>
       </div>
     </div>

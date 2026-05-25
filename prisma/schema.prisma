@@ -31,6 +31,7 @@ model User {
   carts         Cart[]
   payments      Payment[]
   addresses     Address[]
+  feedbacks     Feedback[]
 }
 
 model Account {
@@ -88,14 +89,19 @@ model Product {
   wishlist    Wishlist[]
   favorites   Favorite[]
   carts       Cart[]
+  feedbacks   Feedback[]
 }
 
 model Category {
-  id       String    @id @default(cuid())
-  name     String
-  slug     String    @unique
-  image    String?
-  products Product[]
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String?   @db.Text
+  image       String?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  products    Product[]
 }
 
 model Order {
@@ -112,6 +118,7 @@ model Order {
   address        Json
   items          OrderItem[]
   payments       Payment[]
+  feedbacks      Feedback[]
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
 }
@@ -220,6 +227,7 @@ enum Role {
 
 enum OrderStatus {
   PENDING
+  SCHEDULED
   PROCESSING
   SHIPPED
   DELIVERED
@@ -265,35 +273,49 @@ model Banner {
 }
 
 model Feedback {
-  id                      String            @id @default(uuid()) @db.Uuid
-  authorName              String            @map("author_name") @db.VarChar(100)
-  authorEmail             String            @map("author_email") @db.VarChar(255)
-  authorAvatarUrl         String?           @map("author_avatar_url") @db.Text
-  authorCompany           String?           @map("author_company") @db.VarChar(100)
-  authorRole              String?           @map("author_role") @db.VarChar(100)
-  authorLinkedinUrl       String?           @map("author_linkedin_url") @db.Text
-  serviceType             FeedbackService   @map("service_type")
-  rating                  Int
-  title                   String            @db.VarChar(150)
-  body                    String            @db.Text
-  resultMetric            String?           @map("result_metric") @db.VarChar(200)
-  projectUrl              String?           @map("project_url") @db.Text
-  videoUrl                String?           @map("video_url") @db.Text
-  isVerified              Boolean           @default(false) @map("is_verified")
-  isFeatured              Boolean           @default(false) @map("is_featured")
+  id                    String            @id @default(uuid()) @db.Uuid
+  authorName            String            @map("author_name") @db.VarChar(100)
+  authorEmail           String            @map("author_email") @db.VarChar(255)
+  authorAvatarUrl       String?           @map("author_avatar_url") @db.Text
+  authorCompany         String?           @map("author_company") @db.VarChar(100)
+  authorRole            String?           @map("author_role") @db.VarChar(100)
+  authorLinkedinUrl     String?           @map("author_linkedin_url") @db.Text
+  userId                String?           @map("user_id")
+  user                  User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
+  phone                 String?           @db.VarChar(40)
+  serviceType           FeedbackService   @map("service_type")
+  rating                Int
+  title                 String            @db.VarChar(150)
+  body                  String            @db.Text
+  status                FeedbackStatus    @default(PENDING)
+  priority              FeedbackPriority  @default(NORMAL)
+  source                FeedbackSource    @default(site)
+  productId             String?           @map("product_id")
+  product               Product?          @relation(fields: [productId], references: [id], onDelete: SetNull)
+  orderId               String?           @map("order_id")
+  order                 Order?            @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  resultMetric          String?           @map("result_metric") @db.VarChar(200)
+  projectUrl            String?           @map("project_url") @db.Text
+  videoUrl              String?           @map("video_url") @db.Text
+  isVerified            Boolean           @default(false) @map("is_verified")
+  isFeatured            Boolean           @default(false) @map("is_featured")
   // NEW: destaque específico na página de serviços
-  isFeaturedServices      Boolean           @default(false) @map("is_featured_services")
-  featuredServicesOrder   Int               @default(0)     @map("featured_services_order")
-  isApproved              Boolean           @default(false) @map("is_approved")
-  helpfulCount            Int               @default(0) @map("helpful_count")
-  createdAt               DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt               DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
-  helpfulVotes            FeedbackHelpful[]
+  isFeaturedServices    Boolean           @default(false) @map("is_featured_services")
+  featuredServicesOrder Int               @default(0) @map("featured_services_order")
+  isApproved            Boolean           @default(false) @map("is_approved")
+  helpfulCount          Int               @default(0) @map("helpful_count")
+  createdAt             DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+  helpfulVotes          FeedbackHelpful[]
 
   @@index([isApproved, createdAt], map: "idx_feedbacks_approved")
   @@index([serviceType], map: "idx_feedbacks_service")
   @@index([isFeatured], map: "idx_feedbacks_featured")
   @@index([isFeaturedServices, featuredServicesOrder], map: "idx_feedbacks_featured_services")
+  @@index([status, priority], map: "idx_feedbacks_status_priority")
+  @@index([userId], map: "idx_feedbacks_user")
+  @@index([productId], map: "idx_feedbacks_product")
+  @@index([orderId], map: "idx_feedbacks_order")
   @@map("feedbacks")
 }
 
@@ -314,4 +336,83 @@ enum FeedbackService {
   saas
   pacote_completo
   outro
+}
+
+enum FeedbackStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  ARCHIVED
+}
+
+enum FeedbackPriority {
+  LOW
+  NORMAL
+  HIGH
+}
+
+enum FeedbackSource {
+  site
+  produto
+  pedido
+  suporte
+  outro
+}
+
+enum BriefingStatus {
+  PENDING
+  CONTACTED
+  IN_NEGOTIATION
+  APPROVED
+  REJECTED
+  ARCHIVED
+}
+
+model ProjectBriefing {
+  id                 String         @id @default(cuid())
+  name               String
+  email              String
+  whatsapp           String
+  companyName        String?        @map("company_name")
+  serviceSlug        String         @map("service_slug")
+  serviceName        String         @map("service_name")
+  budget             String?
+  deadline           String?
+  projectDescription String         @map("project_description") @db.Text
+  mainGoal           String?        @map("main_goal") @db.Text
+  targetAudience     String?        @map("target_audience") @db.Text
+  references         String?        @db.Text
+  desiredFeatures    Json           @default("[]")
+  hasDomain          Boolean?       @map("has_domain")
+  hasHosting         Boolean?       @map("has_hosting")
+  hasBranding        Boolean?       @map("has_branding")
+  preferredContact   String?        @map("preferred_contact")
+  extraNotes         String?        @map("extra_notes") @db.Text
+
+  landingPageGoal             String? @map("landing_page_goal") @db.Text
+  landingPageProduct          String? @map("landing_page_product") @db.Text
+  landingPageNeedsForm        Boolean? @map("landing_page_needs_form")
+  landingPageNeedsWhatsapp    Boolean? @map("landing_page_needs_whatsapp")
+  landingPageNeedsLeadCapture Boolean? @map("landing_page_needs_lead_capture")
+  landingPageNeedsEmailMarketing Boolean? @map("landing_page_needs_email_marketing")
+
+  sitePagesCount       Int?     @map("site_pages_count")
+  sitePagesList        Json?    @map("site_pages_list")
+  siteNeedsAdmin       Boolean? @map("site_needs_admin")
+  siteNeedsBlog        Boolean? @map("site_needs_blog")
+  siteNeedsSeo         Boolean? @map("site_needs_seo")
+
+  appNeedsLogin         Boolean? @map("app_needs_login")
+  appNeedsAdmin         Boolean? @map("app_needs_admin")
+  appNeedsDatabase      Boolean? @map("app_needs_database")
+  appNeedsApi           Boolean? @map("app_needs_api")
+  appNeedsPayments      Boolean? @map("app_needs_payments")
+  appUserTypesCount     Int?     @map("app_user_types_count")
+  appMainFeatures       String?  @map("app_main_features") @db.Text
+
+  status    BriefingStatus @default(PENDING)
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @updatedAt @map("updated_at")
+
+  @@map("project_briefings")
 }

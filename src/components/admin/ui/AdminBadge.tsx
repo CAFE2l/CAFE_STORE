@@ -5,6 +5,7 @@ const variants = {
   INACTIVE: 'border-white/10 bg-white/5 text-zinc-300',
   OUT_OF_STOCK: 'border-amber-400/20 bg-amber-400/10 text-amber-300',
   PENDING: 'border-amber-400/20 bg-amber-400/10 text-amber-300',
+  SCHEDULED: 'border-purple-400/20 bg-purple-400/10 text-purple-300',
   PROCESSING: 'border-orange-400/20 bg-orange-400/10 text-orange-300',
   SHIPPED: 'border-sky-400/20 bg-sky-400/10 text-sky-300',
   DELIVERED: 'border-emerald-400/20 bg-emerald-400/10 text-emerald-300',
@@ -29,4 +30,3 @@ export function AdminBadge({ children, variant = 'muted', className }: AdminBadg
     </span>
   );
 }
-

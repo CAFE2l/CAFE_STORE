@@ -12,8 +12,8 @@ const schema = z.object({
   name: z.string().min(3),
   slug: z.string().min(3),
   description: z.string().optional(),
-  price: z.coerce.number().positive(),
-  stock: z.coerce.number().int().min(0),
+  price: z.number().positive(),
+  stock: z.number().int().min(0),
   categoryId: z.string().min(1),
   status: z.nativeEnum(ProductStatus),
   featured: z.boolean().optional(),
@@ -77,10 +77,10 @@ export function ProductCreateDialog({ categories }: { categories: Category[] }) 
                 <input {...form.register('slug')} className="admin-input" placeholder="camiseta-personalizada" />
               </Field>
               <Field label="Preço" error={form.formState.errors.price?.message}>
-                <input type="number" step="0.01" {...form.register('price')} className="admin-input" />
+                <input type="number" step="0.01" {...form.register('price', { valueAsNumber: true })} className="admin-input" />
               </Field>
               <Field label="Estoque" error={form.formState.errors.stock?.message}>
-                <input type="number" {...form.register('stock')} className="admin-input" />
+                <input type="number" {...form.register('stock', { valueAsNumber: true })} className="admin-input" />
               </Field>
               <Field label="Categoria" error={form.formState.errors.categoryId?.message}>
                 <select {...form.register('categoryId')} className="admin-input bg-zinc-950">
@@ -128,4 +128,3 @@ function Field({ label, error, children }: { label: string; error?: string; chil
     </label>
   );
 }
-

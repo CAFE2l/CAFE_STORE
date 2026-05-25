@@ -8,6 +8,8 @@ const updateSchema = z.object({
   isApproved: z.boolean().optional(),
   isVerified: z.boolean().optional(),
   isFeatured: z.boolean().optional(),
+  status: z.enum(['PENDING', 'APPROVED', 'REJECTED', 'ARCHIVED']).optional(),
+  priority: z.enum(['LOW', 'NORMAL', 'HIGH']).optional(),
 });
 
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
@@ -23,6 +25,8 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       ...(parsed.data.isApproved !== undefined && { isApproved: parsed.data.isApproved }),
       ...(parsed.data.isVerified !== undefined && { isVerified: parsed.data.isVerified }),
       ...(parsed.data.isFeatured !== undefined && { isFeatured: parsed.data.isFeatured }),
+      ...(parsed.data.status !== undefined && { status: parsed.data.status, isApproved: parsed.data.status === 'APPROVED' }),
+      ...(parsed.data.priority !== undefined && { priority: parsed.data.priority }),
     },
   });
 

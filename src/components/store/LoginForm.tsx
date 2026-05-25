@@ -21,9 +21,9 @@ function formatPhone(value: string) {
 export function LoginForm({ googleEnabled = false }: LoginFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') ?? '/';
-  const verified = searchParams.get('verified');
-  const reset = searchParams.get('reset');
+  const callbackUrl = searchParams?.get('callbackUrl') ?? '/';
+  const verified = searchParams?.get('verified');
+  const reset = searchParams?.get('reset');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);

@@ -356,6 +356,72 @@
     border: 1px solid rgba(255,110,60,0.08);
     color: #ffb27a;
   }
+
+  .hero-tech-grid::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: linear-gradient(to bottom, rgba(0,0,0,0.95), transparent 78%);
+    opacity: 0.42;
+  }
+
+  .hero-tech-grid::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.12) 1px, transparent 1px);
+    background-size: 22px 22px;
+    mask-image: radial-gradient(ellipse at center, rgba(0,0,0,0.72), transparent 68%);
+    opacity: 0.16;
+  }
+
+  .hero-gradient-text {
+    background: linear-gradient(135deg, #ef4444 0%, #f97316 48%, #facc15 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 0 34px rgba(249,115,22,0.26);
+  }
+
+  .hero-led-line {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(239,68,68,0.28), rgba(249,115,22,0.3), transparent);
+    animation: heroLedPulse 2.5s ease-in-out infinite;
+  }
+
+  .hero-led-line-warm {
+    background: linear-gradient(90deg, transparent, rgba(249,115,22,0.28), rgba(250,204,21,0.28), transparent);
+    animation-delay: 0.4s;
+  }
+
+  .hero-mascot-float {
+    animation: mascotFloat 4s ease-in-out infinite;
+  }
+
+  .hero-mascot-glow {
+    animation: mascotGlowPulse 3s ease-in-out infinite;
+  }
+
+  @keyframes mascotFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+
+  @keyframes mascotGlowPulse {
+    0%, 100% { opacity: 0.25; transform: scale(1); }
+    50% { opacity: 0.55; transform: scale(1.15); }
+  }
+
+  @keyframes heroLedPulse {
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 0.55; }
+  }
 }
 
 /* Reduced motion */

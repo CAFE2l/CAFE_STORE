@@ -6,8 +6,8 @@ import { OrderTimeline } from '@/components/account/OrderTimeline';
 import { StatusBadge } from '@/components/account/StatusBadge';
 import { auth } from '@/lib/auth';
 import { getUserOrderById } from '@/lib/account';
-import dynamic from 'next/dynamic'
-const OrderActionsClient = dynamic(() => import('@/components/account/OrderActionsClient').then(m => m.default), { ssr: false })
+import nextDynamic from 'next/dynamic'
+const OrderActionsClient = nextDynamic(() => import('@/components/account/OrderActionsClient').then(m => m.default), { ssr: false })
 
 type OrderPageProps = {
   params: {

@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
+import Image from 'next/image'
 import { DndContext, closestCenter } from '@dnd-kit/core'
 import { arrayMove, SortableContext, rectSortingStrategy } from '@dnd-kit/sortable'
 import { SortableItem } from './SortableItem'
@@ -66,10 +67,14 @@ export function FeaturedServicesDnd({ initial }: { initial: Array<{ id: string; 
               <div className="flex items-center gap-3 p-3 bg-white/[0.03] border border-white/[0.06] rounded-xl mb-2">
                 <Grip className="text-white/20 cursor-grab" />
                 <span className="text-brand font-mono text-sm w-4">{i + 1}</span>
-                <img src={fb.authorAvatarUrl || ''} className="w-8 h-8 rounded-full" />
+                <div className="relative h-8 w-8 overflow-hidden rounded-full bg-white/10">
+                  {fb.authorAvatarUrl ? (
+                    <Image src={fb.authorAvatarUrl} alt="" fill sizes="32px" className="object-cover" />
+                  ) : null}
+                </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-white text-sm font-medium truncate">{fb.authorName}</p>
-                  <p className="text-white/40 text-xs truncate">"{fb.title || ''}"</p>
+                  <p className="text-white/40 text-xs truncate">&ldquo;{fb.title || ''}&rdquo;</p>
                 </div>
                 <button onClick={() => handleRemove(fb.id)} className="text-white/20 hover:text-red-400 transition-colors">
                   <i className="ti ti-x" aria-hidden="true" />

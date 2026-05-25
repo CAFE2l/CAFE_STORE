@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCartStore } from '@/store/cart';
@@ -70,7 +71,7 @@ export function StickyBar({ product, selectedVariants = {}, variantOptions = [] 
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <div className="relative size-10 shrink-0 overflow-hidden rounded-lg border border-zinc-700 bg-zinc-800">
-              <img src={product.images[0] ?? '/placeholder-product.svg'} alt="" className="h-full w-full object-cover" />
+              <Image src={product.images[0] ?? '/placeholder-product.svg'} alt="" fill sizes="40px" className="object-cover" />
             </div>
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold text-white">{product.name}</p>

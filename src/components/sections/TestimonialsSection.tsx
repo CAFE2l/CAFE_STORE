@@ -66,7 +66,7 @@ export function TestimonialsSection() {
             ))}
           </div>
 
-          <p className="text-white/75 text-sm leading-relaxed mb-4">"{fb.body}"</p>
+          <p className="text-white/75 text-sm leading-relaxed mb-4">&ldquo;{fb.body}&rdquo;</p>
 
           {fb.result_metric && (
             <div className="bg-brand/10 border border-brand/20 rounded-xl px-3 py-2 mb-4">

@@ -146,11 +146,13 @@ export const adminProductSchema = z.object({
 export const adminCategorySchema = z.object({
   name: z.string().min(2, 'Nome obrigatorio.'),
   slug: z.string().min(2, 'Slug obrigatorio.'),
+  description: z.string().max(500).optional().nullable(),
   image: z.string().url().optional().or(z.literal('')),
+  isActive: z.boolean().default(true),
 });
 
 export const adminOrderStatusSchema = z.object({
-  status: z.enum(['PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED']),
+  status: z.enum(['PENDING', 'SCHEDULED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED']),
 });
 
 export const adminReviewModerationSchema = z.object({

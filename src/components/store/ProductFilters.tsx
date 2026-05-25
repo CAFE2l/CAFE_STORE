@@ -12,9 +12,9 @@ type ProductFiltersProps = {
 export function ProductFilters({ categories }: ProductFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const qParam = searchParams.get('q') ?? '';
-  const categoryParam = searchParams.get('category') ?? '';
-  const sortParam = searchParams.get('sort') ?? 'relevance';
+  const qParam = searchParams?.get('q') ?? '';
+  const categoryParam = searchParams?.get('category') ?? '';
+  const sortParam = searchParams?.get('sort') ?? 'relevance';
 
   const [search, setSearch] = useState(qParam);
   const [category, setCategory] = useState(categoryParam);

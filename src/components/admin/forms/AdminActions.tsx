@@ -6,20 +6,30 @@ import { ChangeEvent, useState } from 'react';
 
 export function OrderStatusSelect({ orderId, status }: { orderId: string; status: OrderStatus }) {
   const router = useRouter();
+  const [saving, setSaving] = useState(false);
 
   async function updateStatus(event: ChangeEvent<HTMLSelectElement>) {
-    await fetch(`/api/admin/orders/${orderId}`, {
+    setSaving(true);
+    const response = await fetch(`/api/admin/orders/${orderId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: event.target.value }),
     });
-    router.refresh();
+    setSaving(false);
+    if (response.ok) router.refresh();
   }
 
   return (
-    <select className="input-field" defaultValue={status} onChange={updateStatus}>
-      <option value="PENDING">Pendente</option>
-      <option value="PROCESSING">Processando</option>
+    <select
+      className="h-10 min-w-40 rounded-lg border border-white/10 bg-zinc-950 px-3 text-xs font-semibold text-zinc-200 outline-none transition focus:border-orange-400/60 disabled:cursor-wait disabled:opacity-60"
+      defaultValue={status}
+      onChange={updateStatus}
+      disabled={saving}
+      aria-label="Alterar status do pedido"
+    >
+      <option value="PENDING">Aguardando pagamento</option>
+      <option value="SCHEDULED">Agendado</option>
+      <option value="PROCESSING">Em separação</option>
       <option value="SHIPPED">Enviado</option>
       <option value="DELIVERED">Entregue</option>
       <option value="CANCELLED">Cancelado</option>

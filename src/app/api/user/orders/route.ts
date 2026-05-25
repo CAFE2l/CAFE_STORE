@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 
 const statusMap: Record<OrderStatus, string> = {
   PENDING: 'aguardando_pagamento',
+  SCHEDULED: 'agendado',
   PROCESSING: 'em_processamento',
   SHIPPED: 'enviado',
   DELIVERED: 'entregue',
@@ -12,6 +13,7 @@ const statusMap: Record<OrderStatus, string> = {
 
 const reverseStatusMap: Record<string, OrderStatus> = {
   aguardando_pagamento: 'PENDING',
+  agendado: 'SCHEDULED',
   em_processamento: 'PROCESSING',
   enviado: 'SHIPPED',
   entregue: 'DELIVERED',

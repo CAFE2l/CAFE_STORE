@@ -6,6 +6,7 @@ export const WHATSAPP = 'https://wa.me/5541996713782?text=Olá,%20tenho%20intere
 export type Service = {
   icon: LucideIcon;
   title: string;
+  slug: string;
   tagline: string;
   price: string;
   pricePrefix: string;
@@ -21,6 +22,7 @@ export const services: Service[] = [
   {
     icon: Monitor,
     title: 'Landing Pages',
+    slug: 'landing-page',
     tagline: 'Páginas que convertem visitantes em clientes',
     pricePrefix: 'A partir de',
     price: 'R$ 1.200',
@@ -41,6 +43,7 @@ export const services: Service[] = [
   {
     icon: Globe2,
     title: 'Sites Profissionais',
+    slug: 'site-profissional',
     tagline: 'Presença digital completa para sua marca',
     pricePrefix: 'A partir de',
     price: 'R$ 2.800',
@@ -61,6 +64,7 @@ export const services: Service[] = [
   {
     icon: Zap,
     title: 'Aplicações Web & SaaS',
+    slug: 'aplicacao-web-saas',
     tagline: 'Do MVP ao produto que escala',
     pricePrefix: '',
     price: 'Sob consulta',

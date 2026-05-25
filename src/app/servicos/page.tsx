@@ -198,10 +198,8 @@ export default function ServicesPage() {
                   ))}
                 </ul>
 
-                <a
-                  href={service.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <Link
+                  href={`/servicos/${service.slug}/briefing`}
                   className={cn(
                     'w-full rounded-xl py-3 text-center font-medium transition-all duration-300',
                     featured
@@ -210,7 +208,7 @@ export default function ServicesPage() {
                   )}
                 >
                   {service.cta} →
-                </a>
+                </Link>
               </article>
             );
           })}

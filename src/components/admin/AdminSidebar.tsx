@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Package, ShoppingCart, Users, Tag, Percent, Star, MessageCircle, Image, BarChart, ArrowLeft } from 'lucide-react'
+import { Home, Package, ShoppingCart, Users, Tag, Percent, Star, MessageCircle, ClipboardList, Image, BarChart, ArrowLeft } from 'lucide-react'
 import React from 'react'
 
 const navItems = [
@@ -14,6 +14,7 @@ const navItems = [
   { href: '/admin/cupons', label: 'Cupons', icon: Percent },
   { href: '/admin/avaliacoes', label: 'Avaliações', icon: Star, badgeKey: 'reviews' },
   { href: '/admin/feedbacks', label: 'Feedbacks', icon: MessageCircle, badgeKey: 'feedbacks' },
+  { href: '/admin/briefings', label: 'Briefings', icon: ClipboardList },
   { href: '/admin/banners', label: 'Banners', icon: Image },
   { href: '/admin/relatorios', label: 'Relatórios', icon: BarChart },
 ]

@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -226,7 +227,9 @@ export function ProductTabs({ category, description, productName, reviews = [] }
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           {review.user.image ? (
-                            <img src={review.user.image} alt={review.user.name ?? 'C'} className="size-9 rounded-full object-cover" />
+                            <span className="relative block size-9 overflow-hidden rounded-full">
+                              <Image src={review.user.image} alt={review.user.name ?? 'C'} fill sizes="36px" className="object-cover" />
+                            </span>
                           ) : (
                             <span className="grid size-9 place-items-center rounded-full bg-brand/10 text-sm font-semibold text-brand">
                               {(review.user.name ?? 'C').slice(0, 1).toUpperCase()}

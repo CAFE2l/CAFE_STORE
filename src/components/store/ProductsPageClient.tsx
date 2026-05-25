@@ -56,7 +56,7 @@ export function ProductsPageClient({ categories, products, total, totalPages, pa
   const [loading, setLoading] = useState(false);
   const count = useCartStore((s) => s.count);
   const router = useRouter();
-  const pathname = usePathname();
+  const pathname = usePathname() ?? '/products';
   const searchParams = useSearchParams();
   const [mounted, setMounted] = useState(false);
 

@@ -1,8 +1,11 @@
-import { getAdminUsers, requireAdmin } from '@/lib/admin';
+import { NextRequest, NextResponse } from 'next/server';
+import { getUsersPage } from '@/lib/admin/queries';
 
-export async function GET() {
-  const session = await requireAdmin();
-  if (!session) return Response.json({ success: false, error: 'Acesso negado.' }, { status: 403 });
+export const dynamic = 'force-dynamic';
 
-  return Response.json({ success: true, data: await getAdminUsers() });
+export async function GET(request: NextRequest) {
+  const params = Object.fromEntries(request.nextUrl.searchParams.entries());
+  const data = await getUsersPage(params);
+  return NextResponse.json(data);
 }
+

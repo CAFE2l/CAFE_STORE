@@ -1,4 +1,4 @@
-import { OrderStatus, ProductStatus, Role } from '@prisma/client';
+import { FeedbackPriority, FeedbackStatus, OrderStatus, ProductStatus, Role, BriefingStatus } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 
 const PAGE_SIZE = 10;
@@ -154,6 +154,7 @@ export async function getDashboardData() {
 export async function getProductsPage(searchParams?: Record<string, string | string[] | undefined>) {
   const q = String(searchParams?.q ?? '').trim();
   const status = String(searchParams?.status ?? 'all');
+  const category = String(searchParams?.category ?? '').trim();
   const page = Math.max(Number(searchParams?.page ?? 1), 1);
 
   const where = {
@@ -166,6 +167,7 @@ export async function getProductsPage(searchParams?: Record<string, string | str
         }
       : {}),
     ...(status !== 'all' ? { status: status as ProductStatus } : {}),
+    ...(category ? { category: { slug: category } } : {}),
   };
 
   const [items, total, categories] = await Promise.all([
@@ -281,10 +283,23 @@ export async function getUsersPage(searchParams?: Record<string, string | string
 }
 
 export async function getCategoriesPage() {
-  return prisma.category.findMany({
-    orderBy: { name: 'asc' },
-    include: { _count: { select: { products: true } } },
-  });
+  const [categories, totals] = await Promise.all([
+    prisma.category.findMany({
+      orderBy: [{ isActive: 'desc' }, { name: 'asc' }],
+      include: { _count: { select: { products: true } } },
+    }),
+    prisma.category.aggregate({ _count: true }),
+  ]);
+
+  return {
+    items: categories,
+    summary: {
+      total: totals._count,
+      active: categories.filter((category) => category.isActive).length,
+      inactive: categories.filter((category) => !category.isActive).length,
+      linkedProducts: categories.reduce((sum, category) => sum + category._count.products, 0),
+    },
+  };
 }
 
 export async function getCouponsPage() {
@@ -301,11 +316,86 @@ export async function getReviewsPage() {
   });
 }
 
-export async function getFeedbacksPage() {
-  return prisma.feedback.findMany({ orderBy: { createdAt: 'desc' } });
+export async function getFeedbacksPage(searchParams?: Record<string, string | string[] | undefined>) {
+  const q = String(searchParams?.q ?? '').trim();
+  const status = String(searchParams?.status ?? 'all');
+  const priority = String(searchParams?.priority ?? 'all');
+
+  const where = {
+    ...(status !== 'all' ? { status: status as FeedbackStatus } : {}),
+    ...(priority !== 'all' ? { priority: priority as FeedbackPriority } : {}),
+    ...(q
+      ? {
+          OR: [
+            { authorName: { contains: q, mode: 'insensitive' as const } },
+            { authorEmail: { contains: q, mode: 'insensitive' as const } },
+            { title: { contains: q, mode: 'insensitive' as const } },
+            { body: { contains: q, mode: 'insensitive' as const } },
+          ],
+        }
+      : {}),
+  };
+
+  const [items, counts] = await Promise.all([
+    prisma.feedback.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: { select: { name: true, email: true, phone: true, image: true } },
+        product: { select: { id: true, name: true, slug: true } },
+        order: { select: { id: true, status: true, total: true } },
+      },
+    }),
+    prisma.feedback.groupBy({ by: ['status'], _count: { status: true } }),
+  ]);
+
+  return {
+    items: items.map((feedback) => ({
+      ...feedback,
+      order: feedback.order ? { ...feedback.order, total: money(feedback.order.total) } : null,
+    })),
+    counts: counts.map((item) => ({ status: item.status, total: item._count.status })),
+  };
 }
 
 export async function getBannersPage() {
   return prisma.banner.findMany({ orderBy: [{ position: 'asc' }, { createdAt: 'desc' }] });
 }
 
+export async function getBriefingsPage(searchParams?: Record<string, string | string[] | undefined>) {
+  const q = String(searchParams?.q ?? '').trim();
+  const status = String(searchParams?.status ?? 'all');
+  const page = Math.max(Number(searchParams?.page ?? 1), 1);
+
+  const where = {
+    ...(status !== 'all' ? { status: status as BriefingStatus } : {}),
+    ...(q
+      ? {
+          OR: [
+            { name: { contains: q, mode: 'insensitive' as const } },
+            { email: { contains: q, mode: 'insensitive' as const } },
+            { companyName: { contains: q, mode: 'insensitive' as const } },
+          ],
+        }
+      : {}),
+  };
+
+  const [items, total, counts] = await Promise.all([
+    prisma.projectBriefing.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      skip: (page - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
+    }),
+    prisma.projectBriefing.count({ where }),
+    prisma.projectBriefing.groupBy({ by: ['status'], _count: { status: true } }),
+  ]);
+
+  return {
+    items,
+    page,
+    pageSize: PAGE_SIZE,
+    total,
+    counts: counts.map((item) => ({ status: item.status, total: item._count.status })),
+  };
+}

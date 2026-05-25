@@ -1,8 +1,10 @@
-import { getAdminDashboard, requireAdmin } from '@/lib/admin';
+import { NextResponse } from 'next/server';
+import { getDashboardData } from '@/lib/admin/queries';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  const session = await requireAdmin();
-  if (!session) return Response.json({ success: false, error: 'Acesso negado.' }, { status: 403 });
-
-  return Response.json({ success: true, data: await getAdminDashboard() });
+  const data = await getDashboardData();
+  return NextResponse.json(data);
 }
+

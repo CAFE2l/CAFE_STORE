@@ -18,7 +18,7 @@ const links = [
 ];
 
 export function ProfileSidebar() {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? '/perfil';
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const { data: session } = useSession();
 

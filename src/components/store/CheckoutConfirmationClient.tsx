@@ -8,14 +8,14 @@ import { cn } from '@/lib/utils';
 
 export function CheckoutConfirmationClient() {
   const searchParams = useSearchParams();
-  const orderId = searchParams.get('orderId');
-  const method = searchParams.get('method');
-  const pixPayload = searchParams.get('pix');
-  const qrCodeUrl = searchParams.get('qr');
-  const pixKey = searchParams.get('pixKey');
-  const pixKeyQr = searchParams.get('pixKeyQr');
-  const status = searchParams.get('status');
-  const collectionStatus = searchParams.get('collection_status');
+  const orderId = searchParams?.get('orderId');
+  const method = searchParams?.get('method');
+  const pixPayload = searchParams?.get('pix');
+  const qrCodeUrl = searchParams?.get('qr');
+  const pixKey = searchParams?.get('pixKey');
+  const pixKeyQr = searchParams?.get('pixKeyQr');
+  const status = searchParams?.get('status');
+  const collectionStatus = searchParams?.get('collection_status');
   const paymentStatus = collectionStatus ?? status;
   const isApproved = !paymentStatus || paymentStatus === 'approved';
   const isPending = paymentStatus === 'pending' || paymentStatus === 'in_process';

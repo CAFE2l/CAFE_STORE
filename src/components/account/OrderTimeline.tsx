@@ -7,6 +7,7 @@ type OrderTimelineProps = {
 
 const steps: { status: OrderStatus; label: string }[] = [
   { status: 'PENDING', label: 'Pedido criado' },
+  { status: 'SCHEDULED', label: 'Agendado' },
   { status: 'PROCESSING', label: 'Pagamento/processamento' },
   { status: 'SHIPPED', label: 'Pedido enviado' },
   { status: 'DELIVERED', label: 'Entregue' },

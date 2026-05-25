@@ -5,8 +5,8 @@ import { StatusBadge } from '@/components/account/StatusBadge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { auth } from '@/lib/auth';
 import { getUserOrders } from '@/lib/account';
-import dynamic from 'next/dynamic'
-const OrderActionsClient = dynamic(() => import('@/components/account/OrderActionsClient').then(m => m.default), { ssr: false })
+import nextDynamic from 'next/dynamic'
+const OrderActionsClient = nextDynamic(() => import('@/components/account/OrderActionsClient').then(m => m.default), { ssr: false })
 
 export const metadata: Metadata = {
   title: 'Meus pedidos | Cafe Store',

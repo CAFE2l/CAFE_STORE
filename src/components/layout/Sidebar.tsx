@@ -16,7 +16,7 @@ const adminLinks = [
 ];
 
 export function Sidebar() {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? '/admin/dashboard';
 
   return (
     <aside className="hidden min-h-screen w-64 border-r border-border-subtle bg-cafe-dark-900 p-5 lg:block">

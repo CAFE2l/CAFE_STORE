@@ -13,8 +13,8 @@ type ResetPasswordResponse = {
 export function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const email = searchParams.get('email') ?? '';
-  const token = searchParams.get('token') ?? '';
+  const email = searchParams?.get('email') ?? '';
+  const token = searchParams?.get('token') ?? '';
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
   const [loading, setLoading] = useState(false);
