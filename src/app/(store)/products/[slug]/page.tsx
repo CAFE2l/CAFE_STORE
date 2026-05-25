@@ -33,19 +33,7 @@ function getProductMedia(product: NonNullable<Awaited<ReturnType<typeof getProdu
     label: ['Frente', 'Detalhe', 'Contexto', 'Verso', 'Design', 'Acabamento'][index] ?? `Angulo ${index + 1}`,
   }));
 
-  const supplemental = [
-    { src: '/images/banners/Produtos.png', alt: `${product.name} em contexto CAFÉ STORE`, label: 'Contexto real' },
-    { src: '/images/mascote.png', alt: 'Mascote oficial CAFÉ STORE', label: 'Identidade CAFÉ' },
-    { src: '/images/produtos/banner.png', alt: 'Produto CAFÉ STORE em uso', label: 'Lifestyle' },
-  ];
-
-  for (const item of supplemental) {
-    if (media.length >= 8) break;
-    if (!media.some((image) => image.src === item.src)) {
-      media.push(item);
-    }
-  }
-
+  // Do not add global supplemental images here — only use images that belong to the product
   return media.slice(0, 8);
 }
 
