@@ -8,6 +8,7 @@ import { ProductTabs } from '@/components/store/ProductTabs';
 import { RecentlyViewed } from '@/components/store/RecentlyViewed';
 import { FloatingWhatsApp } from '@/components/ui/FloatingWhatsApp';
 import ProductGalleryClient from '@/components/store/ProductGalleryClient';
+import ErrorBoundaryClient from '@/components/ui/ErrorBoundaryClient';
 import { PriceBlock } from '@/components/ui/PriceBlock';
 import { getProductBySlug, getRelatedProducts } from '@/lib/products';
 
@@ -172,7 +173,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
             <div className="h-px bg-zinc-800" />
 
-            <ProductPageWrapper product={product} />
+            {/* Wrap client product UI with ErrorBoundaryClient to capture render errors */}
+            <ErrorBoundaryClient>
+              <ProductPageWrapper product={product} />
+            </ErrorBoundaryClient>
           </div>
         </section>
 
