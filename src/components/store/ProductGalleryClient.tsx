@@ -10,7 +10,9 @@ export default function ProductGalleryClient({ productId, images, variants, prio
   // derive primary variant values (e.g., color) from variants if available
   const variantOptions = Array.isArray(variants) ? variants : []
   const primaryVariantName = variantOptions[0]?.name
-  const selectedValue = selected ? selected[primaryVariantName] : undefined
+  // If store has no selected variants yet, fall back to the page's default (first available value)
+  const fallbackValue = variantOptions[0]?.values?.[0]
+  const selectedValue = (selected && selected[primaryVariantName]) ? selected[primaryVariantName] : fallbackValue
 
   const grouped = useMemo(() => {
     const map: Record<string, string[]> = {}
