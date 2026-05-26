@@ -9,9 +9,7 @@ export const dynamic = 'force-dynamic';
 const createFeedbackSchema = z.object({
   author_name: z.string().trim().min(2).max(100),
   author_email: z.string().trim().email().max(255),
-  author_avatar_url: z.string().trim().url().optional().or(z.literal('')),
   author_company: z.string().trim().max(100).optional().or(z.literal('')),
-  author_role: z.string().trim().max(100).optional().or(z.literal('')),
   author_linkedin_url: z.string().trim().url().optional().or(z.literal('')),
   service_type: z.nativeEnum(FeedbackService),
   rating: z.number().int().min(1).max(5),
@@ -73,9 +71,7 @@ export async function POST(request: Request) {
     data: {
       authorName: data.author_name,
       authorEmail: data.author_email,
-      authorAvatarUrl: data.author_avatar_url || null,
       authorCompany: data.author_company || null,
-      authorRole: data.author_role || null,
       authorLinkedinUrl: data.author_linkedin_url || null,
       serviceType: data.service_type,
       rating: data.rating,

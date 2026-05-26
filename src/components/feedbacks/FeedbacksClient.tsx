@@ -42,9 +42,7 @@ type Stats = {
 type FormState = {
   author_name: string;
   author_email: string;
-  author_avatar_url: string;
   author_company: string;
-  author_role: string;
   author_linkedin_url: string;
   service_type: FeedbackService;
   rating: number;
@@ -84,9 +82,7 @@ const serviceOptions: Array<{ label: string; value: FeedbackService }> = [
 const initialForm: FormState = {
   author_name: '',
   author_email: '',
-  author_avatar_url: '',
   author_company: '',
-  author_role: '',
   author_linkedin_url: '',
   service_type: 'landing_page',
   rating: 5,
@@ -258,7 +254,6 @@ function SubmitFeedbackForm({ onSubmitted }: { onSubmitted: () => void }) {
   const [form, setForm] = useState<FormState>(initialForm);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [videoFile, setVideoFile] = useState<File | null>(null);
 
   function update<K extends keyof FormState>(key: K, value: FormState[K]) {
@@ -331,12 +326,10 @@ function SubmitFeedbackForm({ onSubmitted }: { onSubmitted: () => void }) {
 
       {step === 1 ? (
         <div className="grid gap-4 md:grid-cols-2">
-          <Input label="Nome completo" value={form.author_name} onChange={(event) => update('author_name', event.target.value)} required />
-          <Input label="E-mail" type="email" value={form.author_email} onChange={(event) => update('author_email', event.target.value)} required />
-          <FileInput label="Foto de perfil" accept="image/*" file={avatarFile} onChange={setAvatarFile} />
-          <Input label="Empresa/organização" value={form.author_company} onChange={(event) => update('author_company', event.target.value)} />
-          <Input label="Cargo" value={form.author_role} onChange={(event) => update('author_role', event.target.value)} />
-          <Input label="URL do LinkedIn" value={form.author_linkedin_url} onChange={(event) => update('author_linkedin_url', event.target.value)} />
+          <Input label="Nome completo" value={form.author_name} onChange={(event) => update('author_name', event.target.value)} required aria-required />
+          <Input label="E-mail" type="email" value={form.author_email} onChange={(event) => update('author_email', event.target.value)} required autoComplete="email" aria-required />
+          <Input label="Empresa / Organização (opcional)" value={form.author_company} onChange={(event) => update('author_company', event.target.value)} className="col-span-2" />
+          <Input label="URL do LinkedIn (opcional)" value={form.author_linkedin_url} onChange={(event) => update('author_linkedin_url', event.target.value)} className="col-span-2" />
         </div>
       ) : null}
 
@@ -382,9 +375,8 @@ function SubmitFeedbackForm({ onSubmitted }: { onSubmitted: () => void }) {
               feedback={{
                 id: 'preview',
                 author_name: form.author_name || 'Seu nome',
-                author_avatar_url: form.author_avatar_url || null,
+                author_avatar_url: null,
                 author_company: form.author_company || null,
-                author_role: form.author_role || null,
                 author_linkedin_url: form.author_linkedin_url || null,
                 service_type: form.service_type,
                 service_label: serviceOptions.find((option) => option.value === form.service_type)?.label ?? 'Serviço',
