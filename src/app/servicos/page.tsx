@@ -301,6 +301,7 @@ export default function ServicesPage() {
                   </div>
                 )}
 
+              </div>
               <div className="mb-3 flex flex-wrap gap-2">
                 {project.tags.map((tag) => (
                   <span key={tag} className="rounded-md border border-white/[0.08] bg-white/[0.04] px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-white/45">

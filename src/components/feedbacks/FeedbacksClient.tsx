@@ -378,6 +378,7 @@ function SubmitFeedbackForm({ onSubmitted }: { onSubmitted: () => void }) {
                 author_name: form.author_name || 'Seu nome',
                 author_avatar_url: null,
                 author_company: form.author_company || null,
+                author_role: null,
                 author_linkedin_url: form.author_linkedin_url || null,
                 service_type: form.service_type,
                 service_label: serviceOptions.find((option) => option.value === form.service_type)?.label ?? 'Serviço',

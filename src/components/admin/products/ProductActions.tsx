@@ -128,7 +128,7 @@ export default function ProductActions({ product }: Props) {
               </div>
               <h3 className="text-lg font-semibold text-white">Deletar produto</h3>
             </div>
-            <p className="mt-4 text-sm text-zinc-300">Tem certeza que deseja deletar <span className="font-semibold text-orange-400">"{product.name}"</span>?</p>
+            <p className="mt-4 text-sm text-zinc-300">Tem certeza que deseja deletar <span className="font-semibold text-orange-400">&ldquo;{product.name}&rdquo;</span>?</p>
             <p className="mt-2 text-sm text-red-400">Esta ação não pode ser desfeita. O produto será removido da loja.</p>
 
             <div className="mt-6 flex justify-end gap-3">
