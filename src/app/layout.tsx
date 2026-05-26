@@ -25,8 +25,8 @@ export const metadata: Metadata = {
   description:
     "Sites, landing pages, web aplicacoes e apoios simbolicos da marca CAFÉ.",
   icons: {
-    icon: "/favicon.png",
-    apple: "/favicon.png",
+    icon: "/images/favicon.png",
+    apple: "/images/favicon.png",
   },
 };
 const gaId = process.env.NEXT_PUBLIC_GA_ID;

@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
+import { auth } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
 import { BannerCarousel } from '@/components/store/BannerCarousel';
 import { ProductGrid } from '@/components/store/ProductGrid';
 import { getFeaturedProducts } from '@/lib/products';
@@ -13,7 +15,16 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
-  const [featuredProducts] = await Promise.all([getFeaturedProducts(8)]);
+  const session = await auth();
+
+  const [featuredProducts, userFavorites] = await Promise.all([
+    getFeaturedProducts(8),
+    session?.user?.id
+      ? prisma.favorite.findMany({ where: { userId: session.user.id }, select: { productId: true } })
+      : Promise.resolve([]),
+  ]);
+
+  const favoriteIds = userFavorites.map((f) => f.productId);
 
   return (
     <main className="overflow-hidden bg-[#050505]">
@@ -98,11 +109,12 @@ export default async function HomePage() {
       <BannerCarousel />
 
       <section className="container-page py-16">
-        <div className="mb-8">
-          <h2 className="font-display text-3xl font-bold text-text-primary">Apoios simbólicos</h2>
-          <p className="mt-2 text-sm text-text-muted">Itens ilustrativos para apoiar o projeto. Nao ha envio fisico.</p>
+        <div>
+          <h2 className="text-3xl font-bold text-white md:text-4xl">Apoios simbólicos</h2>
+          <p className="mt-1 text-sm text-white/40">Itens ilustrativos para apoiar o projeto. Nao ha envio fisico.</p>
+          <div className="mb-8 mt-3 h-0.5 w-12 rounded-full bg-orange-500" />
         </div>
-        <ProductGrid products={featuredProducts} />
+        <ProductGrid products={featuredProducts} favoriteIds={favoriteIds} />
         <div className="mt-8 text-center">
           <Link href="/products" className="btn-secondary">
             Ver apoios

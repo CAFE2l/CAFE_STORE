@@ -6,10 +6,11 @@ import { PackageSearch } from 'lucide-react';
 
 type ProductGridProps = {
   products: ProductListItem[];
+  favoriteIds?: string[];
   onCartOpen?: () => void;
 };
 
-export function ProductGrid({ products, onCartOpen }: ProductGridProps) {
+export function ProductGrid({ products, favoriteIds = [], onCartOpen }: ProductGridProps) {
   if (products.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-3xl border border-white/10 bg-white/[0.035] px-6 py-20 text-center shadow-card backdrop-blur-md">
@@ -33,7 +34,7 @@ export function ProductGrid({ products, onCartOpen }: ProductGridProps) {
   return (
     <div className="grid auto-rows-fr grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-6">
       {products.map((product, index) => (
-        <ProductCard key={product.id} product={product} index={index} onCartOpen={onCartOpen} />
+        <ProductCard key={product.id} product={product} index={index} isFavorited={favoriteIds.includes(product.id)} onCartOpen={onCartOpen} />
       ))}
     </div>
   );

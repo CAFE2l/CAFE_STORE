@@ -13,6 +13,7 @@ import type { ProductListItem } from '@/lib/products';
 type ProductsPageClientProps = {
   categories: { id: string; name: string; slug: string }[];
   products: ProductListItem[];
+  favoriteIds: string[];
   total: number;
   totalPages: number;
   page: number;
@@ -51,7 +52,7 @@ function buildUrl(base: string, params: Record<string, string | undefined>) {
   return qs ? `${base}?${qs}` : base;
 }
 
-export function ProductsPageClient({ categories, products, total, totalPages, page, params }: ProductsPageClientProps) {
+export function ProductsPageClient({ categories, products, favoriteIds, total, totalPages, page, params }: ProductsPageClientProps) {
   const [cartOpen, setCartOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const count = useCartStore((s) => s.count);
@@ -81,12 +82,13 @@ export function ProductsPageClient({ categories, products, total, totalPages, pa
 
         {/* header */}
         <div className="mb-8 animate-fade-up">
-          <h1 className="mb-1 text-3xl font-bold text-white">
+          <h1 className="text-3xl font-bold text-white md:text-4xl">
             {params.category ? params.category.replace(/-/g, ' ') : 'Apoios simbolicos'}
           </h1>
-          <p className="text-sm text-zinc-500">
+          <p className="mt-1 text-sm text-white/40">
             {total} apoios encontrados. Itens ilustrativos, sem envio fisico.
           </p>
+          <div className="mt-3 h-0.5 w-12 rounded-full bg-orange-500" />
         </div>
 
         {/* cart button mobile */}
@@ -116,7 +118,7 @@ export function ProductsPageClient({ categories, products, total, totalPages, pa
           <SkeletonGrid />
         ) : (
           <div className="mt-8">
-            <ProductGrid products={products} onCartOpen={() => setCartOpen(true)} />
+            <ProductGrid products={products} favoriteIds={favoriteIds} onCartOpen={() => setCartOpen(true)} />
           </div>
         )}
 
