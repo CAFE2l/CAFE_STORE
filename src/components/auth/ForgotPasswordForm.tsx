@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { FormEvent, useState } from 'react';
-import { Flame, Mail, ArrowLeft } from 'lucide-react';
+import { Flame, Mail, ArrowLeft, CheckCircle, AlertCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 type ForgotPasswordResponse = {
   success: boolean;
@@ -43,40 +44,80 @@ export function ForgotPasswordForm() {
   }
 
   return (
-    <div className="mx-auto grid w-full max-w-md gap-6">
-      <div className="text-center">
-        <Flame className="mx-auto h-10 w-10 text-cafe-orange-500" />
-        <h1 className="mt-4 font-display text-3xl font-bold text-text-primary">Recuperar senha</h1>
-        <p className="mt-2 text-sm text-text-muted">Informe seu email para receber um link de uso único.</p>
-      </div>
+    <div className="min-h-screen flex items-center justify-center px-4 py-12">
+      <div className="relative max-w-md w-full">
+        <div className="absolute -inset-12 -z-10 blur-3xl opacity-20 rounded-full bg-gradient-to-br from-orange-500 to-orange-300" />
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-8 shadow-2xl">
+          <div className="text-center">
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: 0.05 }} className="mx-auto mb-3 grid h-14 w-14 place-items-center rounded-full bg-gradient-to-br from-orange-600 to-orange-500 shadow-[0_8px_30px_rgba(249,115,22,0.12)]">
+              <Flame className="h-7 w-7 text-white" />
+            </motion.div>
+            <h1 className="text-3xl font-bold text-white">Recuperar senha</h1>
+            <p className="mt-2 text-sm text-white/60">Informe seu e‑mail e enviaremos um link de redefinição.</p>
+          </div>
 
-      <div className="rounded-card border border-border-subtle bg-background-card p-6">
-        <form className="grid gap-4" onSubmit={handleSubmit}>
-          <label className="grid gap-2 text-sm text-text-secondary">
-            E-mail
-            <span className="relative">
-              <Mail className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
-              <input className="input-field w-full pl-10" name="email" type="email" autoComplete="email" required placeholder="voce@email.com" />
-            </span>
-          </label>
-          {error ? <p className="rounded-lg bg-cafe-red-500/10 px-4 py-2.5 text-sm text-cafe-red-500">{error}</p> : null}
-          {message ? <p className="rounded-lg bg-status-success/10 px-4 py-2.5 text-sm text-status-success">{message}</p> : null}
-          {devResetUrl ? (
-            <Link href={devResetUrl} className="text-sm font-semibold text-cafe-orange-500 hover:text-cafe-orange-400">
-              Abrir link de reset em dev
-            </Link>
-          ) : null}
-          <button type="submit" className="btn-primary mt-2 w-full h-11" disabled={loading}>
-            {loading ? 'Enviando...' : 'Enviar link'}
-          </button>
-        </form>
+          <form className="mt-6 grid gap-4" onSubmit={handleSubmit} aria-live="polite">
+            <label className="relative block">
+              <span className="text-sm font-medium text-white/70">E-mail</span>
+              <span className="relative mt-2 block">
+                <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/50" />
+                <input
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  placeholder="voce@exemplo.com"
+                  className="w-full rounded-xl border border-white/20 bg-white/6 px-4 py-3 pl-11 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
+                />
+              </span>
+            </label>
 
-        <p className="mt-6 text-center text-sm text-text-muted">
-          <Link href="/login" className="inline-flex items-center gap-1 font-medium text-cafe-orange-500 transition hover:text-cafe-orange-400">
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Voltar para o login
-          </Link>
-        </p>
+            <div className="flex flex-col gap-3">
+              <button
+                type="submit"
+                disabled={loading}
+                className="inline-flex items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 px-4 py-3 text-sm font-semibold text-white shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-transform disabled:opacity-60"
+              >
+                {loading ? (
+                  <svg className="h-4 w-4 animate-spin text-white" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                  </svg>
+                ) : null}
+                {loading ? 'Enviando...' : 'Enviar link de redefinição'}
+              </button>
+
+              <AnimatePresence>
+                {error ? (
+                  <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} className="rounded-lg border border-red-400/20 bg-red-600/10 px-4 py-2 text-sm text-red-300 flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4 text-red-300" />
+                    <span>{error}</span>
+                  </motion.div>
+                ) : null}
+
+                {message ? (
+                  <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} className="rounded-lg border border-emerald-400/20 bg-emerald-600/10 px-4 py-2 text-sm text-emerald-100 flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-emerald-200" />
+                    <span>{message}</span>
+                  </motion.div>
+                ) : null}
+              </AnimatePresence>
+
+              {devResetUrl ? (
+                <Link href={devResetUrl} className="text-sm font-semibold text-orange-300 hover:text-orange-200">
+                  Abrir link de reset (dev)
+                </Link>
+              ) : null}
+
+              <div className="mt-2 text-center text-sm">
+                <Link href="/login" className="inline-flex items-center gap-2 text-white/70 hover:text-white transition-transform group">
+                  <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+                  Voltar para o login
+                </Link>
+              </div>
+            </div>
+          </form>
+        </motion.div>
       </div>
     </div>
   );

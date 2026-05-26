@@ -25,6 +25,8 @@ export async function POST(request: Request) {
 
   let devResetUrl: string | undefined;
 
+  console.info('forgot-password: RESEND_API_KEY exists:', !!process.env.RESEND_API_KEY);
+
   if (user) {
     const identifier = `password-reset:${email}`;
     const token = randomBytes(32).toString('hex');
@@ -42,7 +44,19 @@ export async function POST(request: Request) {
         expires,
       },
     });
-    await sendPasswordResetEmail(email, resetUrl).catch(() => null);
+
+    // Attempt to send the reset email and surface/log any error to aid debugging
+    try {
+      const sendResult = await sendPasswordResetEmail(email, resetUrl);
+      if ((sendResult as any)?.skipped) {
+        console.error('forgot-password: sendEmail skipped — Resend not configured or missing API key');
+        return Response.json({ success: false, error: 'Envio de email não está configurado.' }, { status: 500 });
+      }
+      console.info('forgot-password: reset email requested for', email);
+    } catch (err) {
+      console.error('forgot-password: error sending reset email to', email, err);
+      return Response.json({ success: false, error: 'Erro ao enviar email. Tente novamente.' }, { status: 500 });
+    }
   }
 
   return Response.json({
