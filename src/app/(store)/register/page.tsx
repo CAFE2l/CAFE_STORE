@@ -7,9 +7,11 @@ export const metadata: Metadata = {
 };
 
 export default function RegisterPage() {
+  const googleEnabled = Boolean(process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET);
+
   return (
     <main className="min-h-screen bg-surface-base">
-      <RegisterForm />
+      <RegisterForm googleEnabled={googleEnabled} />
     </main>
   );
 }

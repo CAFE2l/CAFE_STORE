@@ -44,7 +44,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   pages: {
     signIn: '/login',
+    error: '/login',
   },
+  trustHost: true,
   providers: [
     ...(hasGoogleOAuth
       ? [
@@ -52,6 +54,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             clientId: process.env.AUTH_GOOGLE_ID,
             clientSecret: process.env.AUTH_GOOGLE_SECRET,
             allowDangerousEmailAccountLinking: true,
+            checks: ['state'],
           }),
         ]
       : []),
