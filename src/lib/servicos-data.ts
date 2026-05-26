@@ -2,7 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import { Globe2, Monitor, Zap } from "lucide-react";
 
 export const WHATSAPP =
-  "https://wa.me/5541996713782?text=Olá,%20tenho%20interesse%20nos%seus%20Serviços";
+  "https://wa.me/5541996713782?text=Olá,%20tenho%20interesse%20nos%20seus%20Serviços";
 
 export type Service = {
   icon: LucideIcon;
@@ -114,7 +114,7 @@ export type Project = {
 
 export const projects: Project[] = [
   {
-    name: "CAFÉ STORE",
+    name: "STREAM PIX",
     image: "/images/banners/banner.png",
     tags: ["React", "Firebase", "Render"],
     desc: "Plataforma de Pix e QR code para livestreams",
