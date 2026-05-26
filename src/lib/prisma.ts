@@ -11,7 +11,7 @@ function withConnectionLimit(databaseUrl?: string) {
     const url = new URL(databaseUrl);
 
     if (!url.searchParams.has('connection_limit')) {
-      url.searchParams.set('connection_limit', process.env.PRISMA_CONNECTION_LIMIT ?? '5');
+      url.searchParams.set('connection_limit', process.env.PRISMA_CONNECTION_LIMIT ?? '1');
     }
 
     if (!url.searchParams.has('pool_timeout')) {
