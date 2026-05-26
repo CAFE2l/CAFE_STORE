@@ -46,6 +46,22 @@
 
   ::selection { background: rgba(249,115,22,0.25); color: #fff; }
 
+  /* Autofill fix for dark inputs to avoid white background + white text */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  textarea:-webkit-autofill,
+  textarea:-webkit-autofill:hover,
+  textarea:-webkit-autofill:focus,
+  select:-webkit-autofill,
+  select:-webkit-autofill:hover,
+  select:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0px 1000px var(--cafe-dark-800) inset !important;
+    -webkit-text-fill-color: #ffffff !important;
+    caret-color: #ffffff !important;
+    transition: background-color 5000s ease-in-out 0s !important;
+  }
+
   *:focus-visible {
     outline: 2px solid #C0392B;
     outline-offset: 2px;
