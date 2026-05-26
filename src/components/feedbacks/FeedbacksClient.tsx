@@ -4,6 +4,7 @@ import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useState } fro
 import Image from 'next/image';
 import Link from 'next/link';
 import { Check, ExternalLink, Loader2, Menu, Star, ThumbsUp, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { WHATSAPP } from '@/lib/servicos-data';
 
@@ -226,11 +227,11 @@ function FeedbackCard({ feedback, index }: { feedback: Feedback; index: number }
   );
 }
 
-function Input({ label, ...props }: { label: string } & React.InputHTMLAttributes<HTMLInputElement>) {
+function Input({ label, id, ...props }: { label: string; id?: string } & React.InputHTMLAttributes<HTMLInputElement>) {
   return (
-    <label className="grid gap-2 text-sm text-white/60">
-      {label}
-      <input className="glass-input rounded-xl border-white/10 bg-white/[0.04] text-white" {...props} />
+    <label htmlFor={id} className="grid gap-2 text-sm">
+      <span className="text-xs font-medium text-white/50 mb-1.5 uppercase tracking-wide">{label}</span>
+      <input id={id} className="bg-white/[0.06] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/25 focus:outline-none focus:ring-2 focus:ring-orange-500/60 transition" {...props} />
     </label>
   );
 }
@@ -672,10 +673,21 @@ export function FeedbacksClient() {
       </section>
 
       <section id="enviar" className="mx-auto max-w-7xl px-4 pb-24 sm:px-6 lg:px-8">
-        <div className="mb-10 text-center">
-          <span className="text-xs font-semibold uppercase tracking-widest text-brand">Sua vez</span>
-          <h2 className="mt-3 text-3xl font-bold text-white md:text-4xl">Deixe seu feedback</h2>
-          <p className="mx-auto mt-3 max-w-xl text-white/45">Seu depoimento ajuda outros clientes a decidirem com segurança e valoriza o projeto que construímos juntos.</p>
+        <div className="relative mb-10 text-center">
+          <div className="absolute left-1/2 top-0 -z-10 -translate-x-1/2 blur-[120px] opacity-15 w-72 h-72 rounded-full bg-orange-500" />
+          <motion.span initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className="inline-block mb-3 text-xs font-semibold uppercase tracking-widest text-orange-400 bg-orange-500/10 border border-orange-500/20 rounded-full px-4 py-1">
+            Enviar depoimento
+          </motion.span>
+
+          <motion.h2 initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="mt-3 text-4xl md:text-5xl font-bold text-white leading-tight">
+            Compartilhe sua experiência
+          </motion.h2>
+
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }} className="mx-auto mt-3 max-w-md text-base text-white/50">
+            Seu depoimento ajuda outros clientes a decidir com confiança e mostra o impacto do trabalho entregue.
+          </motion.p>
+
+          <div className="mx-auto mt-4 w-16 h-px bg-gradient-to-r from-transparent via-orange-500 to-transparent" />
         </div>
         {submitted ? <ThankYouState /> : <SubmitFeedbackForm onSubmitted={() => setSubmitted(true)} />}
       </section>
