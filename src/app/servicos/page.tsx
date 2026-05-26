@@ -276,17 +276,31 @@ export default function ServicesPage() {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-3">
-          {projects.map((project) => (
+          {projects.map((project, index) => (
             <a
               key={project.name}
               href={project.href}
               className="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.045] p-5 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-brand/35 hover:shadow-[0_0_34px_rgba(249,115,22,0.12)]"
             >
-              <div className="mb-5 flex aspect-[16/9] items-center justify-center rounded-xl border border-white/[0.06] bg-[radial-gradient(circle_at_center,rgba(249,115,22,0.18),rgba(255,255,255,0.035)_48%,rgba(0,0,0,0.18))]">
-                <span className="bg-gradient-to-r from-brand via-[#FFD000] to-[#FF3C38] bg-clip-text text-3xl font-black text-transparent">
-                  CAFÉ
-                </span>
-              </div>
+              <div className="relative h-48 w-full overflow-hidden rounded-xl border border-white/[0.06] bg-neutral-950">
+                {project.image ? (
+                  <>
+                    <Image
+                      src={project.image}
+                      alt={project.name}
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                      priority={index === 0}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                  </>
+                ) : (
+                  <div className="mb-5 flex aspect-[16/9] items-center justify-center rounded-xl bg-[radial-gradient(circle_at_center,rgba(249,115,22,0.18),rgba(255,255,255,0.035)_48%,rgba(0,0,0,0.18))]">
+                    <span className="bg-gradient-to-r from-brand via-[#FFD000] to-[#FF3C38] bg-clip-text text-3xl font-black text-transparent">CAFÉ</span>
+                  </div>
+                )}
+
               <div className="mb-3 flex flex-wrap gap-2">
                 {project.tags.map((tag) => (
                   <span key={tag} className="rounded-md border border-white/[0.08] bg-white/[0.04] px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-white/45">

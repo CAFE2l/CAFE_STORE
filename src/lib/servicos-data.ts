@@ -108,11 +108,13 @@ export type Project = {
   desc: string;
   metric: string;
   href: string;
+  image?: string;
 };
 
 export const projects: Project[] = [
   {
     name: 'CAFÉ STORE',
+    image: '/images/banners/banner.png',
     tags: ['E-commerce', 'Next.js', 'Checkout'],
     desc: 'Loja virtual completa com catálogo, carrinho, checkout, painel administrativo e área do cliente.',
     metric: 'Loja completa no ar',
@@ -120,6 +122,7 @@ export const projects: Project[] = [
   },
   {
     name: 'Painel Financeiro SaaS',
+    image: '/images/banners/portfolio.png',
     tags: ['Web App', 'React', 'Node.js'],
     desc: 'Dashboard operacional com autenticação, gráficos, relatórios e gerenciamento de usuários.',
     metric: 'Fluxo interno automatizado',
@@ -127,6 +130,7 @@ export const projects: Project[] = [
   },
   {
     name: 'Landing Page de Conversão',
+    image: '/images/banners/cafe-agencias-digitais.png',
     tags: ['Landing Page', 'SEO', 'Performance'],
     desc: 'Página de campanha com copy, formulário integrado, estrutura responsiva e deploy otimizado.',
     metric: 'Entrega em 5 dias',
