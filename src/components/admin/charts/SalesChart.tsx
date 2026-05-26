@@ -35,12 +35,16 @@ export function OrderStatusChart({ data }: { data: { status: string; total: numb
   return (
     <div className="h-[260px] w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} margin={{ left: 0, right: 0, top: 16, bottom: 0 }}>
+        <BarChart key="order-status-chart" data={data} margin={{ left: 0, right: 0, top: 16, bottom: 0 }}>
           <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
           <XAxis dataKey="status" stroke="rgba(255,255,255,0.35)" tickLine={false} axisLine={false} fontSize={11} />
           <YAxis allowDecimals={false} stroke="rgba(255,255,255,0.35)" tickLine={false} axisLine={false} fontSize={12} />
-          <Tooltip contentStyle={{ background: '#090909', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, color: '#fff' }} />
-          <Bar dataKey="total" radius={[8, 8, 0, 0]}>
+          <Tooltip
+            cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+            isAnimationActive={false}
+            contentStyle={{ background: '#090909', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, color: '#fff' }}
+          />
+          <Bar dataKey="total" radius={[8, 8, 0, 0]} isAnimationActive={false}>
             {data.map((item, index) => (
               <Cell key={item.status} fill={colors[index % colors.length]} />
             ))}

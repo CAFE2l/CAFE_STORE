@@ -4,14 +4,20 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { signOut } from 'next-auth/react';
 import { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
-  ChevronDown,
+  AlertTriangle,
   Copy,
+  Eye,
   Heart,
+  Loader2,
   MapPin,
   Package,
   Plus,
   Shield,
+  ShoppingBag,
+  Trash2,
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useCartStore } from '@/store/cart';
@@ -59,7 +65,7 @@ function SkeletonCards() {
   );
 }
 
-type OrderStatus = 'aguardando_pagamento' | 'em_processamento' | 'enviado' | 'entregue' | 'cancelado';
+type OrderStatus = 'aguardando_pagamento' | 'agendado' | 'em_processamento' | 'enviado' | 'entregue' | 'cancelado';
 type OrderItem = {
   id: string;
   productId: string;
@@ -81,33 +87,104 @@ type UserOrder = {
   items: OrderItem[];
 };
 
-const statusMeta: Record<OrderStatus, { label: string; color: string }> = {
-  aguardando_pagamento: { label: 'Aguardando pagamento', color: '#ca8a04' },
-  em_processamento: { label: 'Em processamento', color: '#3b82f6' },
-  enviado: { label: 'Enviado', color: '#a855f7' },
-  entregue: { label: 'Entregue', color: '#16a34a' },
-  cancelado: { label: 'Cancelado', color: '#ef4444' },
+const statusMeta: Record<OrderStatus, { label: string; badge: string; dot: string }> = {
+  aguardando_pagamento: {
+    label: 'Pendente',
+    badge: 'border-yellow-400/30 bg-yellow-400/15 text-yellow-400',
+    dot: 'bg-yellow-400',
+  },
+  agendado: {
+    label: 'Pendente',
+    badge: 'border-yellow-400/30 bg-yellow-400/15 text-yellow-400',
+    dot: 'bg-yellow-400',
+  },
+  em_processamento: {
+    label: 'Processando',
+    badge: 'border-brand/30 bg-brand/15 text-brand',
+    dot: 'bg-brand',
+  },
+  enviado: {
+    label: 'Processando',
+    badge: 'border-brand/30 bg-brand/15 text-brand',
+    dot: 'bg-brand',
+  },
+  entregue: {
+    label: 'Entregue',
+    badge: 'border-green-500/30 bg-green-500/15 text-green-500',
+    dot: 'bg-green-500',
+  },
+  cancelado: {
+    label: 'Cancelado',
+    badge: 'border-red-500/30 bg-red-500/15 text-red-500',
+    dot: 'bg-red-500',
+  },
 };
 
-function relativeDate(value: string) {
-  const date = new Date(value);
-  const diff = Date.now() - date.getTime();
-  const days = Math.floor(diff / 86400000);
-  if (days <= 0) return 'hoje';
-  if (days === 1) return 'ha 1 dia';
-  return `ha ${days} dias`;
+const orderFilters: { value: 'todos' | OrderStatus; label: string }[] = [
+  { value: 'todos', label: 'Todos' },
+  { value: 'entregue', label: 'Entregue' },
+  { value: 'aguardando_pagamento', label: 'Pendente' },
+  { value: 'em_processamento', label: 'Processando' },
+  { value: 'cancelado', label: 'Cancelado' },
+];
+
+function formatOrderDate(value: string, includeTime = false) {
+  return new Intl.DateTimeFormat('pt-BR', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+    ...(includeTime ? { hour: '2-digit', minute: '2-digit' } : {}),
+  }).format(new Date(value));
+}
+
+function formatVariants(variants: unknown) {
+  if (!variants) return '';
+  if (Array.isArray(variants)) {
+    return variants
+      .map((variant) => {
+        if (!variant || typeof variant !== 'object') return '';
+        const record = variant as Record<string, unknown>;
+        const name = String(record.name ?? record.label ?? record.tipo ?? '').trim();
+        const value = String(record.value ?? record.valor ?? record.option ?? '').trim();
+        return [name, value].filter(Boolean).join(' ');
+      })
+      .filter(Boolean)
+      .join(' / ');
+  }
+  if (typeof variants === 'object') {
+    return Object.entries(variants as Record<string, unknown>)
+      .map(([key, value]) => `${key}: ${String(value)}`)
+      .join(' / ');
+  }
+  return String(variants);
+}
+
+function StatusPill({ status, large = false }: { status: OrderStatus; large?: boolean }) {
+  const meta = statusMeta[status] ?? statusMeta.em_processamento;
+  return (
+    <span className={cn(
+      'inline-flex items-center gap-1.5 rounded-full border font-semibold',
+      large ? 'px-3 py-1.5 text-xs' : 'px-2.5 py-1 text-[11px]',
+      meta.badge,
+    )}>
+      <span className={cn('size-1.5 rounded-full', meta.dot)} />
+      {meta.label}
+    </span>
+  );
 }
 
 export function OrdersPageClient() {
-  const addItem = useCartStore((state) => state.addItem);
   const [orders, setOrders] = useState<UserOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [expanded, setExpanded] = useState<string | null>(null);
-  const [status, setStatus] = useState('todos');
+  const [status, setStatus] = useState<'todos' | OrderStatus>('todos');
   const [q, setQ] = useState('');
   const [cursor, setCursor] = useState<string | null>(null);
   const [total, setTotal] = useState(0);
+  const [detailsOrder, setDetailsOrder] = useState<UserOrder | null>(null);
+  const [deleteOrder, setDeleteOrder] = useState<UserOrder | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [toast, setToast] = useState('');
 
   const load = useCallback(async (nextCursor?: string | null) => {
     if (nextCursor) setLoadingMore(true);
@@ -130,133 +207,154 @@ export function OrdersPageClient() {
     return () => clearTimeout(id);
   }, [load]);
 
-  function buyAgain(order: UserOrder) {
-    order.items.forEach((item) => {
-      addItem({
-        id: item.productId,
-        productId: item.productId,
-        slug: item.slug,
-        name: item.nome,
-        image: item.thumbnail,
-        price: item.preco,
-        quantity: item.quantidade,
-      });
-    });
+  async function confirmDelete() {
+    if (!deleteOrder) return;
+    setDeleting(true);
+    try {
+      const response = await fetch(`/api/user/orders/${deleteOrder.id}`, { method: 'DELETE' });
+      const json = await response.json().catch(() => null);
+      if (!response.ok) {
+        setToast(json?.error ?? 'Nao foi possivel remover o pedido.');
+        return;
+      }
+      setOrders((current) => current.filter((order) => order.id !== deleteOrder.id));
+      setTotal((current) => Math.max(0, current - 1));
+      setDeleteOrder(null);
+      setToast('Pedido removido do historico');
+    } catch {
+      setToast('Nao foi possivel remover o pedido agora.');
+    } finally {
+      setDeleting(false);
+      setTimeout(() => setToast(''), 3200);
+    }
   }
-
-  const tabs = ['todos', ...Object.keys(statusMeta)];
 
   if (loading) return <SkeletonCards />;
 
   return (
-    <div className="grid gap-5">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-white">Meus Pedidos</h2>
-          <p className="mt-1 text-sm text-zinc-500">{total} pedido(s) no total</p>
+    <div className="grid gap-6">
+      <header className="grid gap-4">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="grid size-11 place-items-center rounded-2xl border border-brand/20 bg-brand/10 text-brand">
+                <ShoppingBag className="size-5" />
+              </span>
+              <div>
+                <h2 className="font-display text-[2rem] font-bold leading-tight text-white">Meus Pedidos</h2>
+                <p className="mt-1 text-sm text-white/50">Acompanhe seus apoios, detalhes e historico de compras.</p>
+              </div>
+              <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1 text-xs font-semibold text-zinc-300">
+                {total} {total === 1 ? 'pedido encontrado' : 'pedidos encontrados'}
+              </span>
+            </div>
+          </div>
+          <input
+            className="w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-2.5 text-sm text-white outline-none transition placeholder:text-zinc-600 focus:border-brand/60 sm:w-64"
+            placeholder="Buscar numero do pedido"
+            value={q}
+            onChange={(event) => setQ(event.target.value)}
+            aria-label="Buscar numero do pedido"
+          />
         </div>
-        <input
-          className="w-full rounded-xl border border-zinc-700 bg-zinc-900/60 px-4 py-2.5 text-sm text-white outline-none focus:border-brand/60 sm:w-64"
-          placeholder="Buscar numero do pedido"
-          value={q}
-          onChange={(event) => setQ(event.target.value)}
-        />
-      </div>
+        <div className="h-0.5 w-full bg-gradient-to-r from-brand via-brand/40 to-transparent" />
+      </header>
 
       <div className="flex gap-2 overflow-x-auto pb-1">
-        {tabs.map((tab) => (
+        {orderFilters.map((filter) => (
           <button
-            key={tab}
+            key={filter.value}
             type="button"
             className={cn(
-              'shrink-0 rounded-xl px-3 py-2 text-xs font-semibold transition',
-              status === tab ? 'bg-brand text-white' : 'bg-white/[0.04] text-zinc-400 hover:text-white',
+              'shrink-0 rounded-full border px-4 py-2 text-xs font-semibold transition',
+              status === filter.value
+                ? 'border-brand bg-brand text-white shadow-[0_8px_24px_rgba(249,115,22,0.22)]'
+                : 'border-white/[0.08] bg-white/[0.04] text-zinc-400 hover:border-brand/40 hover:text-white',
             )}
-            onClick={() => setStatus(tab)}
+            onClick={() => setStatus(filter.value)}
           >
-            {tab === 'todos' ? 'Todos' : statusMeta[tab as OrderStatus].label}
+            {filter.label}
           </button>
         ))}
       </div>
 
       {orders.length === 0 ? (
-        <EmptyPanel title="Voce ainda nao fez nenhum pedido" subtitle="Os apoios finalizados vao aparecer aqui." action={{ href: '/products', label: 'Explorar produtos' }} />
+        <div className="rounded-[20px] border border-white/[0.08] bg-white/[0.04] p-10 text-center shadow-[0_4px_24px_rgba(0,0,0,0.35)] backdrop-blur-xl">
+          <ShoppingBag className="mx-auto size-20 text-white/20" />
+          <h3 className="mt-5 text-xl font-bold text-white">Nenhum pedido ainda</h3>
+          <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-white/45">Seus apoios aparecerao aqui apos a compra.</p>
+          <Link href="/products" className="btn-primary mt-6 inline-flex">Explorar apoios</Link>
+        </div>
       ) : (
-        <div className="grid gap-4">
+        <motion.div className="grid gap-4" initial="hidden" animate="show" variants={{ hidden: {}, show: { transition: { staggerChildren: 0.1 } } }}>
+          <AnimatePresence initial={false}>
           {orders.map((order) => {
-            const meta = statusMeta[order.status];
-            const firstItem = order.items[0];
-            const open = expanded === order.id;
-            const steps = ['Confirmado', 'Pago', 'Enviado', 'Entregue'];
-            const currentStep = order.status === 'aguardando_pagamento' ? 0 : order.status === 'em_processamento' ? 1 : order.status === 'enviado' ? 2 : order.status === 'entregue' ? 3 : 0;
+            const previewItems = order.items.slice(0, 2);
+            const hiddenCount = Math.max(0, order.items.length - previewItems.length);
+            const itemCount = order.items.reduce((sum, item) => sum + item.quantidade, 0);
 
             return (
-              <article key={order.id} className="rounded-2xl border border-white/[0.06] bg-zinc-900/40 p-4">
-                <button type="button" className="grid w-full gap-4 text-left sm:grid-cols-[5rem_1fr_auto]" onClick={() => setExpanded(open ? null : order.id)}>
-                  <Image src={firstItem?.thumbnail ?? '/placeholder-product.svg'} alt={firstItem?.nome ?? 'Pedido'} width={80} height={80} className="size-20 rounded-xl object-cover" />
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-mono text-sm font-semibold text-white">#{order.numero}</p>
-                      <span className="inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-xs font-semibold text-white" style={{ backgroundColor: `${meta.color}26`, color: meta.color }}>
-                        <span className={cn('size-2 rounded-full', ['aguardando_pagamento', 'enviado'].includes(order.status) && 'animate-pulse')} style={{ backgroundColor: meta.color }} />
-                        {meta.label}
-                      </span>
-                    </div>
-                    <p className="mt-2 text-sm text-zinc-500" title={new Date(order.created_at).toLocaleString('pt-BR')}>
-                      {relativeDate(order.created_at)}
-                    </p>
-                    <p className="mt-1 truncate text-sm text-zinc-400">{order.items.length} item(ns)</p>
+              <motion.article
+                key={order.id}
+                layout
+                variants={{ hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }}
+                exit={{ opacity: 0, y: -14, scale: 0.98 }}
+                transition={{ duration: 0.22 }}
+                className="grid gap-5 rounded-2xl border border-white/[0.08] bg-white/[0.04] p-5 shadow-[0_4px_24px_rgba(0,0,0,0.25)] backdrop-blur-xl transition hover:border-brand/30 hover:shadow-[0_4px_24px_rgba(0,0,0,0.4)] lg:grid-cols-[minmax(180px,0.9fr)_minmax(260px,1.4fr)_auto] lg:items-center"
+              >
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="font-mono text-sm font-semibold text-white">#{order.numero}</p>
+                    <StatusPill status={order.status} />
                   </div>
-                  <div className="flex items-center justify-between gap-4 sm:justify-end">
-                    <p className="font-bold text-brand">{currencyFormatter.format(order.total)}</p>
-                    <ChevronDown className={cn('size-5 text-zinc-500 transition', open && 'rotate-180')} />
-                  </div>
-                </button>
+                  <p className="mt-2 text-sm text-white/45">{formatOrderDate(order.created_at)}</p>
+                  <p className="mt-3 text-sm text-white/55">
+                    <span className="font-bold text-brand">{currencyFormatter.format(order.total)}</span>
+                    <span className="mx-2 text-white/20">•</span>
+                    {itemCount} {itemCount === 1 ? 'item' : 'itens'}
+                  </p>
+                </div>
 
-                {open ? (
-                  <div className="mt-5 grid gap-5 border-t border-white/[0.06] pt-5">
-                    <div className="grid gap-3">
-                      {order.items.map((item) => (
-                        <div key={item.id} className="flex items-center gap-3 rounded-xl bg-white/[0.03] p-3">
-                          <Image src={item.thumbnail} alt={item.nome} width={48} height={48} className="size-12 rounded-lg object-cover" />
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-medium text-white">{item.nome}</p>
-                            <p className="text-xs text-zinc-500">Qtd. {item.quantidade}</p>
-                          </div>
-                          <p className="text-sm text-zinc-300">{currencyFormatter.format(item.preco * item.quantidade)}</p>
+                <div className="grid gap-2">
+                  {previewItems.map((item) => {
+                    const variantText = formatVariants(item.variants);
+                    return (
+                      <div key={item.id} className="grid grid-cols-[40px_minmax(0,1fr)_auto] items-center gap-3 rounded-xl bg-white/[0.03] p-2">
+                        <Image src={item.thumbnail || '/placeholder-product.svg'} alt={item.nome} width={40} height={40} className="size-10 rounded-lg object-cover" />
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-white">{item.nome}</p>
+                          <p className="truncate text-xs text-white/50">{variantText || 'Variacao padrao'}</p>
                         </div>
-                      ))}
-                    </div>
-                    <div className="grid gap-3 text-sm text-zinc-400 md:grid-cols-2">
-                      <div className="rounded-xl bg-white/[0.03] p-4">
-                        <p className="mb-1 font-semibold text-white">Endereco de entrega</p>
-                        <p>{order.endereco_entrega?.street}, {order.endereco_entrega?.number}</p>
-                        <p>{order.endereco_entrega?.city}/{order.endereco_entrega?.state} - {order.endereco_entrega?.zip}</p>
+                        <span className="text-xs font-semibold text-white/55">Qtd {item.quantidade}</span>
                       </div>
-                      <div className="rounded-xl bg-white/[0.03] p-4">
-                        <p className="mb-1 font-semibold text-white">Metodo de pagamento</p>
-                        <p className="capitalize">{order.metodo_pagamento}</p>
-                      </div>
-                    </div>
-                    <div className="grid gap-2 sm:grid-cols-4">
-                      {steps.map((step, index) => (
-                        <div key={step} className={cn('rounded-xl border p-3 text-center text-xs', index <= currentStep ? 'border-brand/30 bg-brand/10 text-white' : 'border-white/[0.06] text-zinc-600')}>
-                          <span className={cn('mx-auto mb-2 block size-3 rounded-full', index === currentStep ? 'animate-pulse bg-brand' : index < currentStep ? 'bg-green-500' : 'bg-zinc-700')} />
-                          {step}
-                        </div>
-                      ))}
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      <Button variant="secondary">Rastrear</Button>
-                      {order.status === 'entregue' ? <Button onClick={() => buyAgain(order)}>Comprar novamente</Button> : null}
-                      {order.status === 'aguardando_pagamento' ? <Button variant="ghost">Ver codigo Pix</Button> : null}
-                    </div>
-                  </div>
-                ) : null}
-              </article>
+                    );
+                  })}
+                  {hiddenCount > 0 ? <p className="px-2 text-xs text-white/40">+{hiddenCount} mais</p> : null}
+                </div>
+
+                <div className="flex flex-wrap gap-2 lg:flex-col lg:items-stretch">
+                  <button
+                    type="button"
+                    className="inline-flex items-center justify-center gap-2 rounded-lg border border-brand/30 bg-brand/10 px-3 py-2 text-sm font-semibold text-brand transition hover:border-brand hover:bg-brand/15"
+                    onClick={() => setDetailsOrder(order)}
+                  >
+                    <Eye className="size-4" />
+                    Ver detalhes
+                  </button>
+                  <button
+                    type="button"
+                    className="inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-red-400/70 transition hover:bg-red-500/10 hover:text-red-400"
+                    onClick={() => setDeleteOrder(order)}
+                  >
+                    <Trash2 className="size-4" />
+                    Deletar
+                  </button>
+                </div>
+              </motion.article>
             );
           })}
-        </div>
+          </AnimatePresence>
+        </motion.div>
       )}
 
       {cursor ? (
@@ -264,6 +362,109 @@ export function OrdersPageClient() {
           Carregar mais
         </Button>
       ) : null}
+
+      <AnimatePresence>
+        {detailsOrder ? (
+          <motion.div
+            className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4 backdrop-blur"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            role="dialog"
+            aria-modal="true"
+          >
+            <motion.div
+              className="max-h-[90vh] w-full max-w-[520px] overflow-y-auto rounded-[20px] border border-brand/20 bg-[#111111] p-6 shadow-2xl"
+              initial={{ opacity: 0, scale: 0.95, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 12 }}
+              transition={{ duration: 0.18 }}
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h3 className="font-mono text-xl font-bold text-white">Pedido #{detailsOrder.numero}</h3>
+                  <p className="mt-1 text-sm text-white/45">{formatOrderDate(detailsOrder.created_at, true)}</p>
+                  <div className="mt-3">
+                    <StatusPill status={detailsOrder.status} large />
+                  </div>
+                </div>
+                <button type="button" className="rounded-full p-2 text-white/45 transition hover:bg-white/10 hover:text-white" onClick={() => setDetailsOrder(null)} aria-label="Fechar detalhes do pedido">
+                  <X className="size-5" />
+                </button>
+              </div>
+
+              <div className="mt-6 grid gap-3">
+                {detailsOrder.items.map((item) => {
+                  const variantText = formatVariants(item.variants);
+                  const itemTotal = item.preco * item.quantidade;
+                  return (
+                    <div key={item.id} className="grid grid-cols-[60px_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-3">
+                      <Image src={item.thumbnail || '/placeholder-product.svg'} alt={item.nome} width={60} height={60} className="size-[60px] rounded-[10px] object-cover" />
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-white">{item.nome}</p>
+                        <p className="mt-1 text-xs text-white/45">{variantText || 'Variacao padrao'}</p>
+                        <p className="mt-1 text-xs text-white/55">{item.quantidade} x {currencyFormatter.format(item.preco)}</p>
+                      </div>
+                      <p className="text-sm font-bold text-white">{currencyFormatter.format(itemTotal)}</p>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="mt-6 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4">
+                <div className="flex justify-between border-b border-white/[0.06] pb-3 text-sm text-white/55">
+                  <span>Subtotal</span>
+                  <span>{currencyFormatter.format(detailsOrder.total)}</span>
+                </div>
+                <div className="flex justify-between border-b border-white/[0.06] py-3 text-sm text-white/55">
+                  <span>Entrega</span>
+                  <span>Nao se aplica</span>
+                </div>
+                <div className="flex justify-between pt-4 text-lg font-bold text-white">
+                  <span>Total</span>
+                  <span className="text-brand">{currencyFormatter.format(detailsOrder.total)}</span>
+                </div>
+                <p className="mt-3 text-xs leading-5 text-white/40">Este pedido representa uma doacao simbolica de apoio ao Cafe Store.</p>
+              </div>
+            </motion.div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {deleteOrder ? (
+          <motion.div className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4 backdrop-blur" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} role="dialog" aria-modal="true">
+            <motion.div className="w-full max-w-md rounded-[20px] border border-red-500/20 bg-[#111111] p-6 shadow-2xl" initial={{ opacity: 0, scale: 0.95, y: 12 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 12 }}>
+              <div className="flex items-start gap-3">
+                <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-red-500/10 text-red-400">
+                  <AlertTriangle className="size-5" />
+                </span>
+                <div>
+                  <h3 className="text-lg font-bold text-white">Remover pedido?</h3>
+                  <p className="mt-2 text-sm leading-6 text-white/55">Tem certeza que deseja remover o pedido #{deleteOrder.numero} do seu historico?</p>
+                </div>
+              </div>
+              <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                <button type="button" className="rounded-xl border border-white/[0.08] px-4 py-2 text-sm font-semibold text-white/70 transition hover:bg-white/[0.06] hover:text-white" onClick={() => setDeleteOrder(null)} disabled={deleting}>
+                  Cancelar
+                </button>
+                <button type="button" className="inline-flex items-center justify-center gap-2 rounded-xl bg-red-500 px-4 py-2 text-sm font-bold text-white transition hover:brightness-90 disabled:cursor-not-allowed disabled:opacity-60" onClick={() => void confirmDelete()} disabled={deleting}>
+                  {deleting ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+                  Sim, remover
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {toast ? (
+          <motion.div className="fixed bottom-6 right-6 z-[60] rounded-xl border border-white/[0.08] bg-zinc-950 px-4 py-3 text-sm font-semibold text-white shadow-2xl" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }}>
+            {toast}
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 }

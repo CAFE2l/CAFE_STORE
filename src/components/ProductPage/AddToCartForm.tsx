@@ -15,7 +15,6 @@ export default function AddToCartForm({ product }: Props) {
       onSubmit={(e) => {
         e.preventDefault()
         if (!isAddToCartEnabled) return
-        console.log('add to cart', { sku: currentVariant?.sku, qty })
       }}
       className="space-y-4"
     >

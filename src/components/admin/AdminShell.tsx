@@ -13,7 +13,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     <div className="min-h-screen bg-[#070707] text-white">
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(249,115,22,0.16),transparent_28%),radial-gradient(circle_at_82%_4%,rgba(192,57,43,0.14),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.035),transparent_35%)]" />
       <div className="relative flex min-h-screen">
-        <div className="hidden lg:block">
+        <div className="hidden shrink-0 lg:block">
           <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((value) => !value)} />
         </div>
 

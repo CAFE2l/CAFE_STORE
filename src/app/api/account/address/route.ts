@@ -24,6 +24,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false, error: 'Preencha todos os campos obrigatorios.' }, { status: 400 });
   }
 
+  const addressCount = await prisma.address.count({
+    where: { userId: session.user.id },
+  });
+
+  if (addressCount >= 3) {
+    return NextResponse.json({ success: false, error: 'Voce pode salvar ate 3 enderecos.' }, { status: 400 });
+  }
+
   if (body.isDefault) {
     await prisma.address.updateMany({
       where: { userId: session.user.id, isDefault: true },

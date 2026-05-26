@@ -3,10 +3,12 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Bookmark, Check, CreditCard, LogIn, Minus, Plus, ShieldCheck, Sparkles, Trash2, UserX, Zap } from 'lucide-react';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { QuantityStepper } from '@/components/ui/QuantityStepper';
 import { useCartStore } from '@/store/cart';
 import type { CartItem } from '@/types';
+import { cn } from '@/lib/utils';
 
 const currencyFormatter = new Intl.NumberFormat('pt-BR', {
   style: 'currency',
@@ -39,14 +41,57 @@ const recommendations = [
   },
 ];
 
+const cardMotion = {
+  hidden: { opacity: 0, y: 18 },
+  show: { opacity: 1, y: 0 },
+};
+
 function getStockWarning(item: CartItem) {
   if (!item.stock || item.stock > 3) return null;
   return item.stock === 1 ? 'so 1 resta!' : `so ${item.stock} restam!`;
 }
 
+function QuantityControl({
+  max,
+  onChange,
+  value,
+}: {
+  max?: number;
+  onChange: (value: number) => void;
+  value: number;
+}) {
+  const canDecrease = value > 1;
+  const canIncrease = !max || value < max;
+
+  return (
+    <div className="inline-flex items-center rounded-full bg-white/[0.06] p-1">
+      <button
+        type="button"
+        className="grid size-8 place-items-center rounded-full border border-white/10 text-white/70 transition duration-150 hover:border-orange-500 hover:bg-orange-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:border-white/10 disabled:hover:bg-transparent"
+        disabled={!canDecrease}
+        onClick={() => onChange(value - 1)}
+        aria-label="Diminuir quantidade"
+      >
+        <Minus className="size-3.5" />
+      </button>
+      <span className="min-w-8 text-center text-sm font-bold text-white">{value}</span>
+      <button
+        type="button"
+        className="grid size-8 place-items-center rounded-full border border-white/10 text-white/70 transition duration-150 hover:border-orange-500 hover:bg-orange-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:border-white/10 disabled:hover:bg-transparent"
+        disabled={!canIncrease}
+        onClick={() => onChange(value + 1)}
+        aria-label="Aumentar quantidade"
+      >
+        <Plus className="size-3.5" />
+      </button>
+    </div>
+  );
+}
+
 export function CartPageClient() {
-  const { clearCart, items, removeItem, total, updateQty } = useCartStore();
+  const { items, removeItem, total, updateQty } = useCartStore();
   const [savedForLater, setSavedForLater] = useState<CartItem[]>([]);
+  const [confirmed, setConfirmed] = useState(false);
   const taxes = total * taxRate;
   const finalTotal = Math.max(0, total + taxes);
 
@@ -74,61 +119,91 @@ export function CartPageClient() {
   }
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1fr_25rem]">
-      <section className="grid gap-6">
+    <div className="grid gap-8 md:grid-cols-[minmax(0,1fr)_360px] lg:grid-cols-[minmax(0,1fr)_400px]">
+      <section className="grid min-w-0 gap-6">
         {items.length > 0 ? (
-          <div className="grid gap-4">
+          <motion.div initial="hidden" animate="show" transition={{ staggerChildren: 0.08 }} className="grid gap-4">
             {items.map((item, index) => {
               const stockWarning = getStockWarning(item);
               const lineTotal = item.price * item.quantity;
 
               return (
-                  <article key={item.id} className="card grid gap-4 p-4 sm:grid-cols-[7rem_1fr] xl:grid-cols-[7rem_1fr_auto]">
-                  <Link href={`/products/${item.slug}`} className="relative aspect-square overflow-hidden rounded-lg bg-cafe-dark-700">
-                    <Image src={item.image} alt={item.name} fill sizes="112px" className="object-cover transition duration-300 hover:scale-105" />
+                <motion.article
+                  key={item.id}
+                  variants={cardMotion}
+                  transition={{ duration: 0.28, ease: 'easeOut' }}
+                  className="grid gap-5 rounded-2xl border border-white/[0.08] bg-white/[0.04] p-5 shadow-[0_4px_24px_rgba(0,0,0,0.4)] backdrop-blur-[10px] transition-colors duration-200 hover:border-orange-500/30 sm:grid-cols-[96px_minmax(0,1fr)] xl:grid-cols-[96px_minmax(0,1fr)_160px]"
+                >
+                  <Link href={`/products/${item.slug}`} className="relative size-24 min-h-20 min-w-20 overflow-hidden rounded-xl bg-zinc-900 sm:size-24">
+                    <Image src={item.image} alt={item.name} fill sizes="96px" className="object-cover transition duration-300 hover:scale-105" />
                   </Link>
-                  <div className="grid content-start gap-2">
+
+                  <div className="grid min-w-0 content-start gap-3">
                     <div className="flex flex-wrap gap-2">
-                      {index === 0 ? <span className="badge-amber text-[10px]">Mais vendido</span> : null}
-                      {stockWarning ? <span className="inline-flex rounded-badge bg-cafe-red-500/15 px-2 py-0.5 text-[10px] font-semibold text-cafe-red-500">{stockWarning}</span> : null}
+                      {index === 0 ? (
+                        <span className="rounded-full bg-orange-500 px-2.5 py-[3px] text-[11px] font-semibold leading-none text-white">
+                          Mais vendido
+                        </span>
+                      ) : null}
+                      {stockWarning ? (
+                        <span className="rounded-full bg-red-500/15 px-2.5 py-[3px] text-[11px] font-semibold leading-none text-red-300">
+                          {stockWarning}
+                        </span>
+                      ) : null}
                     </div>
-                    <Link href={`/products/${item.slug}`} className="font-semibold text-text-primary transition hover:text-cafe-orange-500">
+
+                    <Link href={`/products/${item.slug}`} className="text-base font-semibold text-white transition hover:text-orange-400">
                       {item.name}
                     </Link>
+
                     {item.variants?.length ? (
-                      <p className="text-xs text-text-muted">
+                      <p className="text-[0.8rem] text-white/50">
                         {item.variants.map((variant) => `${variant.name}: ${variant.value}`).join(' / ')}
                       </p>
                     ) : null}
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-text-secondary">
-                      <span>Unit: {currencyFormatter.format(item.price)}</span>
-                      <span className="font-semibold text-cafe-orange-500">Total: {currencyFormatter.format(lineTotal)}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs text-text-muted">
-                      <span className="text-cafe-yellow-500">★★★★</span>
+
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-white/45">
+                      <span className="text-orange-300">★★★★</span>
                       <span>27 avaliações</span>
                     </div>
-                  </div>
-                  <div className="flex flex-wrap items-center justify-between gap-3 xl:flex-col xl:items-end xl:justify-between">
-                    <QuantityStepper
-                      value={item.quantity}
-                      min={1}
-                      max={item.stock}
-                      onChange={(quantity) => updateQty(item.id, quantity)}
-                    />
-                    <div className="flex flex-wrap gap-3 text-sm">
-                      <button type="button" className="text-cafe-orange-500 transition hover:text-cafe-orange-400" onClick={() => handleSaveForLater(item)}>
+
+                    <div className="flex flex-wrap items-center gap-3 pt-1">
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 px-3 py-1 text-xs font-medium text-white/65 transition hover:border-orange-500 hover:text-orange-400"
+                        onClick={() => handleSaveForLater(item)}
+                      >
+                        <Bookmark className="size-3.5" />
                         Salvar pra depois
                       </button>
-                      <button type="button" className="text-cafe-red-500 transition hover:text-cafe-red-400" onClick={() => removeItem(item.id)}>
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-1.5 text-xs font-medium text-red-400/70 transition hover:text-red-400"
+                        onClick={() => removeItem(item.id)}
+                      >
+                        <Trash2 className="size-3.5" />
                         Remover
                       </button>
                     </div>
                   </div>
-                </article>
+
+                  <div className="flex flex-wrap items-center justify-between gap-4 xl:flex-col xl:items-end">
+                    <div className="text-left xl:text-right">
+                      <p className="text-xs text-white/45">Unitário</p>
+                      <p className="text-sm font-medium text-white/75">{currencyFormatter.format(item.price)}</p>
+                      <p className="mt-2 text-xs text-white/45">Total</p>
+                      <p className="text-lg font-bold text-orange-500">{currencyFormatter.format(lineTotal)}</p>
+                    </div>
+                    <QuantityControl
+                      value={item.quantity}
+                      max={item.stock}
+                      onChange={(quantity) => updateQty(item.id, quantity)}
+                    />
+                  </div>
+                </motion.article>
               );
             })}
-          </div>
+          </motion.div>
         ) : (
           <EmptyState
             title="Carrinho sem itens ativos"
@@ -137,9 +212,9 @@ export function CartPageClient() {
           />
         )}
 
-        <section className="grid gap-3 rounded-card border border-cafe-orange-500/30 bg-cafe-orange-500/10 p-5">
-          <h2 className="font-display text-xl font-semibold text-text-primary">Apoio simbolico, sem entrega fisica</h2>
-          <p className="text-sm leading-6 text-text-secondary">
+        <section className="rounded-2xl border border-orange-500/20 bg-orange-500/10 p-5 shadow-[0_0_28px_rgba(249,115,22,0.06)]">
+          <h2 className="font-display text-xl font-semibold text-white">Apoio simbolico, sem entrega fisica</h2>
+          <p className="mt-2 text-sm leading-6 text-white/55">
             Estes itens usam imagens ilustrativas da marca, mas nao sao produtos reais para envio. Ao continuar,
             voce esta fazendo uma doacao de apoio ao projeto CAFÉ STORE.
           </p>
@@ -147,19 +222,24 @@ export function CartPageClient() {
 
         {savedForLater.length > 0 ? (
           <section className="grid gap-4">
-            <h2 className="font-display text-2xl font-semibold text-text-primary">Salvos pra depois</h2>
-            <div className="grid gap-3">
+            <h2 className="font-display text-2xl font-semibold text-white">Salvos pra depois</h2>
+            <div className="grid gap-4">
               {savedForLater.map((item) => (
-                <article key={item.id} className="flex items-center gap-4 rounded-2xl border border-white/10 bg-background-card p-3">
-                  <Image src={item.image} alt={item.name} width={64} height={64} className="size-16 rounded-xl object-cover" />
+                <motion.article
+                  key={item.id}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4 shadow-[0_4px_24px_rgba(0,0,0,0.35)] backdrop-blur-[10px]"
+                >
+                  <Image src={item.image} alt={item.name} width={72} height={72} className="size-[72px] rounded-xl object-cover" />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-text-primary">{item.name}</p>
-                    <p className="text-xs text-text-muted">{currencyFormatter.format(item.price)}</p>
+                    <p className="truncate text-sm font-semibold text-white">{item.name}</p>
+                    <p className="text-xs text-white/50">{currencyFormatter.format(item.price)}</p>
                   </div>
-                  <button type="button" className="btn-secondary px-4 py-2 text-sm" onClick={() => handleMoveBackToCart(item)}>
+                  <button type="button" className="rounded-xl border border-orange-500/30 px-4 py-2 text-sm font-semibold text-orange-400 transition hover:bg-orange-500/10" onClick={() => handleMoveBackToCart(item)}>
                     Voltar
                   </button>
-                </article>
+                </motion.article>
               ))}
             </div>
           </section>
@@ -167,66 +247,103 @@ export function CartPageClient() {
 
         <section className="grid gap-4">
           <div>
-            <h2 className="font-display text-2xl font-semibold text-text-primary">Outras formas de apoiar</h2>
-            <p className="mt-1 text-sm text-text-secondary">Valores simbolicos para contribuir com o projeto.</p>
+            <h2 className="font-display text-2xl font-semibold text-white">Outras formas de apoiar</h2>
+            <p className="mt-1 text-sm text-white/50">Valores simbolicos para contribuir com o projeto.</p>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
-            {recommendations.map((product) => (
-              <Link key={product.href} href={product.href} className="card grid gap-3 p-3 transition hover:border-accent-primary/40">
-                <div className="relative aspect-square overflow-hidden rounded-xl bg-background-surface">
-                  <Image src={product.image} alt={product.name} fill sizes="180px" className="object-cover" />
-                </div>
-                <span className="badge-amber w-fit">{product.label}</span>
-                <p className="text-sm font-semibold text-text-primary">{product.name}</p>
-                <p className="text-sm text-accent-glow">{currencyFormatter.format(product.price)}</p>
-              </Link>
+            {recommendations.map((product, index) => (
+              <motion.div
+                key={product.href}
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.06 }}
+              >
+                <Link href={product.href} className="grid h-full gap-3 rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4 shadow-[0_4px_24px_rgba(0,0,0,0.35)] backdrop-blur-[10px] transition hover:border-orange-500/30">
+                  <div className="relative aspect-square overflow-hidden rounded-xl bg-zinc-900">
+                    <Image src={product.image} alt={product.name} fill sizes="180px" className="object-cover" />
+                  </div>
+                  <span className="w-fit rounded-full bg-orange-500 px-2.5 py-[3px] text-[11px] font-semibold text-white">{product.label}</span>
+                  <p className="text-sm font-semibold text-white">{product.name}</p>
+                  <p className="text-sm font-bold text-orange-400">{currencyFormatter.format(product.price)}</p>
+                </Link>
+              </motion.div>
             ))}
           </div>
         </section>
       </section>
 
-      <aside className="sticky top-28 h-fit rounded-card border border-border-subtle bg-background-card p-5">
-        <h2 className="font-display text-xl font-semibold text-text-primary">Resumo do pedido</h2>
-        <div className="mt-5 grid gap-3">
-          <dl className="grid gap-2 text-sm">
-            <div className="flex justify-between gap-4 text-text-secondary">
+      <aside className="h-fit rounded-[20px] border border-orange-500/20 bg-white/[0.04] p-5 shadow-[0_0_40px_rgba(249,115,22,0.06)] backdrop-blur-[20px] md:sticky md:top-28">
+        <h2 className="text-[1.2rem] font-bold text-white">Resumo do pedido</h2>
+        <div className="mt-5 grid gap-4">
+          <dl className="grid text-sm">
+            <div className="flex justify-between gap-4 border-b border-white/[0.06] py-3 text-white/60">
               <dt>Subtotal</dt>
               <dd>{currencyFormatter.format(total)}</dd>
             </div>
-            <div className="flex justify-between gap-4 text-text-secondary">
+            <div className="flex justify-between gap-4 border-b border-white/[0.06] py-3 text-white/60">
               <dt>Entrega</dt>
               <dd>Nao se aplica</dd>
             </div>
-            <div className="flex justify-between gap-4 text-text-secondary">
+            <div className="flex justify-between gap-4 border-b border-white/[0.06] py-3 text-white/60">
               <dt>Taxas</dt>
               <dd>{taxes > 0 ? currencyFormatter.format(taxes) : 'Inclusas'}</dd>
             </div>
-            <div className="flex justify-between gap-4 border-t border-border-subtle pt-3 text-lg font-bold text-text-primary">
+            <div className="mt-2 flex justify-between gap-4 border-t border-white/15 pt-4 text-lg font-bold text-white">
               <dt>Total</dt>
               <dd>{currencyFormatter.format(finalTotal)}</dd>
             </div>
           </dl>
-          <div className="grid gap-1 text-sm text-text-muted">
-            <p>ou 10x de {currencyFormatter.format(finalTotal / 10)}</p>
+
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-orange-500/15 bg-orange-500/10 px-3 py-2 text-sm">
+            <span className="text-white/55">Parcelamento</span>
+            <span className="rounded-md bg-orange-500/10 px-2 py-0.5 text-xs font-semibold text-orange-400">
+              10x de {currencyFormatter.format(finalTotal / 10)}
+            </span>
           </div>
-          <div className="rounded-button border border-cafe-orange-500/30 bg-cafe-orange-500/10 p-3 text-xs leading-5 text-text-secondary">
-            Confirmo que entendo: isto e uma doacao simbolica. Nao ha envio, frete ou produto fisico garantido.
-          </div>
-          <Link href="/checkout" className="btn-primary mt-2 w-full h-12 text-base">
+
+          <label className="group flex cursor-pointer items-start gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-3 text-xs leading-5 text-white/60 transition hover:border-orange-500/35">
+            <input
+              type="checkbox"
+              className="peer sr-only"
+              checked={confirmed}
+              onChange={(event) => setConfirmed(event.target.checked)}
+            />
+            <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-md border border-orange-500/60 text-transparent transition peer-checked:bg-orange-500 peer-checked:text-white">
+              <Check className={cn('size-3 transition', confirmed ? 'scale-100 opacity-100' : 'scale-75 opacity-0')} />
+            </span>
+            <span>
+              Confirmo que entendo: isto e uma doacao simbolica. Nao ha envio, frete ou produto fisico garantido.
+            </span>
+          </label>
+
+          <Link
+            href={confirmed ? '/checkout' : '#'}
+            aria-disabled={!confirmed}
+            className={cn(
+              'mt-1 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-orange-500 text-sm font-bold tracking-[0.02em] text-white shadow-[0_4px_20px_rgba(249,115,22,0.35)] transition hover:brightness-110 hover:shadow-[0_6px_28px_rgba(249,115,22,0.48)]',
+              !confirmed && 'pointer-events-none opacity-55',
+            )}
+          >
+            <Zap className="size-4" />
             Finalizar apoio
           </Link>
-          <div className="grid grid-cols-2 gap-2">
-            <Link href="/checkout" className="btn-secondary w-full text-center text-sm">
+
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+            <Link href="/checkout" className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-orange-500/30 px-3 text-sm font-semibold text-orange-300 transition hover:border-orange-500 hover:bg-orange-500/5">
+              <UserX className="size-4" />
               Convidado
             </Link>
-            <Link href="/login?callbackUrl=/checkout" className="btn-ghost w-full text-center text-sm">
+            <span className="text-xs text-white/35">ou</span>
+            <Link href="/login?callbackUrl=/checkout" className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-orange-500/15 px-3 text-sm font-semibold text-orange-300 transition hover:bg-orange-500/25">
+              <LogIn className="size-4" />
               Login
             </Link>
           </div>
-          <div className="mt-4 grid gap-2 border-t border-border-subtle pt-4 text-xs leading-5 text-text-muted">
-            <p className="flex items-center gap-1">🔒 Pagamento seguro • SSL • Antifraude</p>
-            <p className="flex items-center gap-1">💛 Doacao simbolica ao projeto</p>
-            <p className="flex items-center gap-1">💳 Pix • Cartao • Mercado Pago • PayPal</p>
+
+          <div className="mt-3 grid gap-2 border-t border-white/[0.06] pt-4 text-xs leading-5 text-white/45">
+            <p className="flex items-center gap-2"><ShieldCheck className="size-3.5 text-orange-400" /> Pagamento seguro • SSL • Antifraude</p>
+            <p className="flex items-center gap-2"><Sparkles className="size-3.5 text-orange-400" /> Doacao simbolica ao projeto</p>
+            <p className="flex items-center gap-2"><CreditCard className="size-3.5 text-orange-400" /> Pix • Cartao • Mercado Pago • PayPal</p>
           </div>
         </div>
       </aside>

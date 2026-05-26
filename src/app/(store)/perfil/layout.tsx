@@ -13,7 +13,7 @@ export default async function PerfilLayout({ children }: { children: ReactNode }
   }
 
   return (
-    <main className="container-page py-12">
+    <main className="mx-auto w-full max-w-[1200px] px-4 py-10 sm:px-6 lg:px-8">
       <div className="mb-6">
         <h1 className="font-display text-3xl font-bold text-text-primary">Meu Perfil</h1>
         <p className="mt-1 text-sm text-text-muted">
@@ -21,7 +21,7 @@ export default async function PerfilLayout({ children }: { children: ReactNode }
         </p>
       </div>
 
-      <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
+      <div className="grid gap-8 md:grid-cols-[240px_minmax(0,1fr)] md:items-start">
         <ProfileSidebar />
         <div className="min-w-0 flex-1">{children}</div>
       </div>

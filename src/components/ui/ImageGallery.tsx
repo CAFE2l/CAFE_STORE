@@ -33,7 +33,13 @@ export function ImageGallery({ images, priority = false }: ImageGalleryProps) {
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
 
-  const selectedImage = safeImages[selectedIndex];
+  const selectedImage = safeImages[selectedIndex] ?? safeImages[0];
+
+  useEffect(() => {
+    setSelectedIndex(0);
+    setModalIndex(0);
+    thumbScrollRef.current?.scrollTo({ left: 0, behavior: 'smooth' });
+  }, [images]);
 
   const goTo = useCallback((index: number) => {
     const target = (index + safeImages.length) % safeImages.length;
@@ -234,8 +240,8 @@ export function ImageGallery({ images, priority = false }: ImageGalleryProps) {
             onClick={(e) => e.stopPropagation()}
           >
             <Image
-              src={safeImages[modalIndex].src}
-              alt={safeImages[modalIndex].alt}
+              src={(safeImages[modalIndex] ?? safeImages[0]).src}
+              alt={(safeImages[modalIndex] ?? safeImages[0]).alt}
               fill
               sizes="90vw"
               className="object-contain select-none"

@@ -34,7 +34,7 @@ function getProductMedia(product: NonNullable<Awaited<ReturnType<typeof getProdu
   }));
 
   // Do not add global supplemental images here — only use images that belong to the product
-  return media.slice(0, 8);
+  return media;
 }
 
 function getSku(product: NonNullable<Awaited<ReturnType<typeof getProductBySlug>>>) {

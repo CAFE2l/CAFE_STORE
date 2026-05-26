@@ -25,7 +25,7 @@ export function Toast({ message, type, onClose, duration = 3000 }: ToastProps) {
   return (
     <div
       className={cn(
-        'fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-2xl border px-6 py-3 text-sm font-medium shadow-2xl backdrop-blur-xl transition-all duration-300',
+        'fixed bottom-6 right-6 z-50 rounded-2xl border px-6 py-3 text-sm font-medium shadow-2xl backdrop-blur-xl transition-all duration-300',
         type === 'success'
           ? 'border-green-500/30 bg-green-900/70 text-green-300'
           : 'border-red-500/30 bg-red-900/70 text-red-300',

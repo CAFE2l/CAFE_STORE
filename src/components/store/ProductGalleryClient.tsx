@@ -1,59 +1,128 @@
 'use client'
 
 import { ImageGallery } from '@/components/ui/ImageGallery'
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import { useVariantStore } from '@/lib/variantStore'
 
-export default function ProductGalleryClient({ productId, images, variants, priority = false }: { productId: string; images: Array<{ src: string; alt?: string }>; variants?: any; priority?: boolean }) {
+type ProductGalleryImage = {
+  src: string
+  alt?: string
+  label?: string
+}
+
+type VariantOption = {
+  name: string
+  values: string[]
+}
+
+function normalize(value: string) {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+}
+
+function parseVariants(variants: unknown): VariantOption[] {
+  if (!Array.isArray(variants)) return []
+  return variants
+    .map((variant): VariantOption | null => {
+      if (
+        typeof variant === 'object' &&
+        variant !== null &&
+        'name' in variant &&
+        'values' in variant &&
+        typeof variant.name === 'string' &&
+        Array.isArray(variant.values)
+      ) {
+        return {
+          name: variant.name,
+          values: (variant.values as unknown[]).filter((value): value is string => typeof value === 'string'),
+        }
+      }
+      return null
+    })
+    .filter((variant): variant is VariantOption => Boolean(variant))
+}
+
+export default function ProductGalleryClient({
+  productId,
+  images,
+  variants,
+  priority = false,
+}: {
+  productId: string
+  images: ProductGalleryImage[]
+  variants?: unknown
+  priority?: boolean
+}) {
   const selected = useVariantStore((s) => s.getSelected(productId))
 
-  // derive primary variant values (e.g., color) from variants if available
-  const variantOptions = Array.isArray(variants) ? variants : []
-  const primaryVariantName = variantOptions[0]?.name
-  // If store has no selected variants yet, fall back to the page's default (first available value)
-  const fallbackValue = variantOptions[0]?.values?.[0]
-  const selectedValue = (selected && selected[primaryVariantName]) ? selected[primaryVariantName] : fallbackValue
+  const variantOptions = useMemo(() => parseVariants(variants), [variants])
+  const colorOption = useMemo(
+    () => variantOptions.find((option) => normalize(option.name) === 'cor'),
+    [variantOptions],
+  )
+  const defaultColor = useMemo(() => {
+    if (!colorOption) return null
+    return colorOption.values.find((value) => normalize(value) === 'preta') ?? colorOption.values[0] ?? null
+  }, [colorOption])
+  const selectedColor = colorOption ? selected?.[colorOption.name] ?? defaultColor : null
 
   const grouped = useMemo(() => {
-    const map: Record<string, string[]> = {}
+    const map: Record<string, ProductGalleryImage[]> = {}
+    const colors = colorOption?.values ?? []
+
     for (const img of images) {
-      const src = img.src.toLowerCase()
+      const src = normalize(img.src)
+      const alt = normalize(img.alt ?? '')
       let matched = false
-      for (const opt of variantOptions) {
-        for (const val of opt.values) {
-          const v = String(val).toLowerCase()
-          if (src.includes(v) || src.includes(`/${v}/`)) {
-            map[v] = map[v] || []
-            map[v].push(img.src)
-            matched = true
-            break
-          }
+
+      for (const color of colors) {
+        const key = normalize(color)
+        if (
+          src.includes(`/${key}/`) ||
+          src.includes(`-${key}-`) ||
+          src.includes(`_${key}_`) ||
+          src.includes(`${key}.`) ||
+          alt.includes(`cor:${key}`) ||
+          alt.includes(`cor ${key}`)
+        ) {
+          map[key] = map[key] || []
+          map[key].push(img)
+          matched = true
+          break
         }
-        if (matched) break
       }
+
       if (!matched) {
         map['__default'] = map['__default'] || []
-        map['__default'].push(img.src)
+        map['__default'].push(img)
       }
     }
+
     return map
-  }, [images, variantOptions])
+  }, [colorOption, images])
 
   const imagesToShow = useMemo(() => {
-    if (selectedValue) {
-      const key = String(selectedValue).toLowerCase()
+    if (selectedColor) {
+      const key = normalize(selectedColor)
       if (grouped[key] && grouped[key].length > 0) {
-        return grouped[key].map((src, i) => ({ src, alt: `Imagem ${i + 1}` }))
+        return grouped[key].map((image, index) => ({
+          ...image,
+          alt: image.alt ?? `${selectedColor} - imagem ${index + 1}`,
+        }))
       }
     }
-    // fallback: return unique images preserving order, limit to 8
-    const uniq: string[] = []
-    for (const img of images) {
-      if (!uniq.includes(img.src)) uniq.push(img.src)
-      if (uniq.length >= 8) break
-    }
-    return uniq.map((s, i) => ({ src: s, alt: `Imagem ${i + 1}` }))
-  }, [grouped, images, selectedValue])
 
-  return <ImageGallery images={imagesToShow as any} priority={priority} />
+    const uniq: ProductGalleryImage[] = []
+    const seen = new Set<string>()
+    for (const img of images) {
+      if (seen.has(img.src)) continue
+      seen.add(img.src)
+      uniq.push(img)
+    }
+    return uniq.map((image, index) => ({ ...image, alt: image.alt ?? `Imagem ${index + 1}` }))
+  }, [grouped, images, selectedColor])
+
+  return <ImageGallery images={imagesToShow} priority={priority} />
 }

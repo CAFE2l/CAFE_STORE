@@ -31,8 +31,8 @@ export function ProfileSidebar() {
 
   return (
     <>
-      <aside className="w-full shrink-0 animate-slide-in-left lg:w-56">
-        <div className="sticky top-24 flex flex-col gap-1 rounded-2xl border border-white/[0.06] bg-zinc-900/40 p-2 backdrop-blur">
+      <aside className="w-full shrink-0 animate-slide-in-left md:w-[240px]">
+        <div className="sticky top-24 hidden flex-col gap-1 rounded-2xl border border-white/[0.06] bg-zinc-900/50 p-2 backdrop-blur md:flex">
           {links.map((link) => {
             const Icon = link.icon;
             const active = isActive(link);
@@ -41,10 +41,10 @@ export function ProfileSidebar() {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  'flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200',
+                  'flex items-center gap-2.5 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-200',
                   active
-                    ? 'bg-brand text-white shadow-[0_0_14px_rgba(249,115,22,0.35)]'
-                    : 'text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200',
+                    ? 'bg-brand text-white shadow-[0_0_14px_rgba(255,107,0,0.3)]'
+                    : 'text-zinc-300 hover:bg-brand/10 hover:text-white',
                 )}
               >
                 <Icon className="size-4 shrink-0" />
@@ -57,7 +57,7 @@ export function ProfileSidebar() {
             <Link
               href="/admin/dashboard"
               className={cn(
-                'flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200 text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200',
+                'flex items-center gap-2.5 rounded-lg px-4 py-2.5 text-sm font-medium text-zinc-300 transition-all duration-200 hover:bg-brand/10 hover:text-white',
               )}
             >
               <Shield className="size-4 shrink-0" />
@@ -69,7 +69,7 @@ export function ProfileSidebar() {
           <button
             type="button"
             onClick={() => setShowLogoutConfirm(true)}
-            className="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-zinc-500 transition-all duration-200 hover:bg-red-500/10 hover:text-red-400"
+            className="flex items-center gap-2.5 rounded-lg px-4 py-2.5 text-sm font-medium text-zinc-500 transition-all duration-200 hover:bg-red-500/10 hover:text-red-400"
           >
             <LogOut className="size-4 shrink-0" />
             Sair
@@ -77,7 +77,7 @@ export function ProfileSidebar() {
         </div>
 
         {/* Mobile: horizontal scroll tabs */}
-        <div className="mt-4 flex gap-2 overflow-x-auto pb-2 lg:hidden">
+        <div className="flex gap-2 overflow-x-auto pb-2 md:hidden">
           {links.map((link) => {
             const Icon = link.icon;
             const active = isActive(link);
@@ -88,8 +88,8 @@ export function ProfileSidebar() {
                 className={cn(
                   'flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl px-4 py-2 text-xs font-medium transition-all',
                   active
-                    ? 'bg-brand/15 text-brand'
-                    : 'bg-zinc-900/60 text-zinc-500 hover:text-zinc-300',
+                    ? 'bg-brand text-white'
+                    : 'bg-zinc-900/60 text-zinc-300 hover:bg-brand/10 hover:text-white',
                 )}
               >
                 <Icon className="size-3.5" />

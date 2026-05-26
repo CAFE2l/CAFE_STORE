@@ -1,5 +1,5 @@
 import { ProductStatus } from '@prisma/client';
-import { MoreHorizontal } from 'lucide-react';
+import ProductActions from '@/components/admin/products/ProductActions';
 import { ProductCreateDialog } from '@/components/admin/products/ProductCreateDialog';
 import { AdminBadge } from '@/components/admin/ui/AdminBadge';
 import { AdminFilters, AdminTable, EmptyPanel, Pagination } from '@/components/admin/ui/AdminTable';
@@ -29,7 +29,7 @@ export default async function ProdutosPage({ searchParams }: { searchParams?: Re
         {data.items.length ? (
           <div className="divide-y divide-white/10">
             {data.items.map((product) => (
-              <div key={product.id} className="grid gap-3 px-5 py-4 md:grid-cols-[1.5fr_1fr_auto_auto_auto] md:items-center">
+              <div id={`product-${product.id}`} key={product.id} className="grid gap-3 px-5 py-4 md:grid-cols-[1.5fr_1fr_auto_auto_auto] md:items-center">
                 <div>
                   <p className="font-semibold text-white">{product.name}</p>
                   <p className="text-xs text-zinc-500">{product.slug} • {product.category.name}</p>
@@ -37,15 +37,8 @@ export default async function ProdutosPage({ searchParams }: { searchParams?: Re
                 <span className="text-sm text-zinc-400">{product.stock} em estoque</span>
                 <AdminBadge variant={product.status}>{product.status}</AdminBadge>
                 <span className="text-sm font-bold text-orange-300">{toMoney(product.price)}</span>
-                <div className="flex justify-end gap-2">
-                  <form action={async () => { 'use server'; await toggleProductStatusAction(product.id); }}>
-                    <button className="h-9 rounded-lg border border-white/10 px-3 text-xs text-zinc-300 hover:bg-white/5">Status</button>
-                  </form>
-                  <form action={async () => { 'use server'; await deleteProductAction(product.id); }}>
-                    <button className="grid h-9 w-9 place-items-center rounded-lg border border-white/10 text-zinc-400 hover:bg-red-500/10 hover:text-red-200" aria-label="Remover produto">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </button>
-                  </form>
+                <div className="flex justify-end">
+                  <ProductActions product={{ id: product.id, slug: product.slug, name: product.name, status: product.status }} />
                 </div>
               </div>
             ))}
