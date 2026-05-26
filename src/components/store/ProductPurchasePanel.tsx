@@ -4,11 +4,11 @@ import { Prisma } from '@prisma/client';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
-import { QuantityStepper } from '@/components/ui/QuantityStepper';
 import { useCartStore } from '@/store/cart';
 import type { ProductDetail } from '@/lib/products';
 import type { CartVariant } from '@/types';
 import { cn } from '@/lib/utils';
+import { Heart, Ruler } from 'lucide-react';
 import { useVariantStore } from '@/lib/variantStore'
 
 type ProductPurchasePanelProps = {
@@ -186,7 +186,7 @@ export function ProductPurchasePanel({ product, selectedVariants: externalVarian
             {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
           </span>
           {hasDiscount ? (
-            <span className="rounded-full bg-[#FF3C38]/15 px-2.5 py-0.5 text-xs font-bold text-[#FF3C38]">
+            <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-xs font-bold text-white">
               -{discountPercent}%
             </span>
           ) : null}
@@ -194,12 +194,12 @@ export function ProductPurchasePanel({ product, selectedVariants: externalVarian
         <span className="text-sm text-zinc-400">
           doacao simbolica de {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
         </span>
-        <span className="text-sm text-blue-400">
+        <span className="text-sm text-brand">
           Pix: {pixPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} (5% off)
         </span>
       </div>
 
-      <div className="rounded-xl border border-brand/30 bg-brand/10 p-4 text-sm leading-6 text-zinc-300">
+      <div className="rounded-xl border border-white/10 bg-white/[0.045] p-4 text-sm leading-6 text-zinc-300 shadow-sm backdrop-blur-md">
         <p className="font-semibold text-white">Aviso importante</p>
         <p className="mt-1">
           Este item e apenas uma doacao simbolica ao projeto CAFÉ STORE. A imagem e ilustrativa,
@@ -235,30 +235,29 @@ export function ProductPurchasePanel({ product, selectedVariants: externalVarian
               ref={(el) => { variantRefs.current[variant.name] = el; }}
               className={cn(
                 'grid gap-3 rounded-lg p-1 -mx-1 transition-all',
-                !selectedVariants[variant.name] && 'ring-2 ring-[#FF3C38]',
+                !selectedVariants[variant.name] && 'ring-2 ring-brand/50',
               )}
             >
               <legend className="flex items-center gap-2 text-sm font-medium text-zinc-400">
                 {variant.name}
                 {variant.name === 'Tamanho' || variant.name === 'Cor' ? (
-                  <button type="button" className="text-xs text-zinc-600 underline underline-offset-2 transition hover:text-brand" onClick={(e) => { e.preventDefault(); alert('Guia de tamanhos disponivel em breve.'); }}>
-                    📏 Guia de tamanhos
+                  <button type="button" className="inline-flex items-center gap-1 text-xs text-zinc-600 underline underline-offset-2 transition hover:text-brand" onClick={(e) => { e.preventDefault(); alert('Guia de tamanhos disponivel em breve.'); }}>
+                    <Ruler className="h-3 w-3" /> Guia de tamanhos
                   </button>
                 ) : null}
               </legend>
               <div className="flex flex-wrap gap-2">
                 {variant.values.map((value) => {
                   const isSelected = selectedVariants[variant.name] === value;
-                  const isSize = variant.name === 'Tamanho' || variant.name === 'Cor';
                   return (
                     <button
                       key={value}
                       type="button"
                       className={cn(
-                        'rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200',
+                        'rounded-full px-5 py-2 text-sm font-medium transition-all duration-200',
                         isSelected
-                          ? 'bg-brand/15 text-brand ring-1 ring-brand/40 shadow-glow-sm'
-                          : 'border border-zinc-700 text-zinc-400 hover:border-brand/40 hover:text-white hover:bg-zinc-800/50',
+                          ? 'bg-brand text-white shadow-[0_0_16px_rgba(249,115,22,0.35)]'
+                          : 'border border-zinc-700 text-zinc-400 hover:border-brand/50 hover:text-white hover:bg-zinc-800/50',
                       )}
                       onClick={() => setSelectedVariants({ ...selectedVariants, [variant.name]: value })}
                     >
@@ -275,7 +274,27 @@ export function ProductPurchasePanel({ product, selectedVariants: externalVarian
       {/* Quantity */}
       <div className="flex flex-col gap-2">
         <label className="text-sm font-medium text-zinc-400">Quantidade</label>
-        <QuantityStepper value={quantity} min={1} max={product.stock || undefined} onChange={setQuantity} />
+        <div className="inline-flex items-center gap-1 rounded-xl border border-zinc-700 bg-zinc-900/60 p-1">
+          <button
+            type="button"
+            className="flex size-9 items-center justify-center rounded-lg text-zinc-400 transition-all hover:bg-brand/15 hover:text-brand disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-zinc-400"
+            aria-label="Diminuir quantidade"
+            disabled={quantity <= 1}
+            onClick={() => setQuantity(Math.max(1, quantity - 1))}
+          >
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12" /></svg>
+          </button>
+          <span className="flex w-10 items-center justify-center text-base font-bold text-white">{quantity}</span>
+          <button
+            type="button"
+            className="flex size-9 items-center justify-center rounded-lg text-zinc-400 transition-all hover:bg-brand/15 hover:text-brand disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-zinc-400"
+            aria-label="Aumentar quantidade"
+            disabled={typeof product.stock === 'number' && quantity >= product.stock}
+            onClick={() => setQuantity(quantity + 1)}
+          >
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+          </button>
+        </div>
       </div>
 
       {/* Actions */}
@@ -302,7 +321,7 @@ export function ProductPurchasePanel({ product, selectedVariants: externalVarian
           )}
         </Button>
         {inStock ? (
-          <Button variant="secondary" className="w-full py-4 text-base" onClick={handleBuyNow}>
+          <Button variant="secondary" className="w-full py-4 text-base no-underline" onClick={handleBuyNow}>
             Apoiar agora
           </Button>
         ) : null}
@@ -318,9 +337,13 @@ export function ProductPurchasePanel({ product, selectedVariants: externalVarian
           )}
           onClick={handleFavorite}
         >
-          <span className={cn('inline-block transition-transform duration-300', favAnim && 'scale-[1.8]')}>
-            {favorite ? '♥' : '♡'}
-          </span>
+          <Heart
+            className={cn(
+              'h-5 w-5 transition-all duration-300',
+              favAnim && 'scale-[1.8]',
+              favorite ? 'fill-brand' : '',
+            )}
+          />
           {favorite ? 'Nos seus favoritos' : 'Adicionar aos favoritos'}
         </button>
         {favAnim ? (
@@ -411,20 +434,6 @@ export function ProductPurchasePanel({ product, selectedVariants: externalVarian
         </a>
       </div>
 
-      {/* Trust signals */}
-      <div className="grid grid-cols-3 gap-2">
-        {[
-          { icon: '🔒', label: 'Pagamento seguro', sub: 'Pix · Cartao · PayPal' },
-          { icon: '💛', label: 'Doacao', sub: 'Apoio ao projeto' },
-          { icon: 'ℹ', label: 'Sem envio', sub: 'Imagem ilustrativa' },
-        ].map((item) => (
-          <div key={item.label} className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-3 text-center transition-colors hover:border-brand/20">
-            <span className="text-lg">{item.icon}</span>
-            <p className="mt-1 text-[11px] font-semibold text-white">{item.label}</p>
-            <p className="text-[10px] text-zinc-600">{item.sub}</p>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }

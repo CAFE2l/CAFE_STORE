@@ -114,7 +114,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
   return (
     <main className="relative min-h-screen bg-surface-base px-6 pb-28 pt-20">
       <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <div className="absolute -left-48 top-40 h-[500px] w-[500px] rounded-full bg-brand/4 blur-[160px]" />
         <div className="absolute right-1/3 top-20 h-[500px] w-[500px] rounded-full bg-brand/6 blur-[140px]" />
+        <div className="absolute -bottom-32 right-1/4 h-[400px] w-[400px] rounded-full bg-brand/3 blur-[120px]" />
       </div>
 
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
@@ -140,21 +142,20 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 {product.category.name}
               </span>
               {product.featured ? (
-                <span className="rounded-full bg-[#FFD000]/15 px-3 py-1 text-xs font-semibold text-[#FFD000]">
-                  🔥 Mais Vendido
+                <span className="inline-flex items-center gap-1 rounded-full border border-brand/25 bg-brand/15 px-3 py-1 text-xs font-semibold text-brand">
+                  <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>
+                  Destaque
                 </span>
               ) : null}
               {hasDiscount ? (
-                <span className="rounded-full border border-[#FF3C38]/30 bg-[#FF3C38]/15 px-3 py-1 text-xs font-bold text-[#FF3C38]">
+                <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-bold text-white">
                   -{discountPercent}%
                 </span>
               ) : null}
             </div>
-
-            <p className="text-xs font-medium uppercase tracking-wider text-brand">{product.category.name}</p>
             <h1 className="text-2xl font-bold leading-snug text-white lg:text-3xl">{product.name}</h1>
             <p className="text-sm leading-relaxed text-zinc-400">{product.description ?? 'Produto oficial CAFÉ STORE.'}</p>
-            <div className="rounded-xl border border-brand/30 bg-brand/10 p-4 text-sm leading-6 text-zinc-300">
+            <div className="rounded-xl border border-white/10 bg-white/[0.045] p-4 text-sm leading-6 text-zinc-300 shadow-sm backdrop-blur-md">
               <strong className="text-white">Apoio simbolico:</strong> as imagens sao ilustrativas. Este item nao e um produto real
               para entrega; o valor funciona como doacao para apoiar o projeto CAFÉ STORE.
             </div>
@@ -172,12 +173,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
         <div className="mx-auto mt-10 max-w-7xl animate-fade-up" style={{ animationDelay: '200ms' }}>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {[
-              { icon: '🔒', title: 'Pagamento seguro', desc: 'Pix, cartao, Mercado Pago e PayPal.' },
-              { icon: '💛', title: 'Doacao simbolica', desc: 'O valor apoia o projeto CAFÉ STORE.' },
-              { icon: 'ℹ', title: 'Sem envio fisico', desc: 'As imagens sao ilustrativas e nao ha entrega.' },
+              { icon: <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0110 0v4" /></svg>, title: 'Pagamento seguro', desc: 'Pix, cartao, Mercado Pago e PayPal.' },
+              { icon: <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0016.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 002 8.5c0 2.3 1.5 4.05 3 5.5l7 7z" /></svg>, title: 'Doacao simbolica', desc: 'O valor apoia o projeto CAFÉ STORE.' },
+              { icon: <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>, title: 'Sem envio fisico', desc: 'As imagens sao ilustrativas e nao ha entrega.' },
             ].map((item) => (
-              <div key={item.title} className="flex flex-col gap-1.5 rounded-xl border border-zinc-800 bg-surface-2/50 p-5 transition-all duration-300 hover:border-brand/20 hover:bg-surface-2">
-                <span className="mb-1 text-xl">{item.icon}</span>
+              <div key={item.title} className="flex flex-col gap-1.5 rounded-xl border border-zinc-800 bg-surface-2/50 p-5 text-brand transition-all duration-300 hover:border-brand/20 hover:bg-surface-2">
+                <span className="mb-1">{item.icon}</span>
                 <span className="text-sm font-semibold text-white">{item.title}</span>
                 <span className="text-xs leading-relaxed text-zinc-500">{item.desc}</span>
               </div>
@@ -194,15 +195,17 @@ export default async function ProductPage({ params }: ProductPageProps) {
         />
 
         {/* Related Products */}
-        <section className="mx-auto mt-14 max-w-7xl px-6">
-          <div>
-            <h2 className="text-2xl font-bold text-white font-display">Outras formas de apoiar</h2>
-            <p className="mt-1 text-sm text-zinc-500">Itens simbolicos relacionados para contribuir com o projeto.</p>
-          </div>
-          <div className="mt-6">
-            <ProductGrid products={relatedProducts} />
-          </div>
-        </section>
+        {relatedProducts.length > 0 ? (
+          <section className="mx-auto mt-14 max-w-7xl animate-fade-up px-6" style={{ animationDelay: '300ms' }}>
+            <div>
+              <h2 className="text-2xl font-bold text-white">Outras formas de apoiar</h2>
+              <p className="mt-1 text-sm text-zinc-500">Itens simbolicos relacionados para contribuir com o projeto.</p>
+            </div>
+            <div className="mt-6">
+              <ProductGrid products={relatedProducts} />
+            </div>
+          </section>
+        ) : null}
       </div>
 
       <RecentlyViewed />
