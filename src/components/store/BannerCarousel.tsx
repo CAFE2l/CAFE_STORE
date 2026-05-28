@@ -11,6 +11,7 @@ type Banner = {
   subtitle: string | null;
   imageUrl: string;
   linkUrl: string | null;
+  linkLabel: string | null;
 };
 
 export function BannerCarousel() {

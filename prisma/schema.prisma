@@ -30,8 +30,12 @@ model User {
   favorites     Favorite[]
   carts         Cart[]
   payments      Payment[]
-  addresses     Address[]
-  feedbacks     Feedback[]
+  addresses                 Address[]
+  feedbacks                 Feedback[]
+  twoFactorSecret           String?   @map("two_factor_secret")
+  twoFactorEnabled          Boolean   @default(false) @map("two_factor_enabled")
+  twoFactorActivatedAt      DateTime? @map("two_factor_activated_at")
+  twoFactorRecoveryCodes    Json?     @map("two_factor_recovery_codes")
 }
 
 model Account {
@@ -262,14 +266,18 @@ model Coupon {
 }
 
 model Banner {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   title     String
   subtitle  String?
   imageUrl  String
   linkUrl   String?
-  position  Int      @default(0)
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now())
+  linkLabel String?
+  position  Int       @default(0)
+  active    Boolean   @default(true)
+  startsAt  DateTime?
+  endsAt    DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model Feedback {

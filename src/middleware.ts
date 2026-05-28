@@ -3,12 +3,14 @@ import { NextResponse, type NextRequest } from 'next/server';
 
 const protectedRoutes = ['/orders', '/profile', '/perfil', '/checkout'];
 const adminRoutePrefix = '/admin';
+const authSecret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = await getToken({
     req: request,
-    secret: process.env.AUTH_SECRET,
+    secret: authSecret,
+    secureCookie: process.env.NODE_ENV === 'production',
   });
 
   const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route));

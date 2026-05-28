@@ -13,6 +13,7 @@ import { useVariantStore } from '@/lib/variantStore'
 
 type ProductPurchasePanelProps = {
   product: ProductDetail;
+  isFavorited?: boolean;
   selectedVariants?: Record<string, string>;
   onVariantsChange?: (variants: Record<string, string>) => void;
 };
@@ -41,12 +42,13 @@ function parseVariants(variants: Prisma.JsonValue): VariantOption[] {
     .filter((variant): variant is VariantOption => Boolean(variant));
 }
 
-export function ProductPurchasePanel({ product, selectedVariants: externalVariants, onVariantsChange }: ProductPurchasePanelProps) {
+export function ProductPurchasePanel({ product, isFavorited = false, selectedVariants: externalVariants, onVariantsChange }: ProductPurchasePanelProps) {
   const router = useRouter();
   const addItem = useCartStore((state) => state.addItem);
   const variantOptions = useMemo(() => parseVariants(product.variants), [product.variants]);
   const [quantity, setQuantity] = useState(1);
-  const [favorite, setFavorite] = useState(false);
+  const [favorite, setFavorite] = useState(isFavorited);
+  const [favoriteLoading, setFavoriteLoading] = useState(false);
   const [favAnim, setFavAnim] = useState(false);
   const [zip, setZip] = useState('');
   const [shippingResult, setShippingResult] = useState<string | null>(null);
@@ -85,6 +87,10 @@ export function ProductPurchasePanel({ product, selectedVariants: externalVarian
     setPageUrl(window.location.href);
   }, []);
 
+  useEffect(() => {
+    setFavorite(isFavorited);
+  }, [isFavorited]);
+
   function getCartVariants(): CartVariant[] {
     return Object.entries(selectedVariants)
       .filter(([, value]) => value)
@@ -121,10 +127,35 @@ export function ProductPurchasePanel({ product, selectedVariants: externalVarian
     setTimeout(() => router.push('/checkout'), 500);
   }
 
-  function handleFavorite() {
-    setFavorite((v) => !v);
-    setFavAnim(true);
-    setTimeout(() => setFavAnim(false), 600);
+  async function handleFavorite() {
+    if (favoriteLoading) return;
+
+    setFavoriteLoading(true);
+    try {
+      const response = await fetch('/api/wishlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId: product.id }),
+      });
+
+      if (response.status === 401) {
+        router.push(`/login?redirect=/products/${product.slug}`);
+        return;
+      }
+
+      if (!response.ok) return;
+
+      const payload = (await response.json()) as { data?: { favorited?: boolean } };
+      const nextFavorite = Boolean(payload.data?.favorited);
+      setFavorite(nextFavorite);
+
+      if (nextFavorite) {
+        setFavAnim(true);
+        setTimeout(() => setFavAnim(false), 600);
+      }
+    } finally {
+      setFavoriteLoading(false);
+    }
   }
 
   async function handleShippingQuote() {
@@ -331,9 +362,11 @@ export function ProductPurchasePanel({ product, selectedVariants: externalVarian
       <div className="relative">
         <button
           type="button"
+          disabled={favoriteLoading}
           className={cn(
             'flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-medium transition-all duration-200',
             favorite ? 'text-brand' : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/40',
+            favoriteLoading && 'cursor-wait opacity-70',
           )}
           onClick={handleFavorite}
         >

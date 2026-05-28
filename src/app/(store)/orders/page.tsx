@@ -18,7 +18,7 @@ export default async function OrdersPage() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-[1200px] px-6 py-12">
+    <main className="mx-auto w-full max-w-[1200px] px-4 py-10 sm:px-6 sm:py-12">
       <OrdersPageClient />
     </main>
   );

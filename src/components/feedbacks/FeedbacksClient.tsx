@@ -3,7 +3,7 @@
 import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Check, ExternalLink, Loader2, Menu, Star, ThumbsUp, X } from 'lucide-react';
+import { Check, CheckCircle2, ChevronDown, ExternalLink, Info, Loader2, Menu, Star, ThumbsUp, Upload, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { WHATSAPP } from '@/lib/servicos-data';
@@ -163,14 +163,17 @@ function HelpfulButton({ feedbackId, count }: { feedbackId: string; count: numbe
   );
 }
 
-function FeedbackCard({ feedback, index }: { feedback: Feedback; index: number }) {
+function FeedbackCard({ feedback, index, preview = false }: { feedback: Feedback; index: number; preview?: boolean }) {
   return (
     <article
-      className="glass-card-hover mb-4 break-inside-avoid p-5 opacity-0 animate-fade-up"
+      className={cn(
+        'glass-card-hover mb-4 max-w-full break-inside-avoid overflow-hidden break-words p-5 opacity-0 animate-fade-up',
+        preview && 'mx-auto w-full',
+      )}
       style={{ animationDelay: `${index * 50}ms`, animationFillMode: 'forwards' }}
     >
       <div className="mb-4 flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 items-center gap-3">
           <div className="relative">
             <img src={avatarUrl(feedback)} alt={feedback.author_name} className="h-11 w-11 rounded-full border border-white/10 object-cover" />
             {feedback.is_verified ? (
@@ -179,14 +182,14 @@ function FeedbackCard({ feedback, index }: { feedback: Feedback; index: number }
               </span>
             ) : null}
           </div>
-          <div>
-            <p className="text-sm font-medium text-white">{feedback.author_name}</p>
-            <p className="text-xs text-white/40">
+          <div className="min-w-0">
+            <p className="truncate text-sm font-medium text-white">{feedback.author_name}</p>
+            <p className="truncate text-xs text-white/40">
               {feedback.author_role || 'Cliente'} {feedback.author_company ? `@ ${feedback.author_company}` : ''}
             </p>
           </div>
         </div>
-        <span className="rounded-full border border-white/[0.08] bg-white/[0.05] px-2 py-1 text-[10px] text-white/40">
+        <span className="shrink-0 rounded-full border border-white/[0.08] bg-white/[0.05] px-2 py-1 text-[10px] text-white/40">
           {feedback.service_label}
         </span>
       </div>
@@ -195,13 +198,14 @@ function FeedbackCard({ feedback, index }: { feedback: Feedback; index: number }
         {[1, 2, 3, 4, 5].map((star) => <StarIcon key={star} filled={star <= feedback.rating} />)}
       </div>
 
-      <h3 className="mb-2 font-semibold text-white">&ldquo;{feedback.title}&rdquo;</h3>
-      <p className="mb-4 text-sm leading-relaxed text-white/60">{feedback.body}</p>
+      <h3 className="mb-2 break-words font-semibold text-white">&ldquo;{feedback.title}&rdquo;</h3>
+      <p className={cn('mb-4 break-words text-sm leading-relaxed text-white/60', preview && 'line-clamp-4')}>{feedback.body}</p>
+      {preview && feedback.body.length > 260 ? <button type="button" className="mb-4 text-sm font-semibold text-brand">Ver mais</button> : null}
 
       {feedback.result_metric ? (
-        <div className="mb-4 rounded-xl border border-brand/20 bg-brand/10 px-4 py-3">
+        <div className="mb-4 max-w-full overflow-hidden rounded-xl border border-brand/20 bg-brand/10 px-4 py-3">
           <span className="mb-1 block text-[10px] uppercase tracking-wider text-brand/60">Resultado obtido</span>
-          <p className="text-sm font-medium text-brand">📈 {feedback.result_metric}</p>
+          <p className="truncate text-sm font-medium text-brand">📈 {feedback.result_metric}</p>
         </div>
       ) : null}
 
@@ -227,25 +231,68 @@ function FeedbackCard({ feedback, index }: { feedback: Feedback; index: number }
   );
 }
 
-function Input({ label, id, ...props }: { label: string; id?: string } & React.InputHTMLAttributes<HTMLInputElement>) {
+function Input({ label, id, optional = false, subtle = false, ...props }: { label: string; id?: string; optional?: boolean; subtle?: boolean } & React.InputHTMLAttributes<HTMLInputElement>) {
+  const { className, ...inputProps } = props;
+
   return (
     <label htmlFor={id} className="grid gap-2 text-sm">
-      <span className="text-xs font-medium text-white/50 mb-1.5 uppercase tracking-wide">{label}</span>
-      <input id={id} className="bg-white/[0.06] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/25 focus:outline-none focus:ring-2 focus:ring-orange-500/60 transition" {...props} />
+      <span className="mb-1.5 text-xs font-medium uppercase tracking-wide text-white/50">
+        {label}
+        {optional ? <span className="ml-1 text-[11px] normal-case tracking-normal text-white/35">(opcional)</span> : null}
+      </span>
+      <input
+        id={id}
+        className={cn(
+          'min-h-11 rounded-xl bg-white/[0.06] px-4 py-3 text-base text-white placeholder-white/25 transition focus:outline-none focus:ring-2 focus:ring-orange-500/60',
+          subtle ? 'border border-white/[0.06]' : 'border border-white/10',
+          className,
+        )}
+        {...inputProps}
+      />
     </label>
   );
 }
 
-function FileInput({ label, accept, file, onChange }: { label: string; accept: string; file: File | null; onChange: (file: File | null) => void }) {
+function VideoDropzone({ file, onChange }: { file: File | null; onChange: (file: File | null) => void }) {
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
     onChange(event.target.files?.[0] ?? null);
   }
 
   return (
-    <label className="grid gap-2 text-sm text-white/60">
-      {label}
-      <input type="file" accept={accept} className="glass-input rounded-xl border-white/10 bg-white/[0.04] text-white file:mr-3 file:rounded-lg file:border-0 file:bg-brand file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-white" onChange={handleChange} />
-      {file ? <span className="text-xs text-white/35">{file.name}</span> : <span className="text-xs text-white/30">Opcional. Se não enviar foto, geramos um avatar automaticamente.</span>}
+    <label
+      className="group grid min-h-[150px] cursor-pointer place-items-center rounded-2xl border-2 border-dashed border-orange-500/30 bg-white/[0.025] p-5 text-center transition hover:border-[#FF6B00] hover:bg-orange-500/[0.05]"
+      onDragOver={(event) => event.preventDefault()}
+      onDrop={(event) => {
+        event.preventDefault();
+        onChange(event.dataTransfer.files?.[0] ?? null);
+      }}
+    >
+      <input type="file" accept="video/mp4" className="hidden" onChange={handleChange} />
+      {file ? (
+        <span className="flex w-full items-center justify-between gap-3 rounded-xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-left">
+          <span className="flex min-w-0 items-center gap-3">
+            <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-300" />
+            <span className="truncate text-sm font-semibold text-white">{file.name}</span>
+          </span>
+          <button
+            type="button"
+            className="grid min-h-11 min-w-11 place-items-center rounded-lg text-white/50 transition hover:bg-white/10 hover:text-white"
+            aria-label="Remover video selecionado"
+            onClick={(event) => {
+              event.preventDefault();
+              onChange(null);
+            }}
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </span>
+      ) : (
+        <span className="grid gap-2">
+          <Upload className="mx-auto h-6 w-6 text-brand" />
+          <span className="text-sm font-bold text-white">Arraste seu vídeo aqui</span>
+          <span className="text-xs text-white/40">.mp4 · até 50MB</span>
+        </span>
+      )}
     </label>
   );
 }
@@ -256,6 +303,11 @@ function SubmitFeedbackForm({ onSubmitted }: { onSubmitted: () => void }) {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [mediaOpen, setMediaOpen] = useState(false);
+
+  useEffect(() => {
+    setMediaOpen(window.matchMedia('(min-width: 768px)').matches);
+  }, []);
 
   function update<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((current) => ({ ...current, [key]: value }));
@@ -272,7 +324,11 @@ function SubmitFeedbackForm({ onSubmitted }: { onSubmitted: () => void }) {
       if (form.rating < 1 || form.rating > 5) return 'Escolha uma nota de 1 a 5 estrelas.';
       if (form.title.trim().length < 6) return 'Escreva um título um pouco mais claro.';
       if (form.body.trim().length < 80) return 'O depoimento precisa ter pelo menos 80 caracteres.';
+      if (form.result_metric.trim().length < 3) return 'Informe o resultado concreto obtido.';
+      if (!/^https?:\/\/\S+\.\S+/.test(form.project_url)) return 'Informe uma URL completa do projeto.';
+      if (form.video_url && !/^https?:\/\/\S+\.\S+/.test(form.video_url)) return 'Use uma URL completa para o vídeo.';
       if (videoFile && videoFile.size > 50 * 1024 * 1024) return 'O vídeo deve ter no máximo 50MB.';
+      if (videoFile && videoFile.type !== 'video/mp4') return 'Envie um vídeo no formato .mp4.';
     }
     if (targetStep === 3 && !form.consent) return 'Confirme a autorização de publicação.';
     return null;
@@ -329,8 +385,8 @@ function SubmitFeedbackForm({ onSubmitted }: { onSubmitted: () => void }) {
         <div className="grid gap-4 md:grid-cols-2">
           <Input label="Nome completo" value={form.author_name} onChange={(event) => update('author_name', event.target.value)} required aria-required />
           <Input label="E-mail" type="email" value={form.author_email} onChange={(event) => update('author_email', event.target.value)} required autoComplete="email" aria-required />
-          <Input label="Empresa / Organização (opcional)" value={form.author_company} onChange={(event) => update('author_company', event.target.value)} className="col-span-2" />
-          <Input label="URL do LinkedIn (opcional)" value={form.author_linkedin_url} onChange={(event) => update('author_linkedin_url', event.target.value)} className="col-span-2" />
+          <Input label="Empresa / Organização" optional value={form.author_company} onChange={(event) => update('author_company', event.target.value)} className="md:col-span-2" />
+          <Input label="URL do LinkedIn" optional value={form.author_linkedin_url} onChange={(event) => update('author_linkedin_url', event.target.value)} className="md:col-span-2" />
         </div>
       ) : null}
 
@@ -355,24 +411,66 @@ function SubmitFeedbackForm({ onSubmitted }: { onSubmitted: () => void }) {
           <Input label="Título do depoimento" value={form.title} onChange={(event) => update('title', event.target.value)} required />
           <label className="grid gap-2 text-sm text-white/60">
             Depoimento completo
-            <textarea className="glass-input min-h-36 rounded-xl border-white/10 bg-white/[0.04] text-white" value={form.body} onChange={(event) => update('body', event.target.value)} />
+            <textarea className="glass-input min-h-36 rounded-xl border-white/10 bg-white/[0.04] text-base text-white" value={form.body} onChange={(event) => update('body', event.target.value)} />
             <span className="text-xs text-white/30">{form.body.length}/80 caracteres mínimos</span>
           </label>
           <div className="grid gap-4 md:grid-cols-2">
-            <Input label="Resultado concreto obtido" value={form.result_metric} onChange={(event) => update('result_metric', event.target.value)} />
-            <Input label="URL do projeto" value={form.project_url} onChange={(event) => update('project_url', event.target.value)} />
-            <Input label="URL do vídeo" value={form.video_url} onChange={(event) => update('video_url', event.target.value)} />
-            <FileInput label="Vídeo de depoimento (.mp4 até 50MB)" accept="video/mp4" file={videoFile} onChange={setVideoFile} />
+            <Input label="Resultado concreto obtido*" value={form.result_metric} onChange={(event) => update('result_metric', event.target.value)} placeholder="Ex: +38% em conversões" required />
+            <Input label="URL do projeto*" value={form.project_url} onChange={(event) => update('project_url', event.target.value)} placeholder="https://..." required />
           </div>
+
+          <section className="rounded-2xl border border-white/[0.06] bg-white/[0.025]">
+            <button
+              type="button"
+              className="flex min-h-11 w-full items-center justify-between gap-3 px-4 py-3 text-left"
+              onClick={() => setMediaOpen((current) => !current)}
+              aria-expanded={mediaOpen}
+            >
+              <span className="flex min-w-0 flex-wrap items-center gap-2">
+                <Info className="h-4 w-4 shrink-0 text-white/45" />
+                <span className="text-xs font-semibold uppercase tracking-wide text-white/45">Mídia adicional (opcional — incluso no pacote completo)</span>
+                <span className="rounded-full border border-amber-400/20 bg-amber-400/10 px-2 py-0.5 text-[10px] font-bold text-amber-300">OPCIONAL</span>
+              </span>
+              <ChevronDown className={cn('h-4 w-4 shrink-0 text-white/40 transition', mediaOpen && 'rotate-180')} />
+            </button>
+            <AnimatePresence initial={false}>
+              {mediaOpen ? (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="grid gap-4 border-t border-white/[0.06] p-4 md:grid-cols-2">
+                    <Input
+                      label="URL do vídeo"
+                      optional
+                      subtle
+                      value={form.video_url}
+                      onChange={(event) => update('video_url', event.target.value)}
+                      placeholder="Cole o link do YouTube ou Vimeo"
+                    />
+                    <div className="grid gap-2 text-sm">
+                      <span className="mb-1.5 text-xs font-medium uppercase tracking-wide text-white/50">
+                        Upload vídeo de depoimento <span className="ml-1 text-[11px] normal-case tracking-normal text-white/35">(opcional)</span>
+                      </span>
+                      <VideoDropzone file={videoFile} onChange={setVideoFile} />
+                    </div>
+                  </div>
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
+          </section>
         </div>
       ) : null}
 
       {step === 3 ? (
         <div className="grid gap-6">
-          <div>
+          <div className="mx-auto w-full max-w-[560px] px-4">
             <p className="mb-3 text-sm font-semibold text-white">Preview do card</p>
             <FeedbackCard
               index={0}
+              preview
               feedback={{
                 id: 'preview',
                 author_name: form.author_name || 'Seu nome',
@@ -395,9 +493,12 @@ function SubmitFeedbackForm({ onSubmitted }: { onSubmitted: () => void }) {
               }}
             />
           </div>
-          <label className="flex items-start gap-3 rounded-xl border border-white/[0.08] bg-white/[0.04] p-4 text-sm text-white/60">
-            <input type="checkbox" className="mt-0.5 rounded border-white/20 bg-transparent text-brand focus:ring-brand/30" checked={form.consent} onChange={(event) => update('consent', event.target.checked)} />
-            Confirmo que sou um cliente real e autorizo a publicação deste feedback na página pública.
+          <label className="mx-auto flex w-full max-w-[560px] items-start gap-3 rounded-xl border border-white/[0.08] bg-white/[0.04] p-4 text-sm leading-6 text-white/60">
+            <span className="relative mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-md border border-white/20 bg-black/20">
+              <input type="checkbox" className="peer absolute inset-0 h-full w-full cursor-pointer opacity-0" checked={form.consent} onChange={(event) => update('consent', event.target.checked)} />
+              <Check className="h-3.5 w-3.5 text-transparent peer-checked:text-brand" />
+            </span>
+            <span>Confirmo que sou um cliente real e autorizo a publicação deste feedback na página pública.</span>
           </label>
         </div>
       ) : null}

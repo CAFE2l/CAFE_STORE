@@ -67,16 +67,16 @@ export default async function OrderPage({ params }: OrderPageProps) {
   }
 
   return (
-    <main className="container-page grid gap-8 py-12">
+    <main className="container-page grid gap-8 py-10 sm:py-12">
       <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
+        <div className="min-w-0">
           <Link href="/orders" className="text-sm text-accent-primary hover:text-accent-glow">
             Voltar aos pedidos
           </Link>
-          <h1 className="mt-3 font-display text-4xl font-semibold text-text-primary">Pedido</h1>
-          <p className="mt-2 font-mono text-sm text-text-muted">{order.id}</p>
+          <h1 className="mt-3 font-display text-3xl font-semibold text-text-primary sm:text-4xl">Pedido</h1>
+          <p className="mt-2 break-all font-mono text-sm text-text-muted">{order.id}</p>
         </div>
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-4">
         <StatusBadge status={order.status} />
         {/* @ts-ignore */}
         <OrderActionsClient orderId={order.id} status={order.status} />
@@ -92,7 +92,7 @@ export default async function OrderPage({ params }: OrderPageProps) {
           <h2 className="font-display text-2xl font-semibold text-text-primary">Itens</h2>
           <div className="mt-5 grid gap-4">
             {order.items.map((item) => (
-              <article key={item.id} className="grid grid-cols-[4.5rem_1fr_auto] gap-4">
+              <article key={item.id} className="grid grid-cols-[4.5rem_minmax(0,1fr)] gap-4 sm:grid-cols-[4.5rem_minmax(0,1fr)_auto]">
                 <div className="relative aspect-square overflow-hidden rounded-xl bg-background-surface">
                   <Image
                     src={item.product.images[0] ?? '/placeholder-product.svg'}
@@ -111,7 +111,7 @@ export default async function OrderPage({ params }: OrderPageProps) {
                   </Link>
                   <p className="mt-1 text-sm text-text-muted">Quantidade: {item.quantity}</p>
                 </div>
-                <p className="text-sm font-semibold text-text-primary">
+                <p className="text-sm font-semibold text-text-primary sm:text-right">
                   {currencyFormatter.format(item.price * item.quantity)}
                 </p>
               </article>

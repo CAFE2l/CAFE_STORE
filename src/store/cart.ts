@@ -1,7 +1,7 @@
 'use client';
 
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, type PersistStorage, type StorageValue } from 'zustand/middleware';
 import type { CartItem } from '@/types';
 
 type CartState = {
@@ -22,6 +22,33 @@ function calculateTotals(items: CartItem[]) {
     count: items.reduce((sum, item) => sum + item.quantity, 0),
   };
 }
+
+const cartStorageName = 'cafe-store-cart';
+
+type PersistedCartState = Pick<CartState, 'items' | 'total' | 'count'>;
+
+const safeCartStorage: PersistStorage<PersistedCartState> = {
+  getItem: (name) => {
+    try {
+      const raw = localStorage.getItem(name);
+      if (!raw) return null;
+      return JSON.parse(raw) as StorageValue<PersistedCartState>;
+    } catch {
+      try {
+        localStorage.removeItem(cartStorageName);
+      } catch {
+        // localStorage may be unavailable in private or restricted contexts.
+      }
+      return null;
+    }
+  },
+  setItem: (name, value) => {
+    localStorage.setItem(name, JSON.stringify(value));
+  },
+  removeItem: (name) => {
+    localStorage.removeItem(name);
+  },
+};
 
 export const useCartStore = create<CartState>()(
   persist(
@@ -123,12 +150,18 @@ export const useCartStore = create<CartState>()(
       },
     }),
     {
-      name: 'cafe-store-cart',
+      name: cartStorageName,
+      storage: safeCartStorage,
       partialize: (state) => ({
         items: state.items,
         total: state.total,
         count: state.count,
       }),
+      onRehydrateStorage: () => (_state, error) => {
+        if (error) {
+          localStorage.removeItem(cartStorageName);
+        }
+      },
     },
   ),
 );

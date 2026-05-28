@@ -27,16 +27,20 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   const page = Number(params.page) || 1;
 
   const session = await auth();
+  const userId = session?.user?.id;
 
-  const [categories, result, userFavorites] = await Promise.all([
+  const [categories, result, userWishlist, userLegacyFavorites] = await Promise.all([
     getCategories(),
     getProducts({ category: params.category, search: params.q, sort: params.sort, page, perPage: PER_PAGE }),
-    session?.user?.id
-      ? prisma.favorite.findMany({ where: { userId: session.user.id }, select: { productId: true } })
+    userId
+      ? prisma.wishlist.findMany({ where: { userId }, select: { productId: true } })
+      : Promise.resolve([]),
+    userId
+      ? prisma.favorite.findMany({ where: { userId }, select: { productId: true } })
       : Promise.resolve([]),
   ]);
 
-  const favoriteIds = userFavorites.map((f) => f.productId);
+  const favoriteIds = Array.from(new Set([...userWishlist, ...userLegacyFavorites].map((f) => f.productId)));
 
   return (
     <ProductsPageClient

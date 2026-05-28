@@ -1,0 +1,6 @@
+-- AlterTable
+ALTER TABLE "Banner"
+ADD COLUMN     "linkLabel" TEXT,
+ADD COLUMN     "startsAt" TIMESTAMP(3),
+ADD COLUMN     "endsAt" TIMESTAMP(3),
+ADD COLUMN     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;

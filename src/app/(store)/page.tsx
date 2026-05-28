@@ -16,15 +16,19 @@ export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
   const session = await auth();
+  const userId = session?.user?.id;
 
-  const [featuredProducts, userFavorites] = await Promise.all([
+  const [featuredProducts, userWishlist, userLegacyFavorites] = await Promise.all([
     getFeaturedProducts(8),
-    session?.user?.id
-      ? prisma.favorite.findMany({ where: { userId: session.user.id }, select: { productId: true } })
+    userId
+      ? prisma.wishlist.findMany({ where: { userId }, select: { productId: true } })
+      : Promise.resolve([]),
+    userId
+      ? prisma.favorite.findMany({ where: { userId }, select: { productId: true } })
       : Promise.resolve([]),
   ]);
 
-  const favoriteIds = userFavorites.map((f) => f.productId);
+  const favoriteIds = Array.from(new Set([...userWishlist, ...userLegacyFavorites].map((f) => f.productId)));
 
   return (
     <main className="overflow-hidden bg-[#050505]">

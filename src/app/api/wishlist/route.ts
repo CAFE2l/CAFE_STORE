@@ -38,21 +38,40 @@ export async function POST(request: Request) {
     );
   }
 
-  const existingWishlistItem = await prisma.wishlist.findUnique({
-    where: {
-      userId_productId: {
-        userId: session.user.id,
-        productId: parsedBody.data.productId,
-      },
-    },
-  });
-
-  if (existingWishlistItem) {
-    await prisma.wishlist.delete({
+  const [existingWishlistItem, existingFavoriteItem] = await Promise.all([
+    prisma.wishlist.findUnique({
       where: {
-        id: existingWishlistItem.id,
+        userId_productId: {
+          userId: session.user.id,
+          productId: parsedBody.data.productId,
+        },
       },
-    });
+    }),
+    prisma.favorite.findUnique({
+      where: {
+        userId_productId: {
+          userId: session.user.id,
+          productId: parsedBody.data.productId,
+        },
+      },
+    }),
+  ]);
+
+  if (existingWishlistItem || existingFavoriteItem) {
+    await prisma.$transaction([
+      prisma.wishlist.deleteMany({
+        where: {
+          userId: session.user.id,
+          productId: parsedBody.data.productId,
+        },
+      }),
+      prisma.favorite.deleteMany({
+        where: {
+          userId: session.user.id,
+          productId: parsedBody.data.productId,
+        },
+      }),
+    ]);
 
     return Response.json({
       success: true,
@@ -62,12 +81,34 @@ export async function POST(request: Request) {
     });
   }
 
-  await prisma.wishlist.create({
-    data: {
-      userId: session.user.id,
-      productId: parsedBody.data.productId,
-    },
-  });
+  await prisma.$transaction([
+    prisma.wishlist.upsert({
+      where: {
+        userId_productId: {
+          userId: session.user.id,
+          productId: parsedBody.data.productId,
+        },
+      },
+      update: {},
+      create: {
+        userId: session.user.id,
+        productId: parsedBody.data.productId,
+      },
+    }),
+    prisma.favorite.upsert({
+      where: {
+        userId_productId: {
+          userId: session.user.id,
+          productId: parsedBody.data.productId,
+        },
+      },
+      update: {},
+      create: {
+        userId: session.user.id,
+        productId: parsedBody.data.productId,
+      },
+    }),
+  ]);
 
   return Response.json({
     success: true,

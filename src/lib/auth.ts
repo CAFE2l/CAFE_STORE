@@ -7,7 +7,22 @@ import Google from 'next-auth/providers/google';
 import { prisma } from '@/lib/prisma';
 import { credentialsSchema } from '@/lib/validations';
 
-const hasGoogleOAuth = Boolean(process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET);
+const isProduction = process.env.NODE_ENV === 'production';
+const hasLocalhostAuthUrl = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?(\/.*)?$/i.test(process.env.AUTH_URL ?? '');
+
+if (isProduction && hasLocalhostAuthUrl) {
+  const vercelUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL ?? process.env.VERCEL_URL;
+  const productionUrl = process.env.NEXTAUTH_URL ?? (vercelUrl ? `https://${vercelUrl}` : undefined);
+
+  if (productionUrl) {
+    process.env.AUTH_URL = productionUrl;
+  }
+}
+
+const authSecret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
+const googleClientId = process.env.AUTH_GOOGLE_ID ?? process.env.GOOGLE_CLIENT_ID;
+const googleClientSecret = process.env.AUTH_GOOGLE_SECRET ?? process.env.GOOGLE_CLIENT_SECRET;
+const hasGoogleOAuth = Boolean(googleClientId && googleClientSecret);
 const loginAttempts = new Map<string, { count: number; blockedUntil?: number }>();
 const maxLoginAttempts = 5;
 const loginBlockMs = 15 * 60 * 1000;
@@ -38,9 +53,22 @@ function clearFailedLogins(email: string) {
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
+  secret: authSecret,
   session: {
     strategy: 'jwt',
     maxAge: 60 * 60 * 24 * 7,
+  },
+  useSecureCookies: isProduction,
+  cookies: {
+    sessionToken: {
+      name: isProduction ? '__Secure-authjs.session-token' : 'authjs.session-token',
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: isProduction,
+      },
+    },
   },
   pages: {
     signIn: '/login',
@@ -51,10 +79,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     ...(hasGoogleOAuth
       ? [
           Google({
-            clientId: process.env.AUTH_GOOGLE_ID,
-            clientSecret: process.env.AUTH_GOOGLE_SECRET,
+            clientId: googleClientId,
+            clientSecret: googleClientSecret,
             allowDangerousEmailAccountLinking: true,
             checks: ['state'],
+            authorization: {
+              params: {
+                prompt: 'consent',
+                access_type: 'offline',
+                response_type: 'code',
+              },
+            },
           }),
         ]
       : []),

@@ -13,9 +13,28 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Missing productId' }, { status: 400 });
   }
 
-  const favorite = await prisma.favorite.create({
-    data: { userId: session.user.id, productId },
-  });
+  const [favorite] = await prisma.$transaction([
+    prisma.wishlist.upsert({
+      where: {
+        userId_productId: {
+          userId: session.user.id,
+          productId,
+        },
+      },
+      update: {},
+      create: { userId: session.user.id, productId },
+    }),
+    prisma.favorite.upsert({
+      where: {
+        userId_productId: {
+          userId: session.user.id,
+          productId,
+        },
+      },
+      update: {},
+      create: { userId: session.user.id, productId },
+    }),
+  ]);
 
   return NextResponse.json(favorite);
 }
@@ -31,9 +50,14 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ error: 'Missing productId' }, { status: 400 });
   }
 
-  await prisma.favorite.deleteMany({
-    where: { userId: session.user.id, productId },
-  });
+  await prisma.$transaction([
+    prisma.wishlist.deleteMany({
+      where: { userId: session.user.id, productId },
+    }),
+    prisma.favorite.deleteMany({
+      where: { userId: session.user.id, productId },
+    }),
+  ]);
 
   return NextResponse.json({ success: true });
 }

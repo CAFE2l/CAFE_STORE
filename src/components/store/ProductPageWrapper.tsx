@@ -26,9 +26,10 @@ function parseVariants(variants: Prisma.JsonValue): VariantOption[] {
 
 type ProductPageWrapperProps = {
   product: ProductDetail;
+  isFavorited?: boolean;
 };
 
-export function ProductPageWrapper({ product }: ProductPageWrapperProps) {
+export function ProductPageWrapper({ product, isFavorited = false }: ProductPageWrapperProps) {
   const variantOptions = useMemo(() => parseVariants(product.variants), [product.variants]);
   const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>(() =>
     Object.fromEntries(variantOptions.map((v) => [v.name, v.values[0] ?? ''])),
@@ -37,7 +38,7 @@ export function ProductPageWrapper({ product }: ProductPageWrapperProps) {
   return (
     <>
       <RecentlyViewedTracker product={product} />
-      <ProductPurchasePanel product={product} selectedVariants={selectedVariants} onVariantsChange={setSelectedVariants} />
+      <ProductPurchasePanel product={product} isFavorited={isFavorited} selectedVariants={selectedVariants} onVariantsChange={setSelectedVariants} />
       <StickyBar product={product} selectedVariants={selectedVariants} variantOptions={variantOptions} />
     </>
   );

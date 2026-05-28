@@ -10,6 +10,8 @@ import { FloatingWhatsApp } from '@/components/ui/FloatingWhatsApp';
 import ProductGalleryClient from '@/components/store/ProductGalleryClient';
 import ErrorBoundaryClient from '@/components/ui/ErrorBoundaryClient';
 import { PriceBlock } from '@/components/ui/PriceBlock';
+import { auth } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
 import { getProductBySlug, getRelatedProducts } from '@/lib/products';
 
 type ProductPageProps = {
@@ -78,7 +80,33 @@ export default async function ProductPage({ params }: ProductPageProps) {
     notFound();
   }
 
-  const relatedProducts = await getRelatedProducts(product);
+  const session = await auth();
+  const userId = session?.user?.id;
+  const [relatedProducts, wishlistFavorite, legacyFavorite] = await Promise.all([
+    getRelatedProducts(product),
+    userId
+      ? prisma.wishlist.findUnique({
+          where: {
+            userId_productId: {
+              userId,
+              productId: product.id,
+            },
+          },
+          select: { id: true },
+        })
+      : Promise.resolve(null),
+    userId
+      ? prisma.favorite.findUnique({
+          where: {
+            userId_productId: {
+              userId,
+              productId: product.id,
+            },
+          },
+          select: { id: true },
+        })
+      : Promise.resolve(null),
+  ]);
   const images = getProductMedia(product);
   const averageRating = product.averageRating.toFixed(1);
   const sku = getSku(product);
@@ -112,7 +140,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   };
 
   return (
-    <main className="relative min-h-screen bg-surface-base px-6 pb-28 pt-20">
+    <main className="relative min-h-screen bg-surface-base px-4 pb-28 pt-20 sm:px-6">
       <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <div className="absolute -left-48 top-40 h-[500px] w-[500px] rounded-full bg-brand/4 blur-[160px]" />
         <div className="absolute right-1/3 top-20 h-[500px] w-[500px] rounded-full bg-brand/6 blur-[140px]" />
@@ -164,7 +192,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
             {/* Wrap client product UI with ErrorBoundaryClient to capture render errors */}
             <ErrorBoundaryClient>
-              <ProductPageWrapper product={product} />
+              <ProductPageWrapper product={product} isFavorited={Boolean(wishlistFavorite || legacyFavorite)} />
             </ErrorBoundaryClient>
           </div>
         </section>

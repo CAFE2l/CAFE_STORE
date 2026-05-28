@@ -7,12 +7,20 @@ export async function DELETE(_request: Request, { params }: { params: { productI
     return Response.json({ success: false, error: 'Nao autorizado.' }, { status: 401 });
   }
 
-  await prisma.wishlist.deleteMany({
-    where: {
-      userId: session.user.id,
-      productId: params.productId,
-    },
-  });
+  await prisma.$transaction([
+    prisma.wishlist.deleteMany({
+      where: {
+        userId: session.user.id,
+        productId: params.productId,
+      },
+    }),
+    prisma.favorite.deleteMany({
+      where: {
+        userId: session.user.id,
+        productId: params.productId,
+      },
+    }),
+  ]);
 
   return Response.json({ success: true });
 }
