@@ -1,4 +1,4 @@
-import otplib from 'otplib';
+import * as otplib from 'otplib';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
@@ -20,10 +20,10 @@ export async function POST() {
   const secret = otplib.generateSecret();
   const serviceName = 'Cafe Store';
   const otpauthUrl = otplib.generateURI({
+    strategy: 'totp',
     issuer: serviceName,
     label: session.user.email ?? session.user.id,
     secret,
-    type: 'totp',
   });
 
   await prisma.user.update({

@@ -1,4 +1,4 @@
-import otplib from 'otplib';
+import * as otplib from 'otplib';
 import { hash } from 'bcryptjs';
 import { randomBytes } from 'crypto';
 import { auth } from '@/lib/auth';

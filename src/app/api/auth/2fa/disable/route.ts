@@ -1,7 +1,6 @@
 import { compare } from 'bcryptjs';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import type { Prisma } from '@prisma/client';
 
 export async function POST(request: Request) {
   const session = await auth();
@@ -16,7 +15,7 @@ export async function POST(request: Request) {
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { password: true, twoFactorEnabled: true, twoFactorSecret: true },
+    select: { password: true, twoFactorEnabled: true },
   });
 
   if (!user?.twoFactorEnabled) {
@@ -30,17 +29,10 @@ export async function POST(request: Request) {
     }
   }
 
-  const data: Prisma.UserUpdateInput = {
-    twoFactorSecret: null,
-    twoFactorEnabled: false,
-    twoFactorActivatedAt: null,
-    twoFactorRecoveryCodes: null,
-  };
-
-  await prisma.user.update({
-    where: { id: session.user.id },
-    data,
-  });
+  await prisma.$executeRawUnsafe(
+    `UPDATE "User" SET two_factor_secret = NULL, two_factor_enabled = false, two_factor_activated_at = NULL, two_factor_recovery_codes = NULL WHERE id = $1`,
+    session.user.id,
+  );
 
   return Response.json({ success: true });
 }
