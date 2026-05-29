@@ -1,6 +1,7 @@
 import Link from 'next/link';
-import { Check, Crown, ShoppingBag, Users } from 'lucide-react';
+import { Check, ShoppingBag } from 'lucide-react';
 import { communityLinks, TELEGRAM_VIP_WHATSAPP } from '@/lib/community-links';
+import { SocialIcon } from '@/components/ui/SocialIcon';
 
 export default function ObrigadoPage() {
   return (
@@ -52,8 +53,8 @@ export default function ObrigadoPage() {
               rel="noopener noreferrer"
               className="group flex items-center gap-4 rounded-xl border border-white/[0.08] bg-white/[0.04] p-4 text-left transition-all duration-300 hover:border-indigo-500/40 hover:bg-indigo-500/[0.06]"
             >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-500/15 text-indigo-400 transition group-hover:shadow-[0_0_16px_rgba(99,102,241,0.2)]">
-                <Users className="h-5 w-5" />
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-500/15 transition group-hover:shadow-[0_0_16px_rgba(99,102,241,0.2)]">
+                <SocialIcon platform="discord" size={20} />
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-white">Comunidade Discord</p>
@@ -66,8 +67,8 @@ export default function ObrigadoPage() {
               rel="noopener noreferrer"
               className="group flex items-center gap-4 rounded-xl border border-white/[0.08] bg-white/[0.04] p-4 text-left transition-all duration-300 hover:border-brand/40 hover:bg-brand/[0.06]"
             >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand/15 text-brand transition group-hover:shadow-[0_0_16px_rgba(249,115,22,0.2)]">
-                <Crown className="h-5 w-5" />
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand/15 transition group-hover:shadow-[0_0_16px_rgba(249,115,22,0.2)]">
+                <SocialIcon platform="telegram" size={20} />
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-white">Telegram VIP</p>

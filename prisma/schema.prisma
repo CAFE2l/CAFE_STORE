@@ -450,3 +450,71 @@ model ProjectBriefing {
 
   @@map("project_briefings")
 }
+
+model StoreSettings {
+  id              String   @id @default("singleton")
+  storeName       String   @default("Café Store")
+  storeDescription String? @db.Text
+  storeEmail      String?
+  whatsappNumber  String?
+  logoUrl         String?
+  faviconUrl      String?
+  primaryColor    String   @default("#f97316")
+  maintenanceMode Boolean  @default(false)
+
+  // Pagamentos
+  mercadoPagoPublicKey   String?  @map("mercado_pago_public_key")
+  mercadoPagoAccessToken String?  @map("mercado_pago_access_token")
+  acceptPix              Boolean  @default(true)  @map("accept_pix")
+  acceptCreditCard       Boolean  @default(true)  @map("accept_credit_card")
+  acceptBoleto           Boolean  @default(true)  @map("accept_boleto")
+  acceptPayPal           Boolean  @default(false) @map("accept_paypal")
+  pixExpiration          String   @default("30min") @map("pix_expiration")
+  maxInstallments        Int      @default(12)    @map("max_installments")
+  discountOnCash         Decimal  @default(0)     @map("discount_on_cash") @db.Decimal(5, 2)
+
+  // Entrega e Frete
+  enableFreeShipping    Boolean  @default(false) @map("enable_free_shipping")
+  freeShippingAmount    Decimal? @map("free_shipping_amount") @db.Decimal(10, 2)
+  showEstimatedDelivery Boolean  @default(true)  @map("show_estimated_delivery")
+  calculateShipping     Boolean  @default(true)  @map("calculate_shipping")
+  processingDays        Int      @default(1)     @map("processing_days")
+  deliveryMessage       String?  @map("delivery_message")
+  showTracking          Boolean  @default(true)  @map("show_tracking")
+
+  // Notificações
+  notifyNewOrder       Boolean @default(true) @map("notify_new_order")
+  notifyPaidOrder      Boolean @default(true) @map("notify_paid_order")
+  notifyCancelledOrder Boolean @default(true) @map("notify_cancelled_order")
+  notifyNewUser        Boolean @default(true) @map("notify_new_user")
+  notifyNewFeedback    Boolean @default(true) @map("notify_new_feedback")
+  notifyNewBriefing    Boolean @default(true) @map("notify_new_briefing")
+  notifyLowStock       Boolean @default(true) @map("notify_low_stock")
+  lowStockThreshold    Int     @default(5)    @map("low_stock_threshold")
+  adminEmails          String? @map("admin_emails") @db.Text
+
+  // SEO
+  metaTitle        String?  @map("meta_title")
+  metaDescription  String?  @map("meta_description") @db.Text
+  canonicalUrl     String?  @map("canonical_url")
+  allowIndexing    Boolean  @default(true) @map("allow_indexing")
+  googleAnalyticsId String? @map("google_analytics_id")
+  facebookPixelId  String?  @map("facebook_pixel_id")
+  sitemapUrl       String?  @map("sitemap_url")
+
+  // Segurança
+  requireTwoFactorAdmin   Boolean @default(false) @map("require_two_factor_admin")
+  blockConcurrentSessions Boolean @default(false) @map("block_concurrent_sessions")
+  sessionExpiration       String  @default("24h") @map("session_expiration")
+  requireStrongPassword   Boolean @default(true)  @map("require_strong_password")
+
+  // Aparência
+  showAnnouncementBanner Boolean @default(true) @map("show_announcement_banner")
+  announcementText       String? @map("announcement_text")
+  forceDarkMode          String  @default("auto") @map("force_dark_mode")
+  showReviewsOnHome      Boolean @default(true)  @map("show_reviews_on_home")
+
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("store_settings")
+}

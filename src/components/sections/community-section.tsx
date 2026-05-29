@@ -1,6 +1,5 @@
-import Link from 'next/link';
-import { Crown, MessageCircle, Users } from 'lucide-react';
 import { communityLinks, TELEGRAM_VIP_WHATSAPP } from '@/lib/community-links';
+import { SocialIcon } from '@/components/ui/SocialIcon';
 
 type CommunitySectionProps = {
   showTitle?: boolean;
@@ -17,8 +16,8 @@ export function CommunitySection({ showTitle = true, variant = 'default' }: Comm
           rel="noopener noreferrer"
           className="group flex items-center gap-4 rounded-xl border border-white/[0.08] bg-white/[0.04] p-4 text-left transition-all duration-300 hover:border-indigo-500/40 hover:bg-indigo-500/[0.06]"
         >
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-500/15 text-indigo-400 transition group-hover:shadow-[0_0_16px_rgba(99,102,241,0.2)]">
-            <Users className="h-5 w-5" />
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-500/15 transition group-hover:shadow-[0_0_16px_rgba(99,102,241,0.2)]">
+            <SocialIcon platform="discord" size={20} />
           </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-white">Comunidade Discord</p>
@@ -31,8 +30,8 @@ export function CommunitySection({ showTitle = true, variant = 'default' }: Comm
           rel="noopener noreferrer"
           className="group flex items-center gap-4 rounded-xl border border-white/[0.08] bg-white/[0.04] p-4 text-left transition-all duration-300 hover:border-brand/40 hover:bg-brand/[0.06]"
         >
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand/15 text-brand transition group-hover:shadow-[0_0_16px_rgba(249,115,22,0.2)]">
-            <Crown className="h-5 w-5" />
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand/15 transition group-hover:shadow-[0_0_16px_rgba(249,115,22,0.2)]">
+            <SocialIcon platform="telegram" size={20} />
           </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-white">Telegram VIP</p>
@@ -65,7 +64,7 @@ export function CommunitySection({ showTitle = true, variant = 'default' }: Comm
         <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.045] p-6 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-indigo-500/30 hover:shadow-[0_0_34px_rgba(99,102,241,0.12)]">
           <div aria-hidden className="absolute right-0 top-0 h-28 w-28 translate-x-10 -translate-y-10 bg-indigo-500/10 blur-3xl" />
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-500/15 ring-1 ring-indigo-500/20 transition group-hover:shadow-[0_0_20px_rgba(99,102,241,0.2)]">
-            <MessageCircle className="h-6 w-6 text-indigo-400" />
+            <SocialIcon platform="discord" size={28} />
           </div>
           <h3 className="mb-2 text-xl font-bold text-white">Comunidade Discord</h3>
           <p className="mb-6 flex-1 text-sm leading-relaxed text-white/60">
@@ -78,7 +77,7 @@ export function CommunitySection({ showTitle = true, variant = 'default' }: Comm
             rel="noopener noreferrer"
             className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-indigo-500/40 px-5 py-3 text-sm font-semibold text-indigo-400 transition-all duration-300 hover:bg-indigo-500 hover:text-white hover:shadow-[0_0_20px_rgba(99,102,241,0.25)] md:w-auto"
           >
-            <Users className="h-4 w-4" />
+            <SocialIcon platform="discord" size={16} />
             Entrar no Discord
           </a>
           {variant === 'default' ? (
@@ -95,7 +94,7 @@ export function CommunitySection({ showTitle = true, variant = 'default' }: Comm
             Exclusivo para clientes
           </span>
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-brand/15 ring-1 ring-brand/20 transition group-hover:shadow-led-brand">
-            <Crown className="h-6 w-6 text-brand" />
+            <SocialIcon platform="telegram" size={28} />
           </div>
           <h3 className="mb-2 text-xl font-bold text-white">Telegram VIP</h3>
           <p className="mb-6 flex-1 text-sm leading-relaxed text-white/60">
@@ -108,7 +107,7 @@ export function CommunitySection({ showTitle = true, variant = 'default' }: Comm
             rel="noopener noreferrer"
             className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand px-5 py-3 text-sm font-bold text-white shadow-led-brand transition-all duration-300 hover:bg-brand-light hover:shadow-[0_0_30px_8px_rgba(249,115,22,0.35)] md:w-auto"
           >
-            <MessageCircle className="h-4 w-4" />
+            <SocialIcon platform="telegram" size={16} />
             Solicitar acesso VIP
           </a>
           <p className="mt-3 text-center text-xs text-white/30 md:text-left">

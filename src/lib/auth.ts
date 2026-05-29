@@ -11,11 +11,22 @@ const isProduction = process.env.NODE_ENV === 'production';
 const hasLocalhostAuthUrl = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?(\/.*)?$/i.test(process.env.AUTH_URL ?? '');
 
 if (isProduction && hasLocalhostAuthUrl) {
-  const vercelUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL ?? process.env.VERCEL_URL;
-  const productionUrl = process.env.NEXTAUTH_URL ?? (vercelUrl ? `https://${vercelUrl}` : undefined);
+  const productionUrl =
+    process.env.NEXTAUTH_URL ??
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL ?? process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL ?? process.env.VERCEL_URL}`
+      : undefined);
 
   if (productionUrl) {
-    process.env.AUTH_URL = productionUrl;
+    try {
+      delete process.env.AUTH_URL;
+    } catch {
+      try {
+        process.env.AUTH_URL = productionUrl;
+      } catch {
+        // environment is fully read-only; nothing we can do
+      }
+    }
   }
 }
 
