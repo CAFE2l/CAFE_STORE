@@ -488,6 +488,69 @@
   }
 }
 
+/* react-phone-input-2 dark theme overrides */
+.react-tel-input .flag-dropdown {
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255,255,255,0.10) !important;
+  border-right: none !important;
+  border-radius: 12px 0 0 12px !important;
+}
+
+.react-tel-input .flag-dropdown.open {
+  border-radius: 12px 0 0 12px !important;
+}
+
+.react-tel-input .selected-flag:hover,
+.react-tel-input .selected-flag:focus,
+.react-tel-input .flag-dropdown.open .selected-flag {
+  background: rgba(255,255,255,0.10) !important;
+  border-radius: 12px 0 0 12px !important;
+}
+
+.react-tel-input .country-list {
+  background: #1a1a1a !important;
+  border: 1px solid rgba(255,255,255,0.10) !important;
+  border-radius: 12px !important;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.10) transparent;
+}
+
+.react-tel-input .country-list .country:hover {
+  background: rgba(255,255,255,0.07) !important;
+}
+
+.react-tel-input .country-list .country.highlight {
+  background: rgba(249,115,22,0.15) !important;
+}
+
+.react-tel-input .country-list .country-name {
+  color: rgba(255,255,255,0.80) !important;
+}
+
+.react-tel-input .country-list .dial-code {
+  color: rgba(255,255,255,0.35) !important;
+}
+
+.react-tel-input .search-box {
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255,255,255,0.10) !important;
+  color: #fff !important;
+  border-radius: 8px !important;
+}
+
+.react-tel-input .search-emoji {
+  display: none;
+}
+
+.react-tel-input input::placeholder {
+  color: rgba(255,255,255,0.25) !important;
+}
+
+.react-tel-input input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0px 1000px #1a1a1a inset !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

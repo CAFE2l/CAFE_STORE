@@ -9,11 +9,15 @@ import {
   Palette,
   Globe,
   Shield,
+  QrCode,
+  Receipt,
+  Wallet,
 } from 'lucide-react';
 import { SettingsCard } from '@/components/admin/settings/SettingsCard';
 import { SettingsInput, SettingsTextarea, SettingsSelect } from '@/components/admin/settings/SettingsInput';
-import { SettingsToggle } from '@/components/admin/settings/SettingsToggle';
+import { SettingsToggle } from '@/components/admin/ui/SettingsToggle';
 import { SaveButton, type SaveStatus } from '@/components/admin/settings/SaveButton';
+import { PhoneInputField } from '@/components/ui/PhoneInputField';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -39,6 +43,51 @@ type SectionId = (typeof SECTIONS)[number]['id'];
 
 function clamp(v: number, min: number, max: number) {
   return Math.min(max, Math.max(min, v));
+}
+
+type PaymentToggleProps = {
+  icon: React.ReactNode;
+  label: string;
+  description: string;
+  checked: boolean;
+  onChange: (value: boolean) => void;
+};
+
+function PaymentMethodToggle({ icon, label, description, checked, onChange }: PaymentToggleProps) {
+  return (
+    <button
+      type="button"
+      onClick={() => onChange(!checked)}
+      className={`flex items-center gap-4 rounded-xl border p-4 text-left transition-all duration-200 ${
+        checked
+          ? 'border-orange-500/25 bg-orange-500/[0.07] shadow-[0_0_20px_rgba(249,115,22,0.08)] hover:bg-orange-500/[0.10]'
+          : 'border-white/[0.07] bg-white/[0.03] hover:border-white/[0.12] hover:bg-white/[0.06]'
+      }`}
+    >
+      <div
+        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors ${
+          checked ? 'bg-orange-500/20 text-orange-400' : 'bg-white/[0.05] text-zinc-500'
+        }`}
+      >
+        {icon}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className={`text-sm font-semibold ${checked ? 'text-orange-200' : 'text-zinc-300'}`}>{label}</p>
+        <p className={`mt-0.5 text-xs ${checked ? 'text-orange-300/60' : 'text-zinc-500'}`}>{description}</p>
+      </div>
+      <div
+        className={`relative h-6 w-11 shrink-0 rounded-full transition-all duration-300 ${
+          checked ? 'bg-orange-500' : 'bg-white/[0.10]'
+        }`}
+      >
+        <span
+          className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white transition-all duration-300 shadow ${
+            checked ? 'translate-x-5' : 'translate-x-0'
+          }`}
+        />
+      </div>
+    </button>
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -185,13 +234,11 @@ export default function SettingsPage() {
               value={(settings.storeEmail as string) ?? ''}
               onChange={(e) => patch('storeEmail', e.target.value)}
             />
-            <SettingsInput
+            <PhoneInputField
               label="WhatsApp / Suporte"
-              name="whatsappNumber"
-              type="tel"
               value={(settings.whatsappNumber as string) ?? ''}
-              onChange={(e) => patch('whatsappNumber', e.target.value)}
-              hint="Com DDD. Ex: 5541999999999"
+              onChange={(v) => patch('whatsappNumber', v)}
+              hint="Selecione o país e digite o número. Salvo automaticamente com código do país."
             />
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               <SettingsInput
@@ -241,12 +288,36 @@ export default function SettingsPage() {
               hint={settings.mercadoPagoAccessToken === '****' ? 'Token já configurado. Digite um novo valor para substituir.' : undefined}
             />
             <div className="border-t border-white/10 pt-4">
-              <p className="mb-3 text-sm font-medium text-zinc-300">Métodos ativos</p>
+              <p className="mb-3 text-sm font-medium text-zinc-300">Métodos de pagamento ativos</p>
               <div className="space-y-3">
-                <SettingsToggle label="Pix" value={(settings.acceptPix as boolean) ?? true} onChange={(v) => patch('acceptPix', v)} />
-                <SettingsToggle label="Cartão de crédito" value={(settings.acceptCreditCard as boolean) ?? true} onChange={(v) => patch('acceptCreditCard', v)} />
-                <SettingsToggle label="Boleto" value={(settings.acceptBoleto as boolean) ?? true} onChange={(v) => patch('acceptBoleto', v)} />
-                <SettingsToggle label="PayPal" value={(settings.acceptPayPal as boolean) ?? false} onChange={(v) => patch('acceptPayPal', v)} />
+                <PaymentMethodToggle
+                  icon={<QrCode className="h-5 w-5" />}
+                  label="Pix"
+                  description="Transferência instantânea — aprovação em segundos."
+                  checked={(settings.acceptPix as boolean) ?? true}
+                  onChange={(v) => patch('acceptPix', v)}
+                />
+                <PaymentMethodToggle
+                  icon={<CreditCard className="h-5 w-5" />}
+                  label="Cartão de crédito"
+                  description="Parcelamento em até 12x com juros da operadora."
+                  checked={(settings.acceptCreditCard as boolean) ?? true}
+                  onChange={(v) => patch('acceptCreditCard', v)}
+                />
+                <PaymentMethodToggle
+                  icon={<Receipt className="h-5 w-5" />}
+                  label="Boleto"
+                  description="Pagamento com vencimento em até 3 dias úteis."
+                  checked={(settings.acceptBoleto as boolean) ?? true}
+                  onChange={(v) => patch('acceptBoleto', v)}
+                />
+                <PaymentMethodToggle
+                  icon={<Wallet className="h-5 w-5" />}
+                  label="PayPal"
+                  description="Carteira digital internacional."
+                  checked={(settings.acceptPayPal as boolean) ?? false}
+                  onChange={(v) => patch('acceptPayPal', v)}
+                />
               </div>
             </div>
             <SettingsSelect

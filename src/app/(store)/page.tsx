@@ -19,6 +19,19 @@ export default async function HomePage() {
   const session = await auth();
   const userId = session?.user?.id;
 
+  const now = new Date();
+  const banners = await prisma.banner.findMany({
+    where: {
+      active: true,
+      AND: [
+        { OR: [{ startsAt: null }, { startsAt: { lte: now } }] },
+        { OR: [{ endsAt: null }, { endsAt: { gte: now } }] },
+      ],
+    },
+    orderBy: { position: 'asc' },
+    select: { id: true, title: true, subtitle: true, imageUrl: true, linkUrl: true, linkLabel: true },
+  });
+
   const [featuredProducts, userWishlist, userLegacyFavorites] = await Promise.all([
     getFeaturedProducts(8),
     userId
@@ -111,7 +124,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <BannerCarousel />
+      <BannerCarousel banners={banners} />
 
       <section className="container-page py-16">
         <div>

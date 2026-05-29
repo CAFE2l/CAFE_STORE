@@ -220,6 +220,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           description={product.description}
           productName={product.name}
           reviews={product.reviews}
+          productId={product.id}
         />
 
         {/* Related Products */}

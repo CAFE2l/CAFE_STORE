@@ -2,11 +2,13 @@
 
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { FormEvent, useMemo, useState } from 'react';
+import { FormEvent, useMemo, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Input } from '@/components/ui/Input';
 import { useCartStore } from '@/store/cart';
+import { fetchAddressByCep } from '@/lib/cep';
+import { cn } from '@/lib/utils';
 
 type CheckoutResponse = {
   success: boolean;
@@ -62,6 +64,36 @@ const currencyFormatter = new Intl.NumberFormat('pt-BR', {
 
 const shipping = 0;
 
+const STEP_ICONS = ['1', '2', '3', '✓'];
+
+function StepIndicator({ step, current }: { step: number; current: number }) {
+  const isComplete = current > step;
+  const isActive = current === step;
+  return (
+    <span
+      className={cn(
+        'grid size-8 shrink-0 place-items-center rounded-full text-xs font-bold transition-all',
+        isComplete && 'bg-emerald-500/20 text-emerald-400',
+        isActive && 'bg-orange-500/20 text-orange-400 ring-2 ring-orange-500/30',
+        !isComplete && !isActive && 'bg-zinc-800 text-zinc-600',
+      )}
+    >
+      {isComplete ? '✓' : step}
+    </span>
+  );
+}
+
+function StepConnector({ active }: { active: boolean }) {
+  return (
+    <div
+      className={cn(
+        'h-px flex-1 transition-colors',
+        active ? 'bg-emerald-500/40' : 'bg-zinc-800',
+      )}
+    />
+  );
+}
+
 export function CheckoutPageClient() {
   const router = useRouter();
   const { clearCart, items, total } = useCartStore();
@@ -69,6 +101,7 @@ export function CheckoutPageClient() {
   const [form, setForm] = useState<CheckoutForm>(initialForm);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [cepLoading, setCepLoading] = useState(false);
   const finalTotal = useMemo(() => (items.length > 0 ? total + shipping : 0), [items.length, total]);
 
   function updateForm<K extends keyof CheckoutForm>(key: K, value: CheckoutForm[K]) {
@@ -77,6 +110,24 @@ export function CheckoutPageClient() {
       [key]: value,
     }));
   }
+
+  const handleCepBlur = useCallback(async () => {
+    const raw = form.zip;
+    const cleaned = raw.replace(/\D/g, '');
+    if (cleaned.length !== 8) return;
+    setCepLoading(true);
+    const address = await fetchAddressByCep(raw);
+    if (address) {
+      setForm((prev) => ({
+        ...prev,
+        street: prev.street || address.street,
+        neighborhood: prev.neighborhood || address.neighborhood,
+        city: prev.city || address.city,
+        state: prev.state || address.state,
+      }));
+    }
+    setCepLoading(false);
+  }, [form.zip]);
 
   function validateCurrentStep() {
     if (step === 1 && (!form.name || !form.email || !form.phone)) {
@@ -87,7 +138,7 @@ export function CheckoutPageClient() {
       step === 2 &&
       (!form.street || !form.number || !form.neighborhood || !form.city || !form.state || !form.zip)
     ) {
-      return 'Preencha os dados de contato obrigatorios.';
+      return 'Preencha todos os dados de endereço.';
     }
 
     return null;
@@ -95,12 +146,10 @@ export function CheckoutPageClient() {
 
   function goNext() {
     const validationError = validateCurrentStep();
-
     if (validationError) {
       setError(validationError);
       return;
     }
-
     setError(null);
     setStep((current) => Math.min(4, current + 1));
   }
@@ -112,15 +161,9 @@ export function CheckoutPageClient() {
 
     const response = await fetch('/api/checkout', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        customer: {
-          name: form.name,
-          email: form.email,
-          phone: form.phone,
-        },
+        customer: { name: form.name, email: form.email, phone: form.phone },
         address: {
           street: form.street,
           number: form.number,
@@ -143,7 +186,7 @@ export function CheckoutPageClient() {
     setLoading(false);
 
     if (!result.success || !result.data) {
-      setError(result.error ?? 'Nao foi possivel criar o pedido.');
+      setError(result.error ?? 'Não foi possível criar o pedido.');
       return;
     }
 
@@ -178,7 +221,7 @@ export function CheckoutPageClient() {
     return (
       <EmptyState
         title="Nada para finalizar"
-        subtitle="Adicione um apoio simbolico ao carrinho antes de continuar."
+        subtitle="Adicione um apoio simbólico ao carrinho antes de continuar."
         action={{ href: '/products', label: 'Ver apoios' }}
       />
     );
@@ -186,104 +229,166 @@ export function CheckoutPageClient() {
 
   return (
     <form className="grid gap-8 lg:grid-cols-[1fr_24rem]" onSubmit={handleSubmit}>
-      <section className="rounded-card border border-border-subtle bg-background-card p-5">
-        <div className="mb-6 flex items-center gap-2">
-          {[
-            { label: 'Dados', step: 1 },
-            { label: 'Contato', step: 2 },
-            { label: 'Pagamento', step: 3 },
-            { label: 'Confirmação', step: 4 },
-          ].map((item, index) => (
-            <button
-              key={item.label}
-              type="button"
-              className={`flex items-center gap-2 text-sm font-medium transition-all ${
-                step > item.step
-                  ? 'text-status-success'
-                  : step === item.step
-                    ? 'text-cafe-orange-500'
-                    : 'text-text-muted'
-              }`}
-              onClick={() => setStep(item.step)}
-            >
-              <span className={`grid size-7 place-items-center rounded-full text-xs font-bold ${
-                step > item.step
-                  ? 'bg-status-success/15 text-status-success'
-                  : step === item.step
-                    ? 'bg-cafe-orange-500/15 text-cafe-orange-500'
-                    : 'bg-cafe-dark-700 text-text-muted'
-              }`}>
-                {step > item.step ? '✓' : item.step}
-              </span>
-              <span className={`hidden sm:inline ${step === item.step ? 'text-text-primary' : ''}`}>{item.label}</span>
-              {index < 3 ? <span className="hidden h-px w-6 bg-border-subtle sm:block" /> : null}
-            </button>
+      {/* Main content */}
+      <section className="rounded-card border border-border-subtle bg-background-card p-6">
+        {/* Header */}
+        <div className="mb-8">
+          <h2 className="font-display text-xl font-semibold text-text-primary">
+            {step === 1 && 'Dados pessoais'}
+            {step === 2 && 'Endereço'}
+            {step === 3 && 'Pagamento'}
+            {step === 4 && 'Confirmação'}
+          </h2>
+          <p className="mt-1 text-sm text-text-muted">
+            {step === 1 && 'Informe seus dados para contato.'}
+            {step === 2 && 'Preencha o endereço de contato.'}
+            {step === 3 && 'Escolha como prefere pagar.'}
+            {step === 4 && 'Revise os dados antes de finalizar.'}
+          </p>
+        </div>
+
+        {/* Stepper */}
+        <div className="mb-8 flex items-center gap-2">
+          {[1, 2, 3, 4].map((s, i) => (
+            <div key={s} className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setStep(s)}
+                className="flex items-center gap-2"
+              >
+                <StepIndicator step={s} current={step} />
+                <span
+                  className={cn(
+                    'hidden text-xs font-medium sm:inline',
+                    step === s ? 'text-text-primary' : 'text-text-muted',
+                  )}
+                >
+                  {['Dados', 'Endereço', 'Pagamento', 'Revisão'][i]}
+                </span>
+              </button>
+              {i < 3 ? <StepConnector active={step > s} /> : null}
+            </div>
           ))}
         </div>
 
-        {step === 1 ? (
-          <div className="grid gap-4">
-            <Input label="Nome" value={form.name} onChange={(event) => updateForm('name', event.target.value)} />
+        {/* Step 1 — Personal Data */}
+        {step === 1 && (
+          <div className="space-y-5">
+            <Input
+              label="Nome completo"
+              placeholder="Seu nome"
+              value={form.name}
+              onChange={(event) => updateForm('name', event.target.value)}
+            />
             <Input
               label="E-mail"
               type="email"
+              placeholder="seu@email.com"
               value={form.email}
               onChange={(event) => updateForm('email', event.target.value)}
             />
-            <Input label="Telefone" value={form.phone} onChange={(event) => updateForm('phone', event.target.value)} />
+            <Input
+              label="Telefone"
+              placeholder="(11) 99999-9999"
+              value={form.phone}
+              onChange={(event) => updateForm('phone', event.target.value)}
+            />
           </div>
-        ) : null}
+        )}
 
-        {step === 2 ? (
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Input
-              label="Endereco de contato"
-              className="sm:col-span-2"
-              value={form.street}
-              onChange={(event) => updateForm('street', event.target.value)}
-            />
-            <Input label="Numero" value={form.number} onChange={(event) => updateForm('number', event.target.value)} />
-            <Input
-              label="Complemento"
-              value={form.complement}
-              onChange={(event) => updateForm('complement', event.target.value)}
-            />
-            <Input
-              label="Bairro"
-              value={form.neighborhood}
-              onChange={(event) => updateForm('neighborhood', event.target.value)}
-            />
-            <Input label="Cidade" value={form.city} onChange={(event) => updateForm('city', event.target.value)} />
+        {/* Step 2 — Address with CEP Autocomplete */}
+        {step === 2 && (
+          <div className="space-y-5">
+            <div className="relative">
+              <Input
+                label="CEP"
+                placeholder="00000-000"
+                maxLength={9}
+                value={form.zip}
+                onChange={(e) => {
+                  const digits = e.target.value.replace(/\D/g, '').slice(0, 8);
+                  const masked = digits.length > 5 ? `${digits.slice(0, 5)}-${digits.slice(5)}` : digits;
+                  updateForm('zip', masked);
+                }}
+                onBlur={handleCepBlur}
+              />
+              {cepLoading && (
+                <span className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-orange-500 border-t-transparent" />
+                </span>
+              )}
+            </div>
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+              <Input
+                label="Rua"
+                placeholder="Nome da rua"
+                className="sm:col-span-2"
+                value={form.street}
+                onChange={(event) => updateForm('street', event.target.value)}
+              />
+              <Input
+                label="Número"
+                placeholder="123"
+                value={form.number}
+                onChange={(event) => updateForm('number', event.target.value)}
+              />
+            </div>
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+              <Input
+                label="Complemento"
+                placeholder="Apto, bloco..."
+                value={form.complement}
+                onChange={(event) => updateForm('complement', event.target.value)}
+              />
+              <Input
+                label="Bairro"
+                placeholder="Bairro"
+                value={form.neighborhood}
+                onChange={(event) => updateForm('neighborhood', event.target.value)}
+              />
+              <Input
+                label="Cidade"
+                placeholder="Cidade"
+                value={form.city}
+                onChange={(event) => updateForm('city', event.target.value)}
+              />
+            </div>
             <Input
               label="Estado"
+              placeholder="UF"
               maxLength={2}
+              className="max-w-[100px] uppercase"
               value={form.state}
-              onChange={(event) => updateForm('state', event.target.value)}
+              onChange={(event) => updateForm('state', event.target.value.toUpperCase())}
             />
-            <Input label="CEP" value={form.zip} onChange={(event) => updateForm('zip', event.target.value)} />
           </div>
-        ) : null}
+        )}
 
-        {step === 3 ? (
-          <fieldset className="grid gap-3">
-            <legend className="mb-2 text-sm font-semibold text-text-primary">Método de pagamento</legend>
+        {/* Step 3 — Payment */}
+        {step === 3 && (
+          <fieldset className="space-y-3">
+            <legend className="mb-4 text-sm font-semibold text-text-primary">Método de pagamento</legend>
             {[
-              { value: 'pix', label: 'Pix', desc: 'Pagamento instantâneo' },
-              { value: 'mercadopago', label: 'Cartão de crédito', desc: 'Até 12x com Mercado Pago' },
-              { value: 'paypal', label: 'PayPal', desc: 'Internacional' },
+              { value: 'pix' as const, label: 'Pix', desc: 'Pagamento instantâneo — aprovação em segundos' },
+              { value: 'mercadopago' as const, label: 'Cartão de crédito', desc: 'Até 12x com Mercado Pago' },
+              { value: 'paypal' as const, label: 'PayPal', desc: 'Carteira digital internacional' },
             ].map((method) => (
-              <label key={method.value} className={`flex cursor-pointer items-center gap-4 rounded-button border p-4 text-sm transition ${
-                form.paymentMethod === method.value
-                  ? 'border-cafe-orange-500 bg-cafe-orange-500/5'
-                  : 'border-border-subtle hover:border-cafe-orange-500/40'
-              }`}>
+              <label
+                key={method.value}
+                className={cn(
+                  'flex cursor-pointer items-center gap-4 rounded-xl border p-4 text-sm transition-all duration-200',
+                  form.paymentMethod === method.value
+                    ? 'border-orange-500/30 bg-orange-500/[0.06]'
+                    : 'border-border-subtle hover:border-orange-500/20 hover:bg-white/[0.02]',
+                )}
+              >
                 <input
                   type="radio"
                   name="paymentMethod"
                   value={method.value}
                   checked={form.paymentMethod === method.value}
-                  onChange={() => updateForm('paymentMethod', method.value as CheckoutForm['paymentMethod'])}
-                  className="text-cafe-orange-500 focus:ring-cafe-orange-500/30"
+                  onChange={() => updateForm('paymentMethod', method.value)}
+                  className="size-4 accent-orange-500"
                 />
                 <span>
                   <span className="block font-medium text-text-primary">{method.label}</span>
@@ -292,44 +397,49 @@ export function CheckoutPageClient() {
               </label>
             ))}
           </fieldset>
-        ) : null}
+        )}
 
-        {step === 4 ? (
-          <div className="grid gap-4">
-            <div className="rounded-lg border border-cafe-orange-500/30 bg-cafe-orange-500/10 p-4 text-sm leading-6 text-text-secondary">
+        {/* Step 4 — Confirmation */}
+        {step === 4 && (
+          <div className="space-y-4">
+            <div className="rounded-xl border border-orange-500/20 bg-orange-500/[0.06] p-4 text-sm leading-6 text-text-secondary">
               <p className="mb-1 font-semibold text-text-primary">Aviso sobre o apoio</p>
               <p>
-                As imagens dos itens sao ilustrativas. Este pedido representa uma doacao simbolica para apoiar
-                o projeto CAFÉ STORE e nao gera envio de produto fisico.
+                As imagens dos itens são ilustrativas. Este pedido representa uma doação simbólica
+                para apoiar o projeto CAFÉ STORE e não gera envio de produto físico.
               </p>
             </div>
-            <div className="rounded-lg bg-cafe-dark-700 p-4 text-sm text-text-secondary">
-              <p className="mb-2 font-semibold text-text-primary">Dados pessoais</p>
-              <p>{form.name}</p>
-              <p>{form.email}</p>
-              <p>{form.phone}</p>
-            </div>
-            <div className="rounded-lg bg-cafe-dark-700 p-4 text-sm text-text-secondary">
-              <p className="mb-2 font-semibold text-text-primary">Contato informado</p>
-              <p>{form.street}, {form.number} {form.complement ? `- ${form.complement}` : ''}</p>
-              <p>{form.neighborhood} - {form.city}/{form.state.toUpperCase()}</p>
-              <p>CEP: {form.zip}</p>
-            </div>
-            <div className="rounded-lg bg-cafe-dark-700 p-4 text-sm text-text-secondary">
-              <p className="mb-2 font-semibold text-text-primary">Pagamento</p>
-              <p className="capitalize">{form.paymentMethod === 'pix' ? 'Pix' : form.paymentMethod === 'mercadopago' ? 'Cartão de crédito (Mercado Pago)' : 'PayPal'}</p>
+            <div className="space-y-3">
+              <ConfirmationBlock title="Dados pessoais">
+                <p>{form.name}</p>
+                <p>{form.email}</p>
+                <p>{form.phone}</p>
+              </ConfirmationBlock>
+              <ConfirmationBlock title="Endereço">
+                <p>{form.street}, {form.number}{form.complement ? ` - ${form.complement}` : ''}</p>
+                <p>{form.neighborhood} — {form.city}/{form.state.toUpperCase()}</p>
+                <p>CEP: {form.zip}</p>
+              </ConfirmationBlock>
+              <ConfirmationBlock title="Pagamento">
+                <p className="capitalize">
+                  {form.paymentMethod === 'pix' ? 'Pix' : form.paymentMethod === 'mercadopago' ? 'Cartão de crédito (Mercado Pago)' : 'PayPal'}
+                </p>
+              </ConfirmationBlock>
             </div>
           </div>
+        )}
+
+        {error ? (
+          <p className="mt-6 rounded-lg bg-status-error/10 px-4 py-3 text-sm text-status-error">{error}</p>
         ) : null}
 
-        {error ? <p className="mt-5 text-sm text-status-error">{error}</p> : null}
-
+        {/* Navigation buttons */}
         <div className="mt-8 flex flex-wrap gap-3">
-          {step > 1 ? (
-            <Button type="button" variant="ghost" onClick={() => setStep((current) => Math.max(1, current - 1))}>
+          {step > 1 && (
+            <Button type="button" variant="ghost" onClick={() => setStep((c) => Math.max(1, c - 1))}>
               Voltar
             </Button>
-          ) : null}
+          )}
           {step < 4 ? (
             <Button type="button" onClick={goNext}>
               Continuar
@@ -342,45 +452,66 @@ export function CheckoutPageClient() {
         </div>
       </section>
 
-      <aside className="sticky top-28 h-fit rounded-card border border-border-subtle bg-background-card p-5">
-        <h2 className="font-display text-xl font-semibold text-text-primary">Seu apoio</h2>
-        <div className="mt-5 grid gap-3">
-          {items.map((item) => (
-            <div key={item.id} className="grid grid-cols-[3rem_1fr_auto] gap-3">
-              <div className="relative aspect-square overflow-hidden rounded-lg bg-cafe-dark-700">
-                <Image src={item.image} alt={item.name} fill sizes="48px" className="object-cover" />
+      {/* Order Summary Sidebar */}
+      <aside className="sticky top-28 h-fit space-y-5">
+        <div className="rounded-card border border-border-subtle bg-background-card p-5">
+          <h3 className="font-display text-lg font-semibold text-text-primary">Seu apoio</h3>
+          <div className="mt-5 space-y-4">
+            {items.map((item) => (
+              <div key={item.id} className="flex gap-3">
+                <div className="relative size-16 shrink-0 overflow-hidden rounded-lg bg-cafe-dark-700">
+                  <Image src={item.image} alt={item.name} fill sizes="64px" className="object-cover" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-text-primary">{item.name}</p>
+                  <p className="text-xs text-text-muted">Qtd. {item.quantity}</p>
+                  <p className="mt-1 text-sm font-medium text-text-secondary">
+                    {currencyFormatter.format(item.price * item.quantity)}
+                  </p>
+                </div>
               </div>
-              <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-text-primary">{item.name}</p>
-                <p className="text-xs text-text-muted">Qtd. {item.quantity}</p>
-              </div>
-              <p className="text-sm text-text-secondary">{currencyFormatter.format(item.price * item.quantity)}</p>
+            ))}
+          </div>
+
+          {/* Coupon */}
+          <div className="mt-5">
+            <label className="mb-1.5 block text-xs font-medium text-text-muted">Cupom de desconto</label>
+            <div className="flex gap-2">
+              <input
+                className="min-w-0 flex-1 rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-white placeholder:text-zinc-600 transition-colors focus:border-orange-500/50 focus:outline-none"
+                placeholder="Código"
+                value={form.couponCode}
+                onChange={(e) => updateForm('couponCode', e.target.value.toUpperCase())}
+              />
             </div>
-          ))}
+          </div>
+
+          {/* Totals */}
+          <dl className="mt-5 space-y-2 border-t border-border-subtle pt-4 text-sm">
+            <div className="flex justify-between text-text-secondary">
+              <dt>Subtotal</dt>
+              <dd>{currencyFormatter.format(total)}</dd>
+            </div>
+            <div className="flex justify-between text-text-secondary">
+              <dt>Entrega</dt>
+              <dd>Não se aplica</dd>
+            </div>
+            <div className="flex justify-between border-t border-border-subtle pt-3 text-base font-bold text-text-primary">
+              <dt>Total</dt>
+              <dd>{currencyFormatter.format(finalTotal)}</dd>
+            </div>
+          </dl>
         </div>
-        <div className="mt-4 flex gap-2">
-          <input
-            className="flex-1 rounded-xl border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-white placeholder:text-zinc-600 transition-colors focus:border-brand/60 focus:outline-none"
-            placeholder="Cupom de desconto"
-            value={form.couponCode}
-            onChange={(e) => updateForm('couponCode', e.target.value.toUpperCase())}
-          />
-        </div>
-        <dl className="mt-4 grid gap-2 border-t border-border-subtle pt-4 text-sm">
-          <div className="flex justify-between text-text-secondary">
-            <dt>Subtotal</dt>
-            <dd>{currencyFormatter.format(total)}</dd>
-          </div>
-          <div className="flex justify-between text-text-secondary">
-            <dt>Entrega</dt>
-            <dd>Nao se aplica</dd>
-          </div>
-          <div className="flex justify-between border-t border-border-subtle pt-2 text-base font-bold text-text-primary">
-            <dt>Total</dt>
-            <dd>{currencyFormatter.format(finalTotal)}</dd>
-          </div>
-        </dl>
       </aside>
     </form>
+  );
+}
+
+function ConfirmationBlock({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="rounded-lg bg-cafe-dark-700 p-4 text-sm text-text-secondary">
+      <p className="mb-2 font-semibold text-text-primary">{title}</p>
+      {children}
+    </div>
   );
 }
