@@ -1,9 +1,10 @@
 'use client';
 
 import type { ProjectBriefing, BriefingStatus } from '@prisma/client';
-import { X, MessageCircle, ExternalLink } from 'lucide-react';
+import { X, ExternalLink } from 'lucide-react';
 import { dateTime } from '@/lib/admin/formatters';
 import { generateWhatsAppUrl } from '@/lib/whatsapp';
+import { WhatsappIcon } from '@/components/ui/WhatsappIcon';
 
 type Props = {
   briefing: ProjectBriefing;
@@ -139,7 +140,7 @@ export function BriefingDetailsDialog({ briefing, onClose }: Props) {
             rel="noopener noreferrer"
             className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-brand px-5 text-sm font-semibold text-white shadow-led-brand transition hover:bg-brand-light"
           >
-            <MessageCircle className="h-4 w-4" />
+            <WhatsappIcon className="h-4 w-4" />
             Abrir no WhatsApp
             <ExternalLink className="h-3 w-3" />
           </a>

@@ -1,10 +1,12 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, MessageCircle, ShoppingBag } from 'lucide-react';
+import { ArrowLeft, ShoppingBag } from 'lucide-react';
 import { prisma } from '@/lib/prisma';
 import { isValidService, getServiceName, getServicePrice, getServiceDeadline } from '@/lib/services';
 import { dateTime } from '@/lib/admin/formatters';
 import { WHATSAPP } from '@/lib/servicos-data';
+import { generateWhatsAppUrl } from '@/lib/whatsapp';
+import { CheckoutActions } from '@/components/services/payment/CheckoutActions';
 
 type Props = {
   params: { slug: string };
@@ -20,6 +22,7 @@ export default async function CheckoutPage({ params, searchParams }: Props) {
 
   const serviceName = getServiceName(slug);
   const price = getServicePrice(slug);
+  const amount = parseServiceAmount(price) || 1200;
   const deadline = getServiceDeadline(slug);
 
   let briefing = null;
@@ -104,32 +107,54 @@ export default async function CheckoutPage({ params, searchParams }: Props) {
             </div>
           ) : null}
 
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <a
-              href={WHATSAPP}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-brand/40 bg-brand/10 px-6 text-sm font-semibold text-brand transition-all duration-300 hover:bg-brand hover:text-white hover:shadow-led-brand"
-            >
-              <MessageCircle className="h-5 w-5" />
-              Falar no WhatsApp
-            </a>
-            <button
-              type="button"
-              disabled
-              className="inline-flex h-12 flex-1 cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-white/[0.04] px-6 text-sm font-semibold text-white/30 border border-white/10"
-              title="Pagamento online em breve"
-            >
-              Finalizar solicitação
-              <span className="rounded bg-white/10 px-2 py-0.5 text-[10px] uppercase tracking-wider">Em breve</span>
-            </button>
-          </div>
+          <CheckoutActions
+            whatsappHref={WHATSAPP}
+            payment={{
+              amount,
+              description: serviceName,
+              briefing: {
+                id: briefing?.id,
+                name: briefing?.name || 'Cliente Cafe Store',
+                email: briefing?.email || 'cliente@cafestore.local',
+                whatsapp: briefing?.whatsapp || '',
+              },
+              whatsappUrl: briefing
+                ? generateWhatsAppUrl({
+                    name: briefing.name,
+                    email: briefing.email,
+                    whatsapp: briefing.whatsapp,
+                    serviceType: briefing.serviceSlug,
+                    serviceName: briefing.serviceName,
+                    projectDescription: briefing.projectDescription,
+                    budget: briefing.budget || undefined,
+                    deadline: briefing.deadline || undefined,
+                    companyName: briefing.companyName || undefined,
+                    mainGoal: briefing.mainGoal || undefined,
+                    targetAudience: briefing.targetAudience || undefined,
+                    references: briefing.references || undefined,
+                    desiredFeatures: Array.isArray(briefing.desiredFeatures) ? briefing.desiredFeatures.map(String) : [],
+                    hasDomain: briefing.hasDomain || undefined,
+                    hasHosting: briefing.hasHosting || undefined,
+                    hasBranding: briefing.hasBranding || undefined,
+                    preferredContact: briefing.preferredContact || undefined,
+                    extraNotes: briefing.extraNotes || undefined,
+                  })
+                : WHATSAPP,
+              mpPublicKey: process.env.VITE_MP_PUBLIC_KEY || process.env.NEXT_PUBLIC_MP_PUBLIC_KEY || process.env.MP_PUBLIC_KEY,
+              paypalClientId: process.env.VITE_PAYPAL_CLIENT_ID || process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || process.env.PAYPAL_CLIENT_ID,
+            }}
+          />
 
           <p className="text-center text-xs text-white/30">
-            Pagamento online será integrado em breve. Por enquanto, o briefing é enviado via WhatsApp.
+            Pagamento seguro por Pix, Mercado Pago ou PayPal. O briefing também será enviado pelo WhatsApp após a confirmação.
           </p>
         </div>
       </div>
     </main>
   );
+}
+
+function parseServiceAmount(price: string) {
+  const numeric = Number(price.replace(/[^\d]/g, ''));
+  return Number.isFinite(numeric) ? numeric : 0;
 }

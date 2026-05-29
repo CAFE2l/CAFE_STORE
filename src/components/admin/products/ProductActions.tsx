@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { Pencil, Eye, Trash2 } from 'lucide-react';
+import { Pencil, Trash2, ExternalLink } from 'lucide-react';
 import { deleteProductAction, toggleProductStatusAction } from '@/lib/admin/actions';
-import { useRouter } from 'next/navigation';
-import { cn } from '@/lib/utils';
+import Link from 'next/link';
+import { Toast } from '@/components/ui/Toast';
 
 type Props = {
   product: { id: string; slug: string; name: string; status: string };
@@ -14,23 +14,9 @@ export default function ProductActions({ product }: Props) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [loading, startTransition] = useTransition();
   const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
-  const router = useRouter();
 
   function showToast(type: 'success' | 'error', message: string) {
     setToast({ type, message });
-    setTimeout(() => setToast(null), 3200);
-  }
-
-  function handleEdit() {
-    router.push(`/admin/produtos/${product.id}/edit`);
-  }
-
-  function handleView() {
-    window.open(`/products/${product.slug}`, '_blank');
-  }
-
-  function handleDeleteConfirm() {
-    setConfirmOpen(true);
   }
 
   function removeRowWithAnimation() {
@@ -50,7 +36,7 @@ export default function ProductActions({ product }: Props) {
         } else {
           showToast('error', result.message || 'Erro ao deletar. Tente novamente.');
         }
-      } catch (err) {
+      } catch {
         showToast('error', 'Erro ao deletar. Tente novamente.');
       }
     });
@@ -61,7 +47,7 @@ export default function ProductActions({ product }: Props) {
       try {
         const result = await toggleProductStatusAction(product.id);
         showToast(result.ok ? 'success' : 'error', result.message);
-      } catch (err) {
+      } catch {
         showToast('error', 'Erro ao alterar status.');
       }
     });
@@ -70,39 +56,36 @@ export default function ProductActions({ product }: Props) {
   return (
     <div className="flex items-center gap-2">
       {toast ? (
-        <div className={cn(
-          'fixed right-5 top-20 z-[90] rounded-xl border px-4 py-3 text-sm shadow-2xl backdrop-blur',
-          toast.type === 'success' ? 'border-emerald-400/20 bg-emerald-500/15 text-emerald-100' : 'border-red-400/20 bg-red-500/15 text-red-100',
-        )}>
-          {toast.message}
-        </div>
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
       ) : null}
 
-      <button
-        type="button"
+      <Link
+        href={`/admin/produtos/${product.id}/editar`}
         title="Editar produto"
         aria-label="Editar produto"
-        onClick={handleEdit}
         className="grid h-8 w-8 place-items-center rounded-md border border-white/8 bg-white/[0.06] text-zinc-300 transition hover:bg-[rgba(249,115,22,0.15)] hover:text-orange-400"
       >
         <Pencil className="h-4 w-4" />
-      </button>
+      </Link>
 
-      <button
-        type="button"
-        title="Ver na loja"
-        aria-label="Ver na loja"
-        onClick={handleView}
+      <Link
+        href={`/admin/produtos/${product.id}`}
+        title="Detalhes do produto"
+        aria-label="Detalhes do produto"
         className="grid h-8 w-8 place-items-center rounded-md border border-white/8 bg-white/[0.06] text-zinc-300 transition hover:bg-white/10 hover:text-white"
       >
-        <Eye className="h-4 w-4" />
-      </button>
+        <ExternalLink className="h-4 w-4" />
+      </Link>
 
       <button
         type="button"
         title="Deletar produto"
         aria-label="Deletar produto"
-        onClick={handleDeleteConfirm}
+        onClick={() => setConfirmOpen(true)}
         className="grid h-8 w-8 place-items-center rounded-md border border-white/8 bg-[rgba(239,68,68,0.08)] text-[rgba(239,68,68,0.6)] transition hover:bg-[rgba(239,68,68,0.15)] hover:text-[#ef4444]"
       >
         <Trash2 className="h-4 w-4" />
@@ -115,7 +98,11 @@ export default function ProductActions({ product }: Props) {
         onClick={toggleStatus}
         className="h-9 rounded-lg border border-white/10 px-3 text-xs text-zinc-300 hover:bg-white/5"
       >
-        Status
+        {loading ? (
+          <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+        ) : (
+          'Status'
+        )}
       </button>
 
       {confirmOpen ? (
@@ -142,7 +129,7 @@ export default function ProductActions({ product }: Props) {
               <button
                 type="button"
                 onClick={confirmDelete}
-                disabled={loading as unknown as boolean}
+                disabled={loading}
                 className="flex items-center gap-2 rounded-lg bg-[#ef4444] px-4 py-2 text-sm font-semibold text-white shadow-[0_4px_12px_rgba(239,68,68,0.3)] hover:bg-[#dc2626] disabled:opacity-60"
               >
                 <Trash2 className="h-4 w-4" />

@@ -1,13 +1,14 @@
 'use client';
 
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useEffect, useMemo, useState } from 'react';
+import { type FieldPath, type Resolver, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, ArrowRight, Check, Loader2 } from 'lucide-react';
 import { briefingSchema, type BriefingInput } from '@/lib/validations/project-briefing';
 import { createProjectBriefing } from '@/lib/actions/project-briefing';
 import { getServiceName } from '@/lib/services';
+import { SERVICES, normalizeServiceKey } from '@/data/services';
 import { BriefingStepPersonal } from '@/components/services/briefing-step-personal';
 import { BriefingStepProject } from '@/components/services/briefing-step-project';
 import { BriefingStepTechnical } from '@/components/services/briefing-step-technical';
@@ -32,17 +33,19 @@ export function BriefingForm({ serviceSlug }: Props) {
   const [submitted, setSubmitted] = useState(false);
   const [whatsappUrl, setWhatsappUrl] = useState('');
   const [briefingId, setBriefingId] = useState('');
+  const [completedSteps, setCompletedSteps] = useState<number[]>([]);
 
-  const serviceName = getServiceName(serviceSlug);
+  const initialService = useMemo(() => normalizeServiceKey(serviceSlug) ?? 'landing-pages', [serviceSlug]);
+  const serviceName = getServiceName(initialService);
 
   const form = useForm<BriefingInput>({
-    resolver: zodResolver(briefingSchema) as any,
+    resolver: zodResolver(briefingSchema) as Resolver<BriefingInput>,
     defaultValues: {
       name: '',
       email: '',
       whatsapp: '',
       companyName: '',
-      serviceType: serviceSlug,
+      serviceType: initialService,
       serviceName,
       budget: '',
       deadline: '',
@@ -59,10 +62,22 @@ export function BriefingForm({ serviceSlug }: Props) {
     },
   });
 
+  const watchedService = form.watch('serviceType');
+
+  useEffect(() => {
+    const normalized = normalizeServiceKey(serviceSlug) ?? 'landing-pages';
+    form.setValue('serviceType', normalized, { shouldDirty: false, shouldValidate: true });
+    form.setValue('serviceName', SERVICES[normalized].label, { shouldDirty: false });
+    form.setValue('budget', '', { shouldDirty: false });
+    form.setValue('deadline', '', { shouldDirty: false });
+    void form.trigger(['serviceType', 'budget', 'deadline']);
+  }, [form, serviceSlug]);
+
   async function handleNext() {
     const fields = getStepFields(step);
-    const output = await form.trigger(fields as any);
-    if (output) {
+    const isValid = await form.trigger(fields, { shouldFocus: true });
+    if (isValid) {
+      setCompletedSteps((current) => (current.includes(step) ? current : [...current, step]));
       setStep((s) => Math.min(s + 1, STEPS.length - 1));
     }
   }
@@ -72,6 +87,9 @@ export function BriefingForm({ serviceSlug }: Props) {
   }
 
   async function handleSubmit() {
+    const isValid = await form.trigger(undefined, { shouldFocus: true });
+    if (!isValid) return;
+
     setSubmitting(true);
     try {
       const data = form.getValues();
@@ -88,6 +106,13 @@ export function BriefingForm({ serviceSlug }: Props) {
       console.error('Submission error:', error);
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  function handleStepClick(nextStep: number) {
+    if (nextStep === step) return;
+    if (completedSteps.includes(nextStep) || nextStep < step) {
+      setStep(nextStep);
     }
   }
 
@@ -122,8 +147,21 @@ export function BriefingForm({ serviceSlug }: Props) {
     <div className="mx-auto max-w-3xl">
       <div className="mb-10">
         <div className="flex items-center justify-between gap-4">
-          {STEPS.map((s, i) => (
-            <div key={s.title} className="flex flex-1 items-center gap-2">
+          {STEPS.map((s, i) => {
+            const isComplete = completedSteps.includes(i);
+            const canClick = i !== step && (isComplete || i < step);
+            const isFuture = i > step && !isComplete;
+
+            return (
+            <button
+              type="button"
+              key={s.title}
+              onClick={() => handleStepClick(i)}
+              disabled={!canClick}
+              className={`flex flex-1 items-center gap-2 text-left transition ${
+                i === step ? 'cursor-default' : isFuture ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'
+              }`}
+            >
               <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold transition-all ${
                 i <= step
                   ? 'bg-brand text-white shadow-[0_0_12px_rgba(249,115,22,0.3)]'
@@ -137,8 +175,9 @@ export function BriefingForm({ serviceSlug }: Props) {
               {i < STEPS.length - 1 ? (
                 <div className={`ml-auto h-px flex-1 ${i < step ? 'bg-brand/50' : 'bg-white/10'}`} />
               ) : null}
-            </div>
-          ))}
+            </button>
+          );
+          })}
         </div>
 
         <div className="mt-2 text-center sm:hidden">
@@ -149,9 +188,9 @@ export function BriefingForm({ serviceSlug }: Props) {
 
       <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-xl sm:p-8">
         {step === 0 && <BriefingStepPersonal form={form} />}
-        {step === 1 && <BriefingStepProject form={form} serviceName={serviceName} />}
-        {step === 2 && <BriefingStepTechnical form={form} serviceSlug={serviceSlug} />}
-        {step === 3 && <BriefingReview data={form.getValues()} serviceName={serviceName} />}
+        {step === 1 && <BriefingStepProject form={form} />}
+        {step === 2 && <BriefingStepTechnical form={form} serviceSlug={watchedService} />}
+        {step === 3 && <BriefingReview data={form.getValues()} serviceName={getServiceName(watchedService)} />}
       </div>
 
       <div className="mt-6 flex items-center justify-between gap-4">
@@ -198,12 +237,12 @@ export function BriefingForm({ serviceSlug }: Props) {
   );
 }
 
-function getStepFields(step: number): (keyof BriefingInput)[] {
+function getStepFields(step: number): FieldPath<BriefingInput>[] {
   switch (step) {
     case 0:
       return ['name', 'email', 'whatsapp'];
     case 1:
-      return ['companyName', 'budget', 'deadline', 'projectDescription', 'mainGoal', 'targetAudience', 'references'];
+      return ['companyName', 'serviceType', 'budget', 'deadline', 'projectDescription', 'mainGoal', 'targetAudience', 'references'];
     case 2:
       return [
         'desiredFeatures', 'hasDomain', 'hasHosting', 'hasBranding', 'preferredContact', 'extraNotes',

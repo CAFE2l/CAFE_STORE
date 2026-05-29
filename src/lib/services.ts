@@ -1,36 +1,31 @@
-export const SERVICE_SLUGS = {
-  'landing-page': 'Landing Pages',
-  'site-profissional': 'Sites Profissionais',
-  'aplicacao-web-saas': 'Aplicações Web & SaaS',
-} as const;
+import { SERVICES, normalizeServiceKey, type ServiceKey } from '@/data/services';
 
-export type ServiceSlug = keyof typeof SERVICE_SLUGS;
+export const SERVICE_SLUGS = SERVICES;
+
+export type ServiceSlug = ServiceKey;
 
 export function getServiceName(slug: string): string {
-  return SERVICE_SLUGS[slug as ServiceSlug] || slug;
+  const serviceKey = normalizeServiceKey(slug);
+  return serviceKey ? SERVICES[serviceKey].label : slug;
 }
 
 export function getServicePrice(slug: string): string {
-  const prices: Record<string, string> = {
-    'landing-page': 'R$ 1.200',
-    'site-profissional': 'R$ 2.800',
-    'aplicacao-web-saas': 'Sob consulta',
-  };
-  return prices[slug] || 'Sob consulta';
+  const serviceKey = normalizeServiceKey(slug);
+  if (!serviceKey) return 'Sob consulta';
+
+  const price = SERVICES[serviceKey].precoMinimo;
+  return price ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(price) : 'Sob consulta';
 }
 
 export function getServiceDeadline(slug: string): string {
-  const deadlines: Record<string, string> = {
-    'landing-page': '5–7 dias úteis',
-    'site-profissional': '10–15 dias úteis',
-    'aplicacao-web-saas': 'sob consulta',
-  };
-  return deadlines[slug] || 'sob consulta';
+  const serviceKey = normalizeServiceKey(slug);
+  return serviceKey ? SERVICES[serviceKey].prazos[0] : 'sob consulta';
 }
 
 export function getServiceSpecificFields(slug: string): string[] {
+  const serviceKey = normalizeServiceKey(slug);
   const fields: Record<string, string[]> = {
-    'landing-page': [
+    'landing-pages': [
       'landingPageGoal',
       'landingPageProduct',
       'landingPageNeedsForm',
@@ -38,14 +33,14 @@ export function getServiceSpecificFields(slug: string): string[] {
       'landingPageNeedsLeadCapture',
       'landingPageNeedsEmailMarketing',
     ],
-    'site-profissional': [
+    'sites-profissionais': [
       'sitePagesCount',
       'sitePagesList',
       'siteNeedsAdmin',
       'siteNeedsBlog',
       'siteNeedsSeo',
     ],
-    'aplicacao-web-saas': [
+    'saas-webapp': [
       'appNeedsLogin',
       'appNeedsAdmin',
       'appNeedsDatabase',
@@ -55,9 +50,9 @@ export function getServiceSpecificFields(slug: string): string[] {
       'appMainFeatures',
     ],
   };
-  return fields[slug] || [];
+  return serviceKey ? fields[serviceKey] : [];
 }
 
 export function isValidService(slug: string): boolean {
-  return slug in SERVICE_SLUGS;
+  return Boolean(normalizeServiceKey(slug));
 }

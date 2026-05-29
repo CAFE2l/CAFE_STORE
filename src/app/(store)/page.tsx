@@ -6,6 +6,7 @@ import { prisma } from '@/lib/prisma';
 import { BannerCarousel } from '@/components/store/BannerCarousel';
 import { ProductGrid } from '@/components/store/ProductGrid';
 import { getFeaturedProducts } from '@/lib/products';
+import { CommunitySection } from '@/components/sections/community-section';
 
 export const metadata: Metadata = {
   title: 'CAFÉ STORE | Sites e Web Aplicações',
@@ -126,8 +127,8 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <CommunitySection />
 
-      
     </main>
   );
 }

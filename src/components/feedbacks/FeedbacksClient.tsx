@@ -7,6 +7,7 @@ import { Check, CheckCircle2, ChevronDown, ExternalLink, Info, Loader2, Menu, St
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { WHATSAPP } from '@/lib/servicos-data';
+import { WhatsappIcon } from '@/components/ui/WhatsappIcon';
 
 type FeedbackService = 'landing_page' | 'site' | 'saas' | 'pacote_completo' | 'outro';
 
@@ -53,6 +54,26 @@ type FormState = {
   project_url: string;
   video_url: string;
   consent: boolean;
+};
+
+type FeedbackApiIssue = {
+  path?: string;
+  message?: string;
+};
+
+const fieldLabels: Record<string, string> = {
+  author_name: 'Nome',
+  author_email: 'E-mail',
+  author_company: 'Empresa',
+  author_linkedin_url: 'LinkedIn',
+  service_type: 'Serviço',
+  rating: 'Nota',
+  title: 'Título',
+  body: 'Depoimento',
+  result_metric: 'Resultado',
+  project_url: 'URL do projeto',
+  video_url: 'URL do vídeo',
+  consent: 'Autorização',
 };
 
 const emptyStats: Stats = {
@@ -167,8 +188,8 @@ function FeedbackCard({ feedback, index, preview = false }: { feedback: Feedback
   return (
     <article
       className={cn(
-        'glass-card-hover mb-4 max-w-full break-inside-avoid overflow-hidden break-words p-5 opacity-0 animate-fade-up',
-        preview && 'mx-auto w-full',
+        'glass-card-hover mb-4 w-full min-w-0 break-inside-avoid [overflow-wrap:anywhere] [word-break:break-word] p-5 opacity-0 animate-fade-up',
+        preview && 'mx-auto w-full min-w-0',
       )}
       style={{ animationDelay: `${index * 50}ms`, animationFillMode: 'forwards' }}
     >
@@ -189,7 +210,7 @@ function FeedbackCard({ feedback, index, preview = false }: { feedback: Feedback
             </p>
           </div>
         </div>
-        <span className="shrink-0 rounded-full border border-white/[0.08] bg-white/[0.05] px-2 py-1 text-[10px] text-white/40">
+        <span className="max-w-[46%] shrink-0 truncate rounded-full border border-white/[0.08] bg-white/[0.05] px-2 py-1 text-[10px] text-white/40">
           {feedback.service_label}
         </span>
       </div>
@@ -198,26 +219,26 @@ function FeedbackCard({ feedback, index, preview = false }: { feedback: Feedback
         {[1, 2, 3, 4, 5].map((star) => <StarIcon key={star} filled={star <= feedback.rating} />)}
       </div>
 
-      <h3 className="mb-2 break-words font-semibold text-white">&ldquo;{feedback.title}&rdquo;</h3>
-      <p className={cn('mb-4 break-words text-sm leading-relaxed text-white/60', preview && 'line-clamp-4')}>{feedback.body}</p>
+      <h3 className="mb-2 [overflow-wrap:anywhere] [word-break:break-word] font-semibold text-white">&ldquo;{feedback.title}&rdquo;</h3>
+      <p className={cn('mb-4 [overflow-wrap:anywhere] [word-break:break-word] whitespace-pre-line text-sm leading-relaxed text-white/60', preview && 'line-clamp-4')}>{feedback.body}</p>
       {preview && feedback.body.length > 260 ? <button type="button" className="mb-4 text-sm font-semibold text-brand">Ver mais</button> : null}
 
       {feedback.result_metric ? (
-        <div className="mb-4 max-w-full overflow-hidden rounded-xl border border-brand/20 bg-brand/10 px-4 py-3">
+        <div className="mb-4 rounded-xl border border-brand/20 bg-brand/10 px-4 py-3">
           <span className="mb-1 block text-[10px] uppercase tracking-wider text-brand/60">Resultado obtido</span>
-          <p className="truncate text-sm font-medium text-brand">📈 {feedback.result_metric}</p>
+          <p className="text-sm font-medium text-brand [overflow-wrap:anywhere] [word-break:break-word]">📈 {feedback.result_metric}</p>
         </div>
       ) : null}
 
       {feedback.project_url ? (
-        <a href={feedback.project_url} target="_blank" rel="noopener noreferrer" className="mb-4 flex items-center gap-2 text-xs text-white/40 transition-colors hover:text-brand">
-          <ExternalLink className="h-3 w-3" />
-          Ver projeto entregue
+        <a href={feedback.project_url} target="_blank" rel="noopener noreferrer" className="mb-4 flex min-w-0 items-center gap-2 text-xs text-white/40 transition-colors hover:text-brand">
+          <ExternalLink className="h-3 w-3 shrink-0" />
+          <span className="min-w-0 truncate">Ver projeto entregue</span>
         </a>
       ) : null}
 
-      <div className="flex items-center justify-between border-t border-white/[0.06] pt-4">
-        <div className="flex items-center gap-3">
+      <div className="flex min-w-0 items-center justify-between gap-3 border-t border-white/[0.06] pt-4">
+        <div className="flex min-w-0 items-center gap-3">
           <span className="text-xs text-white/30">{formatDate(feedback.created_at)}</span>
           {feedback.author_linkedin_url ? (
             <a href={feedback.author_linkedin_url} target="_blank" rel="noopener noreferrer" className="text-white/20 transition-colors hover:text-brand">
@@ -352,16 +373,33 @@ function SubmitFeedbackForm({ onSubmitted }: { onSubmitted: () => void }) {
     }
 
     setSubmitting(true);
+    const payload = {
+      ...form,
+      rating: Number(form.rating),
+      consent: Boolean(form.consent),
+      authorized_publication: Boolean(form.consent),
+    };
+
     const response = await fetch('/api/feedbacks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
+      body: JSON.stringify(payload),
     });
     setSubmitting(false);
 
     if (!response.ok) {
       const result = await response.json().catch(() => null);
-      setError(result?.error ?? 'Não foi possível enviar seu feedback.');
+      const issues = Array.isArray(result?.issues) ? result.issues as FeedbackApiIssue[] : [];
+      const apiIssues = issues.filter((issue) => typeof issue.message === 'string');
+      if (apiIssues.length > 0) {
+        const messages = apiIssues.map((issue) => {
+          const label = issue.path ? fieldLabels[issue.path] || issue.path : '';
+          return label ? `${label}: ${issue.message}` : issue.message;
+        });
+        setError(messages.join('. '));
+      } else {
+        setError(result?.error ?? 'Não foi possível enviar seu feedback.');
+      }
       return;
     }
 
@@ -369,14 +407,14 @@ function SubmitFeedbackForm({ onSubmitted }: { onSubmitted: () => void }) {
   }
 
   return (
-    <form className="glass-card mx-auto max-w-3xl p-6 md:p-8" onSubmit={submit}>
-      <div className="mb-8 flex items-center justify-center gap-2">
+    <form className="glass-card mx-auto w-full max-w-3xl p-4 sm:p-6 md:p-8" onSubmit={submit}>
+      <div className="mb-8 flex items-center justify-center gap-1 sm:gap-2">
         {[1, 2, 3].map((item) => (
-          <span key={item} className="flex items-center gap-2">
+          <span key={item} className="flex items-center gap-1 sm:gap-2">
             <span className={cn('flex h-8 w-8 items-center justify-center rounded-full border text-sm font-medium transition-all duration-300', step >= item ? 'border-brand bg-brand text-white shadow-led-brand' : 'border-white/20 text-white/30')}>
               {step > item ? '✓' : item}
             </span>
-            {item < 3 ? <span className={cn('h-px w-12 transition-all duration-500', step > item ? 'bg-brand' : 'bg-white/10')} /> : null}
+            {item < 3 ? <span className={cn('h-px w-8 transition-all duration-500 sm:w-12', step > item ? 'bg-brand' : 'bg-white/10')} /> : null}
           </span>
         ))}
       </div>
@@ -402,7 +440,7 @@ function SubmitFeedbackForm({ onSubmitted }: { onSubmitted: () => void }) {
             <span className="text-sm text-white/60">Nota</span>
             <div className="flex gap-1">
               {[1, 2, 3, 4, 5].map((star) => (
-                <button key={star} type="button" className="p-1" onClick={() => update('rating', star)}>
+                <button key={star} type="button" className="flex min-h-11 min-w-11 items-center justify-center rounded-lg p-1 transition hover:bg-white/[0.06]" onClick={() => update('rating', star)}>
                   <StarIcon filled={star <= form.rating} className="h-7 w-7" />
                 </button>
               ))}
@@ -411,7 +449,7 @@ function SubmitFeedbackForm({ onSubmitted }: { onSubmitted: () => void }) {
           <Input label="Título do depoimento" value={form.title} onChange={(event) => update('title', event.target.value)} required />
           <label className="grid gap-2 text-sm text-white/60">
             Depoimento completo
-            <textarea className="glass-input min-h-36 rounded-xl border-white/10 bg-white/[0.04] text-base text-white" value={form.body} onChange={(event) => update('body', event.target.value)} />
+            <textarea className="glass-input min-h-36 resize-y rounded-xl border-white/10 bg-white/[0.04] text-base text-white" value={form.body} onChange={(event) => update('body', event.target.value)} />
             <span className="text-xs text-white/30">{form.body.length}/80 caracteres mínimos</span>
           </label>
           <div className="grid gap-4 md:grid-cols-2">
@@ -465,8 +503,8 @@ function SubmitFeedbackForm({ onSubmitted }: { onSubmitted: () => void }) {
       ) : null}
 
       {step === 3 ? (
-        <div className="grid gap-6">
-          <div className="mx-auto w-full max-w-[560px] px-4">
+        <div className="grid w-full min-w-0 gap-6">
+          <div className="w-full">
             <p className="mb-3 text-sm font-semibold text-white">Preview do card</p>
             <FeedbackCard
               index={0}
@@ -493,28 +531,33 @@ function SubmitFeedbackForm({ onSubmitted }: { onSubmitted: () => void }) {
               }}
             />
           </div>
-          <label className="mx-auto flex w-full max-w-[560px] items-start gap-3 rounded-xl border border-white/[0.08] bg-white/[0.04] p-4 text-sm leading-6 text-white/60">
-            <span className="relative mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-md border border-white/20 bg-black/20">
-              <input type="checkbox" className="peer absolute inset-0 h-full w-full cursor-pointer opacity-0" checked={form.consent} onChange={(event) => update('consent', event.target.checked)} />
-              <Check className="h-3.5 w-3.5 text-transparent peer-checked:text-brand" />
-            </span>
-            <span>Confirmo que sou um cliente real e autorizo a publicação deste feedback na página pública.</span>
-          </label>
+          <div className="grid gap-2">
+            <label className="mx-auto flex w-full min-w-0 max-w-[560px] cursor-pointer items-start gap-3 rounded-xl border border-white/[0.08] bg-white/[0.04] p-4 text-sm leading-6 text-white/60 transition hover:border-white/[0.16] hover:bg-white/[0.06] has-[:checked]:border-brand/30 has-[:checked]:bg-brand/[0.04]">
+              <span className="relative mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-md border border-white/20 bg-black/20 has-[:checked]:border-brand/60 has-[:checked]:bg-brand/20">
+                <input type="checkbox" className="peer absolute inset-0 h-full w-full cursor-pointer opacity-0" checked={form.consent} onChange={(event) => update('consent', event.target.checked)} />
+                <Check className="h-3.5 w-3.5 text-transparent peer-checked:text-brand" />
+              </span>
+              <span>Confirmo que sou um cliente real e autorizo a publicação deste feedback na página pública.</span>
+            </label>
+            {error && !form.consent ? (
+              <p className="mx-auto w-full max-w-[560px] px-4 text-xs font-medium text-red-400">{error}</p>
+            ) : null}
+          </div>
         </div>
       ) : null}
 
-      {error ? <p className="mt-5 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-200">{error}</p> : null}
+      {error && !(step === 3 && !form.consent) ? <p className="mt-5 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-200">{error}</p> : null}
 
-      <div className="mt-8 flex justify-between gap-3">
-        <button type="button" className="rounded-xl border border-white/10 px-5 py-3 text-sm font-semibold text-white/50 transition hover:text-white" onClick={() => setStep((current) => Math.max(current - 1, 1))} disabled={step === 1 || submitting}>
+      <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-between">
+        <button type="button" className="w-full rounded-xl border border-white/10 px-5 py-3 text-sm font-semibold text-white/50 transition hover:text-white sm:w-auto" onClick={() => setStep((current) => Math.max(current - 1, 1))} disabled={step === 1 || submitting}>
           Voltar
         </button>
         {step < 3 ? (
-          <button type="button" className="rounded-xl bg-brand px-6 py-3 text-sm font-bold text-white shadow-led-brand transition hover:bg-brand-light" onClick={nextStep}>
+          <button type="button" className="w-full rounded-xl bg-brand px-6 py-3 text-sm font-bold text-white shadow-led-brand transition hover:bg-brand-light sm:w-auto" onClick={nextStep}>
             Continuar
           </button>
         ) : (
-          <button type="submit" className="inline-flex items-center gap-2 rounded-xl bg-brand px-6 py-3 text-sm font-bold text-white shadow-led-brand transition hover:bg-brand-light" disabled={submitting}>
+          <button type="submit" className="w-full rounded-xl bg-brand px-6 py-3 text-sm font-bold text-white shadow-led-brand transition hover:bg-brand-light sm:w-auto sm:inline-flex sm:items-center sm:gap-2" disabled={submitting}>
             {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
             Enviar feedback
           </button>
@@ -624,8 +667,9 @@ export function FeedbacksClient() {
             href={WHATSAPP}
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden rounded-xl border border-brand/40 bg-brand/10 px-4 py-2 text-sm font-semibold text-brand shadow-[0_0_18px_rgba(249,115,22,0.12)] transition-all duration-300 hover:bg-brand hover:text-white hover:shadow-led-brand md:inline-flex"
+            className="hidden items-center gap-2 rounded-xl border border-brand/40 bg-brand/10 px-4 py-2 text-sm font-semibold text-brand shadow-[0_0_18px_rgba(249,115,22,0.12)] transition-all duration-300 hover:bg-brand hover:text-white hover:shadow-led-brand md:inline-flex"
           >
+            <WhatsappIcon className="h-4 w-4 shrink-0" />
             Falar comigo
           </a>
 
@@ -656,9 +700,10 @@ export function FeedbacksClient() {
                 href={WHATSAPP}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-2 rounded-xl bg-brand px-4 py-3 text-center text-sm font-bold text-white shadow-led-brand"
+                className="mt-2 inline-flex items-center justify-center gap-2 rounded-xl bg-brand px-4 py-3 text-center text-sm font-bold text-white shadow-led-brand"
                 onClick={() => setMobileOpen(false)}
               >
+                <WhatsappIcon className="h-4 w-4 shrink-0" />
                 Falar comigo
               </a>
             </div>
@@ -687,7 +732,7 @@ export function FeedbacksClient() {
         </div>
       </section>
 
-      <section className="glass-card mx-auto mb-12 max-w-2xl p-8">
+      <section className="glass-card mx-auto mb-12 max-w-2xl p-4 sm:p-6 md:p-8">
         <div className="flex flex-col items-center gap-8 md:flex-row">
           <div className="flex-shrink-0 text-center">
             <span className="text-7xl font-bold text-white">{stats.avgRating || '0.0'}</span>
@@ -746,8 +791,8 @@ export function FeedbacksClient() {
           ))}
         </div>
 
-        <div className="mb-6 flex justify-end">
-          <select className="glass-input rounded-xl border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white" value={sort} onChange={(event) => setSort(event.target.value)}>
+        <div className="mb-6 flex sm:justify-end">
+          <select className="glass-input w-full rounded-xl border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm text-white sm:w-auto" value={sort} onChange={(event) => setSort(event.target.value)}>
             <option value="recent">Mais recentes</option>
             <option value="rating">Melhor avaliação</option>
             <option value="helpful">Mais úteis</option>
@@ -755,7 +800,7 @@ export function FeedbacksClient() {
         </div>
 
         {feedbacks.length > 0 ? (
-          <div className="columns-1 gap-4 space-y-4 md:columns-2 lg:columns-3">
+          <div className="columns-1 gap-4 md:columns-2 lg:columns-3">
             {feedbacks.map((feedback, index) => <FeedbackCard key={feedback.id} feedback={feedback} index={index} />)}
           </div>
         ) : (

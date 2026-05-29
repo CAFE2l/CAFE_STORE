@@ -2,12 +2,13 @@
 
 import { useState, useTransition } from 'react';
 import type { ProjectBriefing, BriefingStatus } from '@prisma/client';
-import { Search, Eye, MessageCircle, Check, X, Archive, PhoneCall, Handshake } from 'lucide-react';
+import { Search, Eye, Check, X, Archive, PhoneCall, Handshake } from 'lucide-react';
 import { updateBriefingStatusAction } from '@/lib/admin/actions';
 import { dateTime } from '@/lib/admin/formatters';
 import { cn } from '@/lib/utils';
 import { BriefingDetailsDialog } from '@/components/admin/briefing-details-dialog';
 import { generateWhatsAppUrl } from '@/lib/whatsapp';
+import { WhatsappIcon } from '@/components/ui/WhatsappIcon';
 
 type BriefingItem = ProjectBriefing;
 
@@ -132,7 +133,7 @@ export function BriefingsTable({ briefings, filters }: Props) {
                     preferredContact: (briefing.preferredContact as 'whatsapp' | 'email') || undefined,
                     extraNotes: briefing.extraNotes || undefined,
                   }), '_blank')}>
-                    <MessageCircle className="h-4 w-4" />
+                    <WhatsappIcon className="h-4 w-4" />
                   </IconButton>
                   <IconButton label="Detalhes" onClick={() => setSelected(briefing)}>
                     <Eye className="h-4 w-4" />

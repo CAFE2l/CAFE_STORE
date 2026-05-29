@@ -2,13 +2,15 @@
 
 import type { UseFormReturn } from 'react-hook-form';
 import type { BriefingInput } from '@/lib/validations/project-briefing';
+import { PhoneField } from '@/components/ui/PhoneField';
+import { FieldErrorMessage } from '@/components/services/field-error-message';
 
 type Props = {
   form: UseFormReturn<BriefingInput>;
 };
 
 export function BriefingStepPersonal({ form }: Props) {
-  const { register, formState: { errors } } = form;
+  const { register, control, formState: { errors } } = form;
 
   return (
     <div className="grid gap-6">
@@ -25,11 +27,11 @@ export function BriefingStepPersonal({ form }: Props) {
           <input
             {...register('name')}
             placeholder="Seu nome completo"
-            className="h-12 w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-brand/50 focus:shadow-[0_0_20px_rgba(249,115,22,0.1)]"
+            className={`h-12 w-full rounded-xl border bg-white/[0.04] px-4 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-brand/50 focus:shadow-[0_0_20px_rgba(249,115,22,0.1)] ${
+              errors.name ? 'border-red-500' : 'border-white/10'
+            }`}
           />
-          {errors.name ? (
-            <p className="mt-1.5 text-xs text-red-400">{errors.name.message}</p>
-          ) : null}
+          <FieldErrorMessage message={errors.name?.message} />
         </div>
 
         <div>
@@ -40,26 +42,20 @@ export function BriefingStepPersonal({ form }: Props) {
             {...register('email')}
             type="email"
             placeholder="seu@email.com"
-            className="h-12 w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-brand/50 focus:shadow-[0_0_20px_rgba(249,115,22,0.1)]"
+            className={`h-12 w-full rounded-xl border bg-white/[0.04] px-4 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-brand/50 focus:shadow-[0_0_20px_rgba(249,115,22,0.1)] ${
+              errors.email ? 'border-red-500' : 'border-white/10'
+            }`}
           />
-          {errors.email ? (
-            <p className="mt-1.5 text-xs text-red-400">{errors.email.message}</p>
-          ) : null}
+          <FieldErrorMessage message={errors.email?.message} />
         </div>
 
-        <div>
-          <label className="mb-2 block text-sm font-medium text-white/70">
-            WhatsApp <span className="text-brand">*</span>
-          </label>
-          <input
-            {...register('whatsapp')}
-            placeholder="(41) 99999-9999"
-            className="h-12 w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-brand/50 focus:shadow-[0_0_20px_rgba(249,115,22,0.1)]"
-          />
-          {errors.whatsapp ? (
-            <p className="mt-1.5 text-xs text-red-400">{errors.whatsapp.message}</p>
-          ) : null}
-        </div>
+        <PhoneField
+          name="whatsapp"
+          label="WhatsApp"
+          control={control}
+          error={errors.whatsapp}
+          defaultCountry="BR"
+        />
       </div>
     </div>
   );

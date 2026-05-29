@@ -1,6 +1,7 @@
 'use client';
 
 import type { BriefingInput } from '@/lib/validations/project-briefing';
+import { formatPhoneNumber, formatPhoneNumberIntl, getCountryCallingCode, parsePhoneNumber } from 'react-phone-number-input';
 
 type Props = {
   data: BriefingInput;
@@ -26,7 +27,7 @@ export function BriefingReview({ data, serviceName }: Props) {
       <Section title="Dados pessoais">
         <Row label="Nome" value={data.name} />
         <Row label="E-mail" value={data.email} />
-        <Row label="WhatsApp" value={data.whatsapp} />
+        <Row label="WhatsApp" value={formatPhoneForReview(data.whatsapp)} />
       </Section>
 
       <Section title="Dados do projeto">
@@ -116,6 +117,15 @@ export function BriefingReview({ data, serviceName }: Props) {
       ) : null}
     </div>
   );
+}
+
+function formatPhoneForReview(value: string) {
+  const phone = parsePhoneNumber(value);
+  if (phone?.country === 'BR') {
+    return `+${getCountryCallingCode(phone.country)} ${formatPhoneNumber(value)}`;
+  }
+
+  return formatPhoneNumberIntl(value) || value;
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {

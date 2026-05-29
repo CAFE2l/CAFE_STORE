@@ -219,6 +219,31 @@
     background-clip: text;
   }
 
+  .phone-field {
+    @apply flex w-full items-center rounded-xl border border-zinc-700 bg-zinc-800/60 transition-colors focus-within:border-orange-500;
+  }
+
+  .phone-field-error {
+    @apply border-red-500;
+  }
+
+  .phone-field .PhoneInputInput,
+  .phone-field-input {
+    @apply h-12 flex-1 bg-transparent px-4 py-3 text-sm text-white outline-none placeholder:text-zinc-500;
+  }
+
+  .phone-field-country {
+    @apply flex h-12 min-w-[80px] shrink-0 cursor-pointer items-center gap-2 rounded-l-xl border-r border-zinc-700 px-3 py-3 text-sm font-medium text-white transition hover:bg-zinc-800;
+  }
+
+  .phone-field .PhoneInputCountryIcon {
+    @apply h-4 w-5 overflow-hidden rounded-sm bg-transparent shadow-none;
+  }
+
+  .phone-field .PhoneInputCountryIconImg {
+    @apply h-4 w-5 rounded-sm object-cover;
+  }
+
   .btn-primary {
     @apply relative overflow-hidden inline-flex items-center justify-center bg-brand hover:bg-brand-light text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200 ease-out hover:shadow-led-sm active:scale-[0.97] cursor-pointer;
   }

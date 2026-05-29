@@ -99,7 +99,7 @@ export async function getAdminProduct(id: string) {
     ...product,
     price: product.price.toNumber(),
     oldPrice: product.oldPrice?.toNumber() ?? null,
-  };
+  } as typeof product & { price: number; oldPrice: number | null };
 }
 
 export async function getAdminOrders() {

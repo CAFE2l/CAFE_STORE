@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { Check, MessageCircle, ShoppingBag } from 'lucide-react';
+import { Check, Crown, ShoppingBag, Users } from 'lucide-react';
+import { communityLinks, TELEGRAM_VIP_WHATSAPP } from '@/lib/community-links';
 
 export default function ObrigadoPage() {
   return (
@@ -33,8 +34,48 @@ export default function ObrigadoPage() {
         </div>
 
         <p className="mt-8 text-sm text-white/30">
-          Enquanto isso, me acompanhe nas redes sociais ou volte para loja.
+          Enquanto isso, acompanhe a comunidade ou volte para loja.
         </p>
+      </div>
+
+      <div className="mx-auto max-w-2xl px-4 pb-24 sm:px-6 lg:px-8">
+        <div className="mb-8 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+
+        <div className="text-center">
+          <p className="mb-6 text-sm text-white/50">
+            Participe da comunidade enquanto seu projeto não fica pronto.
+          </p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <a
+              href={communityLinks.discord}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-center gap-4 rounded-xl border border-white/[0.08] bg-white/[0.04] p-4 text-left transition-all duration-300 hover:border-indigo-500/40 hover:bg-indigo-500/[0.06]"
+            >
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-500/15 text-indigo-400 transition group-hover:shadow-[0_0_16px_rgba(99,102,241,0.2)]">
+                <Users className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-white">Comunidade Discord</p>
+                <p className="text-xs text-white/45">Entre e conheça outros criadores</p>
+              </div>
+            </a>
+            <a
+              href={TELEGRAM_VIP_WHATSAPP}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-center gap-4 rounded-xl border border-white/[0.08] bg-white/[0.04] p-4 text-left transition-all duration-300 hover:border-brand/40 hover:bg-brand/[0.06]"
+            >
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand/15 text-brand transition group-hover:shadow-[0_0_16px_rgba(249,115,22,0.2)]">
+                <Crown className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-white">Telegram VIP</p>
+                <p className="text-xs text-white/45">Liberado após a conclusão do serviço</p>
+              </div>
+            </a>
+          </div>
+        </div>
       </div>
     </main>
   );

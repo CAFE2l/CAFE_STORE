@@ -1,8 +1,10 @@
 import type { LucideIcon } from "lucide-react";
 import { Globe2, Monitor, Zap } from "lucide-react";
+import { createWhatsAppLink, whatsappMessages } from "./whatsapp";
 
-export const WHATSAPP =
-  "https://wa.me/5541996713782?text=Olá,%20tenho%20interesse%20nos%20seus%20Serviços";
+export const WHATSAPP = createWhatsAppLink(whatsappMessages.generic);
+
+export const WHATSAPP_PACOTE = createWhatsAppLink(whatsappMessages.pacoteCompleto);
 
 export type Service = {
   icon: LucideIcon;
@@ -16,6 +18,7 @@ export type Service = {
   description: string;
   features: string[];
   cta: string;
+  whatsappMessage: string;
   href: string;
 };
 
@@ -39,7 +42,8 @@ export const services: Service[] = [
       "Prazo de 5–7 dias úteis",
     ],
     cta: "Quero uma Landing Page",
-    href: WHATSAPP,
+    whatsappMessage: whatsappMessages.landingPage,
+    href: createWhatsAppLink(whatsappMessages.landingPage),
   },
   {
     icon: Globe2,
@@ -60,7 +64,8 @@ export const services: Service[] = [
       "Prazo de 10–15 dias úteis",
     ],
     cta: "Quero meu Site",
-    href: WHATSAPP,
+    whatsappMessage: whatsappMessages.siteProfissional,
+    href: createWhatsAppLink(whatsappMessages.siteProfissional),
   },
   {
     icon: Zap,
@@ -82,7 +87,8 @@ export const services: Service[] = [
       "Painel administrativo",
     ],
     cta: "Falar sobre meu projeto",
-    href: WHATSAPP,
+    whatsappMessage: whatsappMessages.webSaas,
+    href: createWhatsAppLink(whatsappMessages.webSaas),
   },
 ];
 

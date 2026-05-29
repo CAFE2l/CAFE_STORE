@@ -5,8 +5,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Check, ChevronDown, Menu, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { WHATSAPP, deliverables, faqs, processSteps, projects, services, testimonials } from '@/lib/servicos-data';
+import { WHATSAPP, WHATSAPP_PACOTE, deliverables, faqs, processSteps, projects, services, testimonials } from '@/lib/servicos-data';
 import { TestimonialsSection } from '@/components/sections/TestimonialsSection';
+import { CommunitySection } from '@/components/sections/community-section';
+import { WhatsappIcon } from '@/components/ui/WhatsappIcon';
 
 export default function ServicesPage() {
   const [openFaq, setOpenFaq] = useState<string | null>(faqs[0]?.q ?? null);
@@ -18,6 +20,7 @@ export default function ServicesPage() {
     { href: '#pacote', label: 'Pacote Completo' },
     { href: '#provas', label: 'Projetos' },
     { href: '/feedbacks', label: 'Feedbacks' },
+    { href: '#comunidade', label: 'Comunidade' },
     { href: '#faq', label: 'FAQ' },
     { href: '#contato', label: 'Contato' },
   ];
@@ -63,8 +66,9 @@ export default function ServicesPage() {
             href={WHATSAPP}
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden rounded-xl border border-brand/40 bg-brand/10 px-4 py-2 text-sm font-semibold text-brand shadow-[0_0_18px_rgba(249,115,22,0.12)] transition-all duration-300 hover:bg-brand hover:text-white hover:shadow-led-brand md:inline-flex"
+            className="hidden items-center gap-2 rounded-xl border border-brand/40 bg-brand/10 px-4 py-2 text-sm font-semibold text-brand shadow-[0_0_18px_rgba(249,115,22,0.12)] transition-all duration-300 hover:bg-brand hover:text-white hover:shadow-led-brand md:inline-flex"
           >
+            <WhatsappIcon className="h-4 w-4 shrink-0" />
             Falar comigo
           </a>
 
@@ -95,9 +99,10 @@ export default function ServicesPage() {
                 href={WHATSAPP}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-2 rounded-xl bg-brand px-4 py-3 text-center text-sm font-bold text-white shadow-led-brand"
+                className="mt-2 inline-flex items-center justify-center gap-2 rounded-xl bg-brand px-4 py-3 text-center text-sm font-bold text-white shadow-led-brand"
                 onClick={() => setMobileOpen(false)}
               >
+                <WhatsappIcon className="h-4 w-4 shrink-0" />
                 Falar comigo
               </a>
             </div>
@@ -198,17 +203,20 @@ export default function ServicesPage() {
                   ))}
                 </ul>
 
-                <Link
-                  href={`/servicos/${service.slug}/briefing`}
+                <a
+                  href={service.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className={cn(
-                    'w-full rounded-xl py-3 text-center font-medium transition-all duration-300',
+                    'inline-flex w-full items-center justify-center gap-2 rounded-xl py-3 text-center font-medium transition-all duration-300',
                     featured
                       ? 'bg-brand text-white shadow-led-brand hover:bg-brand-light'
                       : 'border border-brand/40 text-brand hover:bg-brand hover:text-white hover:shadow-led-brand',
                   )}
                 >
+                  <WhatsappIcon className="h-4 w-4 shrink-0" />
                   {service.cta} →
-                </Link>
+                </a>
               </article>
             );
           })}
@@ -253,11 +261,12 @@ export default function ServicesPage() {
               </div>
 
               <a
-                href={WHATSAPP}
+                href={WHATSAPP_PACOTE}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex w-full items-center justify-center rounded-xl bg-brand px-10 py-4 text-lg font-bold text-white shadow-led-brand transition-all duration-300 hover:bg-brand-light hover:shadow-[0_0_30px_8px_rgba(249,115,22,0.5)] active:scale-[0.98] md:w-auto"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand px-10 py-4 text-lg font-bold text-white shadow-led-brand transition-all duration-300 hover:bg-brand-light hover:shadow-[0_0_30px_8px_rgba(249,115,22,0.5)] active:scale-[0.98] md:w-auto"
               >
+                <WhatsappIcon className="h-5 w-5 shrink-0" />
                 Quero o pacote completo →
               </a>
             </div>
@@ -379,6 +388,10 @@ export default function ServicesPage() {
         </div>
       </section>
 
+      <section id="comunidade" className="scroll-mt-28">
+        <CommunitySection />
+      </section>
+
       <section
         id="contato"
         className="border-t border-white/[0.06] bg-gradient-radial from-brand/10 via-transparent to-transparent px-4 py-16 text-center"
@@ -389,9 +402,10 @@ export default function ServicesPage() {
           href={WHATSAPP}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex rounded-xl bg-brand px-8 py-3 font-semibold text-white shadow-led-brand transition-all duration-300 hover:bg-brand-light"
+          className="inline-flex items-center gap-2 rounded-xl bg-brand px-8 py-3 font-semibold text-white shadow-led-brand transition-all duration-300 hover:bg-brand-light"
         >
-          💬 Falar no WhatsApp
+          <WhatsappIcon className="h-5 w-5 shrink-0" />
+          Falar no WhatsApp
         </a>
       </section>
     </main>

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, Playfair_Display } from "next/font/google";
+import "react-phone-number-input/style.css";
 import "./globals.css";
 import Script from "next/script";
 

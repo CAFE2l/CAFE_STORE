@@ -1,36 +1,27 @@
 import { z } from 'zod';
+import { isValidPhoneNumber } from 'react-phone-number-input/min';
+import { SERVICES, SERVICE_KEYS, isServiceKey } from '@/data/services';
 
-const phoneRegex = /^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/;
-
-const budgetOptions = [
-  'Até R$ 1.000',
-  'R$ 1.000 - R$ 2.000',
-  'R$ 2.000 - R$ 5.000',
-  'R$ 5.000 - R$ 10.000',
-  'R$ 10.000 - R$ 20.000',
-  'Acima de R$ 20.000',
-  'Sob consulta',
-] as const;
-
-const deadlineOptions = [
-  'Urgente (até 7 dias)',
-  '15 dias',
-  '30 dias',
-  '60 dias',
-  '90 dias',
-  'Sem prazo definido',
-] as const;
+const serviceKeys = SERVICE_KEYS as [string, ...string[]];
 
 export const briefingSchema = z.object({
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres').max(120, 'Nome muito longo'),
   email: z.string().email('Informe um e-mail válido'),
-  whatsapp: z.string().min(8, 'Informe um WhatsApp válido'),
+  whatsapp: z.string()
+    .min(1, 'WhatsApp é obrigatório')
+    .refine(
+      (val) => isValidPhoneNumber(val),
+      { message: 'Número de telefone inválido para o país selecionado' },
+    ),
   companyName: z.string().optional(),
-  serviceType: z.string().min(1, 'Selecione um serviço'),
+  serviceType: z.enum(serviceKeys, { message: 'Selecione o serviço desejado' }),
   serviceName: z.string().optional(),
-  budget: z.string().min(1, 'Selecione um orçamento'),
-  deadline: z.string().min(1, 'Selecione um prazo'),
-  projectDescription: z.string().min(30, 'Descreva o projeto com pelo menos 30 caracteres'),
+  budget: z.string().min(1, 'Selecione uma faixa de orçamento'),
+  deadline: z.string().min(1, 'Selecione o prazo desejado'),
+  projectDescription: z
+    .string()
+    .min(30, 'Descreva um pouco mais — mín. 30 caracteres')
+    .max(500, 'Máximo de 500 caracteres'),
   mainGoal: z.string().optional(),
   targetAudience: z.string().optional(),
   references: z.string().optional(),
@@ -61,8 +52,30 @@ export const briefingSchema = z.object({
   appNeedsPayments: z.boolean().optional(),
   appUserTypesCount: z.coerce.number().int().optional(),
   appMainFeatures: z.string().optional(),
+}).superRefine((data, ctx) => {
+  if (!isServiceKey(data.serviceType)) return;
+
+  const service = SERVICES[data.serviceType];
+  const validBudgets: readonly string[] = service.orcamentos;
+  const validDeadlines: readonly string[] = service.prazos;
+
+  if (!validBudgets.includes(data.budget)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['budget'],
+      message: `Orçamento inválido para ${service.label}`,
+    });
+  }
+
+  if (!validDeadlines.includes(data.deadline)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['deadline'],
+      message: `Prazo inválido para ${service.label}`,
+    });
+  }
 });
 
 export type BriefingInput = z.infer<typeof briefingSchema>;
 
-export { budgetOptions, deadlineOptions };
+export { SERVICES };

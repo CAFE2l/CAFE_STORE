@@ -5,11 +5,11 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import {
   Flame,
   Mail,
-  MessageCircle,
   ChevronDown,
-  ArrowRight,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { WhatsappIcon } from '@/components/ui/WhatsappIcon';
+import { communityLinks, TELEGRAM_VIP_WHATSAPP } from '@/lib/community-links';
 
 const footerLinks = {
   loja: [
@@ -27,19 +27,13 @@ const footerLinks = {
     { label: 'Status do sistema', href: '/status' },
     { label: 'Documentação', href: '/docs' },
   ],
+  comunidade: [
+    { label: 'Discord', href: communityLinks.discord, external: true },
+    { label: 'Telegram VIP', href: TELEGRAM_VIP_WHATSAPP, external: true },
+  ],
 };
 
 const socialIcons: { icon: (props: { size?: number }) => ReactNode; label: string }[] = [
-  {
-    icon: ({ size = 16 }) => (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width={size} height={size}>
-        <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-      </svg>
-    ),
-    label: 'Instagram',
-  },
   {
     icon: ({ size = 16 }) => (
       <svg viewBox="0 0 24 24" fill="currentColor" width={size} height={size}>
@@ -64,21 +58,28 @@ const socialIcons: { icon: (props: { size?: number }) => ReactNode; label: strin
     ),
     label: 'LinkedIn',
   },
+  {
+    icon: ({ size = 16 }) => (
+      <svg viewBox="0 0 24 24" fill="currentColor" width={size} height={size}>
+        <path d="M20.317 4.3698a19.7913 19.7913 0 0 0-4.8851-1.5152.0741.0741 0 0 0-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 0 0-.0785-.037 19.7363 19.7363 0 0 0-4.8852 1.515.0699.0699 0 0 0-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 0 0 .0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 0 0 .0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 0 0-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 0 1-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 0 1 .0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 0 1 .0785.0095c.1202.099.246.1981.3723.2924a.077.077 0 0 1-.0066.1276 12.2986 12.2986 0 0 1-1.873.8914.0766.0766 0 0 0-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 0 0 .0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 0 0 .0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 0 0-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189z" />
+      </svg>
+    ),
+    label: 'Discord',
+  },
 ];
 
 function FooterLink({ href, external, children }: { href: string; external?: boolean; children: ReactNode }) {
   const cls = 'group/link relative inline-flex items-center gap-1.5 overflow-hidden py-1 text-sm text-[#AAAAAA] no-underline transition-colors duration-150 hover:text-white';
-  const after = 'after:absolute after:bottom-0 after:left-0 after:h-px after:w-full after:origin-right after:scale-x-0 after:bg-[#FF6B00] after:transition-transform after:duration-200 hover:after:origin-left hover:after:scale-x-100';
 
   if (external) {
     return (
-      <a href={href} target="_blank" rel="noopener noreferrer" className={`${cls} ${after}`}>
+      <a href={href} target="_blank" rel="noopener noreferrer" className={cls}>
         <span className="translate-x-0 transition-transform duration-200 group-hover/link:translate-x-1.5">{children}</span>
       </a>
     );
   }
   return (
-    <Link href={href} className={`${cls} ${after}`}>
+    <Link href={href} className={cls}>
       <span className="translate-x-0 transition-transform duration-200 group-hover/link:translate-x-1.5">{children}</span>
     </Link>
   );
@@ -137,9 +138,6 @@ function SocialIcon({ icon, label }: { icon: (props: { size?: number }) => React
 export function Footer() {
   const footerRef = useRef<HTMLElement>(null);
   const [visible, setVisible] = useState(false);
-  const [email, setEmail] = useState('');
-  const [newsletterMsg, setNewsletterMsg] = useState('');
-
   useEffect(() => {
     const el = footerRef.current;
     if (!el) return;
@@ -156,14 +154,6 @@ export function Footer() {
   const hour = now.getHours();
   const day = now.getDay();
   const isOnline = day >= 1 && day <= 5 && hour >= 9 && hour < 18;
-
-  async function handleNewsletter(event: React.FormEvent) {
-    event.preventDefault();
-    if (!email) return;
-    setNewsletterMsg('Obrigado por se inscrever!');
-    setEmail('');
-    setTimeout(() => setNewsletterMsg(''), 4000);
-  }
 
   return (
     <footer
@@ -193,7 +183,7 @@ export function Footer() {
         }}
       >
         <div
-          className="grid grid-cols-1 max-lg:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1.5fr]"
+          className="grid grid-cols-1 max-lg:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_1.5fr]"
           style={{
             gap: 'clamp(32px,4vw,64px)',
             alignItems: 'start',
@@ -214,9 +204,9 @@ export function Footer() {
               </div>
               <span className="font-display text-lg font-bold tracking-wide text-white">CAFÉ STORE</span>
             </Link>
-            <p className="mt-2 text-[13px] italic text-[#FF6B00]">Dream. Build. Inspire.</p>
+            <p className="mt-2 text-[13px] italic text-[#FF6B00]">CREATE BUILD INSPIRE</p>
             <p className="mt-4 text-[13px] leading-[1.65] text-[#AAAAAA]" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-              Sua loja de café especial. Grãos selecionados, torra artesanal e entrega para todo o Brasil.
+              Criação de web-aplicações, agências digitais, sites e landing pages para você e seu negócio.
             </p>
 
             <div className="mt-6 flex gap-[10px]">
@@ -259,33 +249,45 @@ export function Footer() {
             <ColumnLinks title="Recursos" links={footerLinks.recursos} />
           </div>
 
-          {/* Col 4: Suporte */}
+          {/* Col 4: Comunidade */}
+          <div
+            className="footer-col"
+            style={{
+              opacity: visible ? 1 : 0,
+              transform: visible ? 'translateY(0)' : 'translateY(32px)',
+              transition: 'opacity 500ms cubic-bezier(0.25, 0.46, 0.45, 0.94) 300ms, transform 500ms cubic-bezier(0.25, 0.46, 0.45, 0.94) 300ms',
+            }}
+          >
+            <ColumnLinks title="Comunidade" links={footerLinks.comunidade} />
+          </div>
+
+          {/* Col 5: Suporte */}
           <div
             className="footer-col grid gap-6"
             style={{
               opacity: visible ? 1 : 0,
               transform: visible ? 'translateY(0)' : 'translateY(32px)',
-              transition: 'opacity 500ms cubic-bezier(0.25, 0.46, 0.45, 0.94) 340ms, transform 500ms cubic-bezier(0.25, 0.46, 0.45, 0.94) 340ms',
+              transition: 'opacity 500ms cubic-bezier(0.25, 0.46, 0.45, 0.94) 380ms, transform 500ms cubic-bezier(0.25, 0.46, 0.45, 0.94) 380ms',
             }}
           >
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#FF6B00]">Suporte</p>
               <div className="mt-5 grid gap-3">
                 <a
-                  href="mailto:contato@cafestore.com.br"
+                  href="mailto:gutiajs@gmail.com"
                   className="flex items-center gap-2.5 rounded-xl border border-[rgba(255,255,255,0.07)] bg-[rgba(255,255,255,0.03)] p-4 text-sm text-[#AAAAAA] no-underline backdrop-blur-[8px] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[inset_0_0_40px_rgba(255,107,0,0.04)]"
                 >
                   <Mail className="size-4 shrink-0 text-[#FF6B00]" />
-                  contato@cafestore.com.br
+                  gutiajs@gmail.com
                 </a>
                 <a
-                  href="https://wa.me/554199671XXXX"
+                  href="https://wa.me/5541996713782"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2.5 rounded-xl border border-[rgba(255,255,255,0.07)] bg-[rgba(255,255,255,0.03)] p-4 text-sm text-[#AAAAAA] no-underline backdrop-blur-[8px] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[inset_0_0_40px_rgba(255,107,0,0.04)]"
                 >
-                  <MessageCircle className="size-4 shrink-0 text-[#25D366]" />
-                  (41) 99671-xxxx
+                  <WhatsappIcon className="size-4 shrink-0" />
+                  +55 (41) 99671-3782
                 </a>
               </div>
               <p className="mt-2 text-xs text-[#666666]">Seg–Sex, 9h–18h</p>
@@ -300,26 +302,7 @@ export function Footer() {
             {/* Newsletter */}
             <div className="rounded-xl border border-[rgba(255,255,255,0.07)] bg-[rgba(255,255,255,0.03)] p-4 backdrop-blur-[8px] transition-shadow duration-300 hover:shadow-[inset_0_0_40px_rgba(255,107,0,0.04)]">
               <p className="text-sm font-semibold text-white">Receba novidades</p>
-              <form onSubmit={handleNewsletter} className="mt-3 flex gap-2">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="seu@email.com"
-                  aria-label="Email para newsletter"
-                  className="min-w-0 flex-1 rounded-lg border border-[rgba(255,255,255,0.07)] bg-[rgba(255,255,255,0.04)] px-3 py-2 text-sm text-white outline-none placeholder:text-[#666666] transition-all duration-200 focus:border-[#FF6B00] focus:shadow-[0_0_0_3px_rgba(255,107,0,0.12)]"
-                />
-                <button
-                  type="submit"
-                  className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-[#FF6B00] px-3 py-2 text-sm font-semibold text-white transition-all duration-200 hover:bg-[#E55A00] active:scale-[0.97]"
-                >
-                  Entrar
-                  <ArrowRight className="size-3.5" />
-                </button>
-              </form>
-              {newsletterMsg ? (
-                <p className="mt-2 text-xs text-green-400">{newsletterMsg}</p>
-              ) : null}
+              <p className="mt-2 text-xs text-[#666666]">Em breve</p>
             </div>
           </div>
         </div>

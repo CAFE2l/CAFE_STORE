@@ -6,16 +6,18 @@ import { isValidService, getServiceName } from '@/lib/services';
 
 type Props = {
   params: { slug: string };
+  searchParams?: { service?: string };
 };
 
-export default function BriefingPage({ params }: Props) {
+export default function BriefingPage({ params, searchParams }: Props) {
   const { slug } = params;
+  const initialService = searchParams?.service ?? slug;
 
-  if (!isValidService(slug)) {
+  if (!isValidService(initialService)) {
     notFound();
   }
 
-  const serviceName = getServiceName(slug);
+  const serviceName = getServiceName(initialService);
 
   return (
     <main className="relative min-h-screen bg-[#050505] text-white selection:bg-brand/30 selection:text-white">
@@ -46,7 +48,7 @@ export default function BriefingPage({ params }: Props) {
           </p>
         </div>
 
-        <BriefingForm serviceSlug={slug} />
+        <BriefingForm serviceSlug={initialService} />
       </div>
     </main>
   );

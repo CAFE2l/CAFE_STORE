@@ -42,7 +42,7 @@ export async function createProjectBriefing(input: unknown): Promise<BriefingAct
       data: {
         name: sanitize(data.name) || data.name,
         email: data.email.toLowerCase().trim(),
-        whatsapp: data.whatsapp.replace(/\D/g, ''),
+        whatsapp: data.whatsapp,
         companyName: sanitize(data.companyName),
         serviceSlug: data.serviceType,
         serviceName: data.serviceName || data.serviceType,

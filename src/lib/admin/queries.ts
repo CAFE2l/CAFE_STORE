@@ -303,7 +303,10 @@ export async function getCategoriesPage() {
 }
 
 export async function getCouponsPage() {
-  return prisma.coupon.findMany({ orderBy: { createdAt: 'desc' } });
+  return prisma.coupon.findMany({
+    orderBy: { createdAt: 'desc' },
+    include: { _count: { select: { usages: true } } },
+  });
 }
 
 export async function getReviewsPage() {

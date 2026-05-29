@@ -76,8 +76,9 @@ model Product {
   id          String        @id @default(cuid())
   name        String
   slug        String        @unique
-  description String?       @db.Text
-  price       Decimal       @db.Decimal(10, 2)
+  description       String?       @db.Text
+  shortDescription  String?       @map("short_description") @db.Text
+  price             Decimal       @db.Decimal(10, 2)
   oldPrice    Decimal?      @db.Decimal(10, 2)
   stock       Int           @default(0)
   images      String[]
@@ -252,17 +253,42 @@ enum PaymentStatus {
   CANCELLED
 }
 
+enum CouponType {
+  PERCENTAGE
+  FIXED
+  FREE_SHIPPING
+}
+
 model Coupon {
-  id        String    @id @default(cuid())
-  code      String    @unique
-  discount  Decimal   @db.Decimal(10, 2)
-  type      String    @default("PERCENTAGE")
-  minAmount Decimal?  @db.Decimal(10, 2)
-  maxUses   Int       @default(0)
-  usedCount Int       @default(0)
-  expiresAt DateTime?
-  active    Boolean   @default(true)
-  createdAt DateTime  @default(now())
+  id            String      @id @default(cuid())
+  code          String      @unique
+  name          String?
+  description   String?     @db.Text
+  type          CouponType  @default(PERCENTAGE)
+  discount      Decimal     @db.Decimal(10, 2)
+  minAmount     Decimal?    @db.Decimal(10, 2)
+  maxDiscount   Decimal?    @db.Decimal(10, 2)
+  maxUses       Int         @default(0)
+  usedCount     Int         @default(0)
+  usagePerUser  Int?
+  startsAt      DateTime?
+  expiresAt     DateTime?
+  active        Boolean     @default(true)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  usages        CouponUsage[]
+}
+
+model CouponUsage {
+  id        String   @id @default(cuid())
+  couponId  String
+  userId    String?
+  orderId   String?
+  usedAt    DateTime @default(now())
+  coupon    Coupon   @relation(fields: [couponId], references: [id])
+
+  @@index([couponId])
+  @@index([userId])
 }
 
 model Banner {

@@ -1,6 +1,6 @@
 'use client';
 
-import type { UseFormReturn } from 'react-hook-form';
+import type { FieldPath, UseFormReturn } from 'react-hook-form';
 import type { BriefingInput } from '@/lib/validations/project-briefing';
 
 type Props = {
@@ -9,7 +9,7 @@ type Props = {
 };
 
 const commonFeatures: Record<string, string[]> = {
-  'landing-page': [
+  'landing-pages': [
     'Formulário de contato',
     'Integração com WhatsApp',
     'Captura de leads',
@@ -17,7 +17,7 @@ const commonFeatures: Record<string, string[]> = {
     'Animações e microinterações',
     'SEO on-page',
   ],
-  'site-profissional': [
+  'sites-profissionais': [
     'Painel administrativo',
     'Blog integrado',
     'SEO básico',
@@ -25,7 +25,7 @@ const commonFeatures: Record<string, string[]> = {
     'Galeria de portfólio',
     'Integração com Google Analytics',
   ],
-  'aplicacao-web-saas': [
+  'saas-webapp': [
     'Login e cadastro',
     'Painel administrativo',
     'Banco de dados',
@@ -49,9 +49,9 @@ export function BriefingStepTechnical({ form, serviceSlug }: Props) {
     }
   }
 
-  function handleCheckbox(e: React.ChangeEvent<HTMLInputElement>, field: string) {
+  function handleCheckbox(e: React.ChangeEvent<HTMLInputElement>, field: FieldPath<BriefingInput>) {
     const value = e.target.checked;
-    setValue(field as any, value, { shouldValidate: true });
+    setValue(field, value, { shouldValidate: true });
   }
 
   return (
@@ -213,7 +213,7 @@ export function BriefingStepTechnical({ form, serviceSlug }: Props) {
         </div>
       </div>
 
-      {serviceSlug === 'landing-page' && (
+      {serviceSlug === 'landing-pages' && (
         <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5">
           <h3 className="mb-4 font-semibold text-white">Específico para Landing Page</h3>
           <div className="grid gap-5 sm:grid-cols-2">
@@ -261,7 +261,7 @@ export function BriefingStepTechnical({ form, serviceSlug }: Props) {
         </div>
       )}
 
-      {serviceSlug === 'site-profissional' && (
+      {serviceSlug === 'sites-profissionais' && (
         <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5">
           <h3 className="mb-4 font-semibold text-white">Específico para Site Profissional</h3>
           <div className="grid gap-5 sm:grid-cols-2">
@@ -296,7 +296,7 @@ export function BriefingStepTechnical({ form, serviceSlug }: Props) {
         </div>
       )}
 
-      {serviceSlug === 'aplicacao-web-saas' && (
+      {serviceSlug === 'saas-webapp' && (
         <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5">
           <h3 className="mb-4 font-semibold text-white">Específico para Aplicações Web & SaaS</h3>
           <div className="grid gap-5 sm:grid-cols-2">
