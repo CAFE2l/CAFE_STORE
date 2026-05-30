@@ -2,8 +2,8 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
 import { Check, CreditCard, LogIn, Minus, Plus, ShieldCheck, Sparkles, Trash2, UserX, Zap } from 'lucide-react';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { useCartStore } from '@/store/cart';
@@ -93,8 +93,24 @@ function QuantitySelector({
 export function CartPageClient() {
   const { items, removeItem, total, updateQty } = useCartStore();
   const [confirmed, setConfirmed] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
   const taxes = total * taxRate;
   const finalTotal = Math.max(0, total + taxes);
+
+  useEffect(() => setHydrated(true), []);
+
+  if (!hydrated) {
+    return (
+      <div className="grid gap-8 md:grid-cols-[minmax(0,1fr)_360px] lg:grid-cols-[minmax(0,1fr)_400px]">
+        <div className="grid gap-4">
+          {[1, 2].map((i) => (
+            <div key={i} className="h-36 animate-pulse rounded-2xl bg-white/[0.04]" />
+          ))}
+        </div>
+        <div className="h-64 animate-pulse rounded-2xl bg-white/[0.04]" />
+      </div>
+    );
+  }
 
   if (items.length === 0) {
     return (
@@ -111,6 +127,7 @@ export function CartPageClient() {
       <section className="grid min-w-0 gap-6">
         {items.length > 0 ? (
           <motion.div initial="hidden" animate="show" transition={{ staggerChildren: 0.08 }} className="grid gap-4">
+            <AnimatePresence mode="popLayout">
             {items.map((item, index) => {
               const stockWarning = getStockWarning(item);
               const lineTotal = item.price * item.quantity;
@@ -120,6 +137,7 @@ export function CartPageClient() {
                   key={item.id}
                   variants={cardMotion}
                   transition={{ duration: 0.28, ease: 'easeOut' }}
+                  exit={{ opacity: 0, x: -20, height: 0, marginBottom: 0 }}
                   className="relative grid gap-5 rounded-2xl border border-white/[0.08] bg-white/[0.04] p-5 pb-16 shadow-[0_4px_24px_rgba(0,0,0,0.4)] backdrop-blur-[10px] transition-colors duration-200 hover:border-orange-500/30 sm:grid-cols-[96px_minmax(0,1fr)] xl:grid-cols-[96px_minmax(0,1fr)_160px]"
                 >
                   <Link href={`/products/${item.slug}`} className="relative size-24 min-h-20 min-w-20 overflow-hidden rounded-xl bg-zinc-900 sm:size-24">
@@ -150,11 +168,6 @@ export function CartPageClient() {
                       </p>
                     ) : null}
 
-                    <div className="flex flex-wrap items-center gap-2 text-xs text-white/45">
-                      <span className="text-orange-300">★★★★</span>
-                      <span>27 avaliações</span>
-                    </div>
-
                   </div>
 
                   <div className="flex flex-wrap items-center justify-between gap-4 xl:flex-col xl:items-end">
@@ -184,6 +197,7 @@ export function CartPageClient() {
                 </motion.article>
               );
             })}
+            </AnimatePresence>
           </motion.div>
         ) : null}
 
@@ -240,7 +254,7 @@ export function CartPageClient() {
             </div>
             <div className="mt-2 flex justify-between gap-4 border-t border-white/15 pt-4 text-lg font-bold text-white">
               <dt>Total</dt>
-              <dd>{currencyFormatter.format(finalTotal)}</dd>
+              <dd className="text-orange-400 drop-shadow-[0_0_8px_rgba(249,115,22,0.55)]">{currencyFormatter.format(finalTotal)}</dd>
             </div>
           </dl>
 
@@ -270,7 +284,8 @@ export function CartPageClient() {
             href={confirmed ? '/checkout' : '#'}
             aria-disabled={!confirmed}
             className={cn(
-              'mt-1 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-orange-500 text-sm font-bold tracking-[0.02em] text-white shadow-[0_4px_20px_rgba(249,115,22,0.35)] transition hover:brightness-110 hover:shadow-[0_6px_28px_rgba(249,115,22,0.48)]',
+              'mt-1 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-sm font-bold tracking-[0.02em] text-white transition-all duration-300',
+              'shadow-[0_4px_20px_rgba(249,115,22,0.4)] hover:shadow-[0_6px_32px_rgba(249,115,22,0.6)] hover:scale-[1.01]',
               !confirmed && 'pointer-events-none opacity-55',
             )}
           >
@@ -293,7 +308,12 @@ export function CartPageClient() {
           <div className="mt-3 grid gap-2 border-t border-white/[0.06] pt-4 text-xs leading-5 text-white/45">
             <p className="flex items-center gap-2"><ShieldCheck className="size-3.5 text-orange-400" /> Pagamento seguro • SSL • Antifraude</p>
             <p className="flex items-center gap-2"><Sparkles className="size-3.5 text-orange-400" /> Doacao simbolica ao projeto</p>
-            <p className="flex items-center gap-2"><CreditCard className="size-3.5 text-orange-400" /> Pix • Cartao • Mercado Pago • PayPal</p>
+            <p className="flex items-center gap-2">
+              <Image src="/images/icons/pix.png" alt="Pix" width={14} height={14} className="size-3.5 object-contain" />
+              <Image src="/images/icons/Mercadopago.png" alt="Mercado Pago" width={14} height={14} className="size-3.5 object-contain" />
+              <Image src="/images/icons/PayPal.png" alt="PayPal" width={14} height={14} className="size-3.5 object-contain" />
+              Pix • Cartão • Mercado Pago • PayPal
+            </p>
           </div>
         </div>
       </aside>

@@ -27,6 +27,7 @@ type PhoneFieldProps<TFieldValues extends FieldValues> = {
   control: Control<TFieldValues>;
   error?: FieldError;
   defaultCountry?: Country;
+  onChange?: (value: string) => void;
 };
 
 type CountryOption = {
@@ -54,6 +55,7 @@ export function PhoneField<TFieldValues extends FieldValues>({
   control,
   error,
   defaultCountry = 'BR',
+  onChange,
 }: PhoneFieldProps<TFieldValues>) {
   return (
     <Controller
@@ -65,6 +67,7 @@ export function PhoneField<TFieldValues extends FieldValues>({
           label={label}
           error={error}
           defaultCountry={defaultCountry}
+          onExternalChange={onChange}
         />
       )}
     />
@@ -76,11 +79,13 @@ function ControlledPhoneInput<TFieldValues extends FieldValues>({
   label,
   error,
   defaultCountry,
+  onExternalChange,
 }: {
   field: ControllerRenderProps<TFieldValues, Path<TFieldValues>>;
   label: string;
   error?: FieldError;
   defaultCountry: Country;
+  onExternalChange?: (value: string) => void;
 }) {
   const [country, setCountry] = useState<Country | undefined>(defaultCountry);
   const errorMessage = getPhoneErrorMessage(error?.message, field.value, country);
@@ -103,7 +108,11 @@ function ControlledPhoneInput<TFieldValues extends FieldValues>({
       <PhoneInput
         {...field}
         value={(field.value || undefined) as Value | undefined}
-        onChange={(value) => field.onChange(value ?? '')}
+        onChange={(value) => {
+            const v = value ?? '';
+            field.onChange(v);
+            onExternalChange?.(v);
+          }}
         onCountryChange={(nextCountry) => setCountry(nextCountry)}
         defaultCountry={defaultCountry}
         labels={labels}

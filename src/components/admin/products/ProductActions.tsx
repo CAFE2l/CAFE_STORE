@@ -14,6 +14,7 @@ export default function ProductActions({ product }: Props) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [loading, startTransition] = useTransition();
   const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [currentStatus, setCurrentStatus] = useState(product.status);
 
   function showToast(type: 'success' | 'error', message: string) {
     setToast({ type, message });
@@ -46,6 +47,9 @@ export default function ProductActions({ product }: Props) {
     startTransition(async () => {
       try {
         const result = await toggleProductStatusAction(product.id);
+        if (result.ok) {
+          setCurrentStatus((s) => (s === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'));
+        }
         showToast(result.ok ? 'success' : 'error', result.message);
       } catch {
         showToast('error', 'Erro ao alterar status.');
@@ -96,13 +100,16 @@ export default function ProductActions({ product }: Props) {
         title="Clique para ativar/desativar"
         aria-label="Alternar status"
         onClick={toggleStatus}
-        className="h-9 rounded-lg border border-white/10 px-3 text-xs text-zinc-300 hover:bg-white/5"
+        disabled={loading}
+        className={`h-8 rounded-lg border px-3 text-xs font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+          currentStatus === 'ACTIVE'
+            ? 'border-green-500/30 bg-green-500/10 text-green-400 hover:bg-green-500/20'
+            : 'border-zinc-500/30 bg-zinc-500/10 text-zinc-400 hover:bg-zinc-500/20'
+        }`}
       >
         {loading ? (
           <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
-        ) : (
-          'Status'
-        )}
+        ) : currentStatus === 'ACTIVE' ? '● Ativo' : '○ Inativo'}
       </button>
 
       {confirmOpen ? (

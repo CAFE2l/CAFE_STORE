@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useEffect, useState, useCallback } from 'react';
 import {
   Store,
@@ -291,14 +292,14 @@ export default function SettingsPage() {
               <p className="mb-3 text-sm font-medium text-zinc-300">Métodos de pagamento ativos</p>
               <div className="space-y-3">
                 <PaymentMethodToggle
-                  icon={<QrCode className="h-5 w-5" />}
+                  icon={<Image src="/images/icons/pix.png" alt="Pix" width={20} height={20} className="size-5 object-contain" />}
                   label="Pix"
                   description="Transferência instantânea — aprovação em segundos."
                   checked={(settings.acceptPix as boolean) ?? true}
                   onChange={(v) => patch('acceptPix', v)}
                 />
                 <PaymentMethodToggle
-                  icon={<CreditCard className="h-5 w-5" />}
+                  icon={<Image src="/images/icons/Mercadopago.png" alt="Mercado Pago" width={20} height={20} className="size-5 object-contain" />}
                   label="Cartão de crédito"
                   description="Parcelamento em até 12x com juros da operadora."
                   checked={(settings.acceptCreditCard as boolean) ?? true}
@@ -312,7 +313,7 @@ export default function SettingsPage() {
                   onChange={(v) => patch('acceptBoleto', v)}
                 />
                 <PaymentMethodToggle
-                  icon={<Wallet className="h-5 w-5" />}
+                  icon={<Image src="/images/icons/PayPal.png" alt="PayPal" width={20} height={20} className="size-5 object-contain" />}
                   label="PayPal"
                   description="Carteira digital internacional."
                   checked={(settings.acceptPayPal as boolean) ?? false}

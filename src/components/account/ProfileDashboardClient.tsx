@@ -6,9 +6,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Camera, Check, ChevronRight, Gift, Heart, Loader2, MapPin, Package, Pencil, Tag, X } from 'lucide-react';
+import { useForm } from 'react-hook-form';
 import { StatusBadge } from '@/components/account/StatusBadge';
 import { Button } from '@/components/ui/Button';
 import { Toast } from '@/components/ui/Toast';
+import { PhoneField } from '@/components/ui/PhoneField';
 import { nameToBgColor, nameToTextColor, getCustomerLevel } from '@/lib/color';
 import { cn } from '@/lib/utils';
 
@@ -133,8 +135,12 @@ export function ProfileDashboardClient({ addresses, orders, user, wishlist, acti
   const [avatarDragging, setAvatarDragging] = useState(false);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [displayName, setDisplayName] = useState(user.name ?? '');
-  const [phone, setPhone] = useState(user.phone ? maskPhone(user.phone) : '');
+  const [phone, setPhone] = useState(user.phone ?? '');
   const [profileSaving, setProfileSaving] = useState(false);
+
+  const { control, formState: { errors: phoneErrors } } = useForm<{ phone: string }>({
+    defaultValues: { phone: user.phone ?? '' },
+  });
   const [profileMessage, setProfileMessage] = useState<string | null>(null);
   const [profileError, setProfileError] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
@@ -176,7 +182,7 @@ export function ProfileDashboardClient({ addresses, orders, user, wishlist, acti
   const profileProgress = useMemo(() => {
     const items = [
       { label: 'nome', complete: Boolean(displayName.trim()) },
-      { label: 'telefone', complete: Boolean(phone.replace(/\D/g, '')) },
+      { label: 'telefone', complete: Boolean(phone) },
       { label: 'foto', complete: Boolean(avatarPreview) },
       { label: 'endereco', complete: addressList.length > 0 },
     ];
@@ -301,9 +307,9 @@ export function ProfileDashboardClient({ addresses, orders, user, wishlist, acti
   }
 
   async function handleSaveProfile() {
-    const phoneError = validatePhone(phone);
-    if (phoneError) {
-      setProfileError(phoneError);
+    const digits = phone.replace(/\D/g, '');
+    if (phone && digits.length < 8) {
+      setProfileError('Telefone inválido.');
       return;
     }
     setProfileError(null);
@@ -622,23 +628,17 @@ export function ProfileDashboardClient({ addresses, orders, user, wishlist, acti
                   />
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                    Telefone
-                  </label>
-                  <input
-                    className={cn(
-                      'w-full rounded-xl border px-4 py-2.5 text-sm text-white placeholder:text-zinc-600 transition-colors focus:outline-none focus:shadow-[0_0_0_3px_rgba(249,115,22,0.1)]',
-                      profileError && profileError.includes('Telefone')
-                        ? 'border-red-500 focus:border-red-500'
-                        : 'border-zinc-700 bg-zinc-800/50 focus:border-brand/60',
-                    )}
-                    value={phone}
-                    onChange={(e) => setPhone(maskPhone(e.target.value))}
-                    placeholder="(00) 00000-0000"
+                  <PhoneField
+                    name="phone"
+                    label="Telefone"
+                    control={control}
+                    error={phoneErrors.phone ?? (profileError?.includes('Telefone') ? { type: 'manual', message: profileError } : undefined)}
+                    defaultCountry="BR"
+                    onChange={(value) => {
+                      setPhone(value);
+                      if (profileError?.includes('Telefone')) setProfileError(null);
+                    }}
                   />
-                  {profileError && profileError.includes('Telefone') ? (
-                    <p className="mt-1 text-xs text-red-400">{profileError}</p>
-                  ) : null}
                 </div>
                 <div>
                   <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-500">

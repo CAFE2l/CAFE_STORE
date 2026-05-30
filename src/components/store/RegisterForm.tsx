@@ -4,8 +4,10 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import { FormEvent, useState } from 'react';
-import { Flame, User, Mail, Lock, Phone, FileText, Eye, EyeOff } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { Flame, User, Mail, Lock, FileText, Eye, EyeOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { PhoneField } from '@/components/ui/PhoneField';
 
 type RegisterFormProps = {
   googleEnabled?: boolean;
@@ -18,13 +20,6 @@ type RegisterResponse = {
     devVerificationUrl?: string;
   };
 };
-
-function formatPhone(value: string) {
-  const digits = value.replace(/\D/g, '').slice(0, 11);
-  if (digits.length <= 2) return `(${digits}`;
-  if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
-  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
-}
 
 function formatCpf(value: string) {
   const digits = value.replace(/\D/g, '').slice(0, 11);
@@ -48,6 +43,10 @@ export function RegisterForm({ googleEnabled = false }: RegisterFormProps) {
   const [acceptPromotions, setAcceptPromotions] = useState(false);
   const [phone, setPhone] = useState('');
   const [cpf, setCpf] = useState('');
+
+  const { control, formState: { errors: phoneErrors }, getValues: getPhoneValues } = useForm<{ phone: string }>({
+    defaultValues: { phone: '' },
+  });
 
   const passwordScore = [
     password.length >= 8,
@@ -84,7 +83,7 @@ export function RegisterForm({ googleEnabled = false }: RegisterFormProps) {
       name: String(formData.get('name') ?? ''),
       email: String(formData.get('email') ?? ''),
       cpf: cpf.replace(/\D/g, ''),
-      phone: phone.replace(/\D/g, ''),
+      phone: phone,
       password: String(formData.get('password') ?? ''),
       confirmPassword: String(formData.get('confirmPassword') ?? ''),
       acceptPromotions,
@@ -167,24 +166,14 @@ export function RegisterForm({ googleEnabled = false }: RegisterFormProps) {
             {/* Telefone + CPF */}
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
-                <label htmlFor="phone" className="text-sm font-medium text-zinc-300">
-                  Telefone / WhatsApp
-                </label>
-                <div className="relative">
-                  <Phone className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
-                  <input
-                    id="phone"
-                    className="input-base w-full pl-11"
-                    name="phone"
-                    type="tel"
-                    inputMode="tel"
-                    autoComplete="tel"
-                    required
-                    placeholder="(00) 00000-0000"
-                    value={phone}
-                    onChange={(e) => setPhone(formatPhone(e.target.value))}
-                  />
-                </div>
+                <PhoneField
+                  name="phone"
+                  label="Telefone / WhatsApp"
+                  control={control}
+                  error={phoneErrors.phone}
+                  defaultCountry="BR"
+                  onChange={(value) => setPhone(value)}
+                />
               </div>
               <div className="grid gap-2">
                 <label htmlFor="cpf" className="text-sm font-medium text-zinc-300">

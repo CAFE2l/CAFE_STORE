@@ -1,12 +1,13 @@
 'use client';
 
+import Image from 'next/image';
 import { CreditCard, Landmark, Wallet } from 'lucide-react';
 import type { PaymentMethod } from './types';
 
-const methods: Array<{ value: PaymentMethod; label: string; icon: React.ElementType }> = [
-  { value: 'pix', label: 'Pix', icon: Landmark },
-  { value: 'mercadopago', label: 'Mercado Pago', icon: CreditCard },
-  { value: 'paypal', label: 'PayPal', icon: Wallet },
+const methods: Array<{ value: PaymentMethod; label: string; icon?: React.ElementType; img?: string }> = [
+  { value: 'pix', label: 'Pix', img: '/images/icons/pix.png' },
+  { value: 'mercadopago', label: 'Mercado Pago', img: '/images/icons/Mercadopago.png' },
+  { value: 'paypal', label: 'PayPal', img: '/images/icons/PayPal.png' },
 ];
 
 type Props = {
@@ -32,7 +33,9 @@ export function MethodSelector({ selected, onChange }: Props) {
                 : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200'
             }`}
           >
-            <Icon className="h-4 w-4" />
+            {method.img ? (
+              <Image src={method.img} alt={method.label} width={18} height={18} className="size-[18px] object-contain" />
+            ) : null}
             <span className="hidden sm:inline">{method.label}</span>
             <span className="sm:hidden">{method.value === 'mercadopago' ? 'MP' : method.label}</span>
           </button>
