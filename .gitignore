@@ -3,3 +3,6 @@
 .next/
 node_modules/
 public/client_secret_*.json
+
+# Stakpak session files
+.stakpak/session*
