@@ -127,7 +127,7 @@ export function CartPageClient() {
       <section className="grid min-w-0 gap-6">
         {items.length > 0 ? (
           <motion.div initial="hidden" animate="show" transition={{ staggerChildren: 0.08 }} className="grid gap-4">
-            <AnimatePresence mode="popLayout">
+            <AnimatePresence>
             {items.map((item, index) => {
               const stockWarning = getStockWarning(item);
               const lineTotal = item.price * item.quantity;
@@ -137,7 +137,7 @@ export function CartPageClient() {
                   key={item.id}
                   variants={cardMotion}
                   transition={{ duration: 0.28, ease: 'easeOut' }}
-                  exit={{ opacity: 0, x: -20, height: 0, marginBottom: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
                   className="relative grid gap-5 rounded-2xl border border-white/[0.08] bg-white/[0.04] p-5 pb-16 shadow-[0_4px_24px_rgba(0,0,0,0.4)] backdrop-blur-[10px] transition-colors duration-200 hover:border-orange-500/30 sm:grid-cols-[96px_minmax(0,1fr)] xl:grid-cols-[96px_minmax(0,1fr)_160px]"
                 >
                   <Link href={`/products/${item.slug}`} className="relative size-24 min-h-20 min-w-20 overflow-hidden rounded-xl bg-zinc-900 sm:size-24">
