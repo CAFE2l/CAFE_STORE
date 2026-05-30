@@ -7,7 +7,8 @@ export default async function AdminBriefingsPage({ searchParams }: { searchParam
   const data = await getBriefingsPage(searchParams);
   const filters = {
     q: String(searchParams?.q ?? ''),
-    status: String(searchParams?.status ?? 'all'),
+    status: String(searchParams?.status ?? 'active'),
+    briefingStatus: String(searchParams?.briefingStatus ?? 'all'),
   };
 
   const pending = data.counts.find((item) => item.status === 'PENDING')?.total ?? 0;

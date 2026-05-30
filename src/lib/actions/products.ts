@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { productEditSchema } from '@/lib/validations/product';
+import { generateSku, sanitizeSku } from '@/lib/sku';
 
 export type ActionState = {
   ok: boolean;
@@ -65,11 +66,22 @@ export async function updateProductAction(
     return { ok: false, message: 'Este slug já está em uso por outro produto.' };
   }
 
+  const sku = sanitizeSku(parsed.data.sku) || generateSku(parsed.data.name);
+  const skuConflict = await prisma.product.findFirst({
+    where: { sku, id: { not: id } },
+    select: { id: true },
+  });
+
+  if (skuConflict) {
+    return { ok: false, message: 'Este SKU já está em uso por outro produto.' };
+  }
+
   try {
     await prisma.product.update({
       where: { id },
       data: {
         name: parsed.data.name,
+        sku,
         slug: parsed.data.slug,
         description: parsed.data.description || null,
         shortDescription: parsed.data.shortDescription || null,

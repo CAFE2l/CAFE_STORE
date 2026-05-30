@@ -1,8 +1,7 @@
 import { Role } from '@prisma/client';
-import { AdminBadge } from '@/components/admin/ui/AdminBadge';
-import { AdminFilters, AdminTable, EmptyPanel, Pagination } from '@/components/admin/ui/AdminTable';
+import { AdminFilters } from '@/components/admin/ui/AdminTable';
+import { UsersAdminClient } from '@/components/admin/users-admin-client';
 import { getUsersPage } from '@/lib/admin/queries';
-import { dateTime } from '@/lib/admin/formatters';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,25 +17,7 @@ export default async function UsuariosPage({ searchParams }: { searchParams?: Re
         { label: 'Clientes', value: Role.CUSTOMER },
         { label: 'Admins', value: Role.ADMIN },
       ]} />
-      <AdminTable>
-        {data.items.length ? (
-          <div className="divide-y divide-white/10">
-            {data.items.map((user) => (
-              <div key={user.id} className="grid gap-3 px-5 py-4 md:grid-cols-[1.4fr_1.2fr_auto_auto] md:items-center">
-                <div>
-                  <p className="font-semibold text-white">{user.name ?? 'Cliente sem nome'}</p>
-                  <p className="text-xs text-zinc-500">{user.email}</p>
-                </div>
-                <span className="text-sm text-zinc-400">{user.phone ?? 'Sem telefone'}</span>
-                <AdminBadge variant={user.role}>{user.role}</AdminBadge>
-                <span className="text-sm text-zinc-400">{user._count.orders} pedidos • {user._count.reviews} avaliações</span>
-                <span className="text-xs text-zinc-600 md:col-span-4">Cadastro em {dateTime.format(user.createdAt)}</span>
-              </div>
-            ))}
-          </div>
-        ) : <EmptyPanel title="Nenhum usuário encontrado" description="Ajuste a busca para localizar clientes cadastrados." />}
-        <Pagination page={data.page} pageSize={data.pageSize} total={data.total} basePath={basePath} />
-      </AdminTable>
+      <UsersAdminClient data={data} basePath={basePath} />
     </div>
   );
 }
@@ -49,4 +30,3 @@ function PageHeader({ title, description }: { title: string; description: string
     </header>
   );
 }
-

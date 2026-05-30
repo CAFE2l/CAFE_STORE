@@ -2,6 +2,7 @@ import { ProductStatus } from '@prisma/client';
 import { requireAdmin } from '@/lib/admin';
 import { prisma } from '@/lib/prisma';
 import { adminProductSchema } from '@/lib/validations';
+import { generateSku, sanitizeSku } from '@/lib/sku';
 
 type ProductRouteProps = { params: { id: string } };
 
@@ -17,6 +18,7 @@ export async function PUT(request: Request, { params }: ProductRouteProps) {
     where: { id: params.id },
     data: {
       ...parsed.data,
+      sku: sanitizeSku(parsed.data.sku) || generateSku(parsed.data.name),
       description: parsed.data.description || null,
       oldPrice: parsed.data.oldPrice ?? null,
       variants: parsed.data.variants ?? undefined,

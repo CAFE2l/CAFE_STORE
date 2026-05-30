@@ -4,17 +4,21 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { useEffect, useRef, useState } from 'react';
+import { LayoutDashboard } from 'lucide-react';
+import type { Role } from '@prisma/client';
 
 interface ProfileDropdownProps {
   userName: string;
   userEmail?: string;
   avatarUrl?: string;
+  userRole?: Role;
   onLogout: () => void;
 }
 
-export function ProfileDropdown({ userName, userEmail, avatarUrl, onLogout }: ProfileDropdownProps) {
+export function ProfileDropdown({ userName, userEmail, avatarUrl, userRole, onLogout }: ProfileDropdownProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const isAdmin = userRole === 'ADMIN';
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -90,6 +94,15 @@ export function ProfileDropdown({ userName, userEmail, avatarUrl, onLogout }: Pr
           <div className="py-1.5">
             <DropdownItem href="/perfil" icon={<UserIcon />} label="Meu Perfil" onClick={() => setOpen(false)} />
             <DropdownItem href="/perfil/seguranca" icon={<SettingsIcon />} label="Configurações" onClick={() => setOpen(false)} />
+            {isAdmin ? (
+              <DropdownItem
+                href="/admin"
+                icon={<LayoutDashboard className="h-4 w-4" />}
+                label="Painel Admin"
+                onClick={() => setOpen(false)}
+                premium
+              />
+            ) : null}
           </div>
 
           <div className="border-t border-white/[0.06] py-1.5">
@@ -116,19 +129,27 @@ function DropdownItem({
   icon,
   label,
   onClick,
+  premium,
 }: {
   href: string;
   icon: ReactNode;
   label: string;
   onClick: () => void;
+  premium?: boolean;
 }) {
   return (
     <Link
       href={href}
       onClick={onClick}
-      className="group flex items-center gap-3 px-4 py-2.5 text-sm text-white/60 transition-all duration-150 hover:bg-white/[0.05] hover:text-white"
+      className={`group flex items-center gap-3 px-4 py-2.5 text-sm transition-all duration-150 ${
+        premium
+          ? 'text-orange-300/85 hover:bg-orange-500/[0.08] hover:text-orange-300'
+          : 'text-white/60 hover:bg-white/[0.05] hover:text-white'
+      }`}
     >
-      <span className="text-white/30 transition-colors group-hover:text-brand">{icon}</span>
+      <span className={`transition-colors ${premium ? 'text-orange-400/80' : 'text-white/30 group-hover:text-brand'}`}>
+        {icon}
+      </span>
       {label}
     </Link>
   );

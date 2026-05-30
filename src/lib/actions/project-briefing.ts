@@ -5,6 +5,7 @@ import { briefingSchema } from '@/lib/validations/project-briefing';
 import { generateWhatsAppUrl } from '@/lib/whatsapp';
 import { revalidatePath } from 'next/cache';
 import type { Prisma } from '@prisma/client';
+import { requireAdmin } from '@/lib/admin';
 
 export type BriefingActionState = {
   ok: boolean;
@@ -105,6 +106,11 @@ export async function updateBriefingStatusAction(
   briefingId: string,
   status: 'PENDING' | 'CONTACTED' | 'IN_NEGOTIATION' | 'APPROVED' | 'REJECTED' | 'ARCHIVED',
 ): Promise<BriefingActionState> {
+  const session = await requireAdmin();
+  if (!session) {
+    return { ok: false, message: 'Acesso negado.' };
+  }
+
   try {
     await prisma.projectBriefing.update({
       where: { id: briefingId },

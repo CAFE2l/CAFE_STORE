@@ -21,12 +21,14 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { productEditSchema, type ProductEditInput } from '@/lib/validations/product';
 import { updateProductAction, type ActionState } from '@/lib/actions/products';
+import { generateSku, sanitizeSku } from '@/lib/sku';
 
 type CategoryOption = { id: string; name: string };
 
 type ProductData = {
   id: string;
   name: string;
+  sku: string | null;
   slug: string;
   description: string | null;
   shortDescription: string | null;
@@ -78,6 +80,7 @@ export function ProductForm({ product, categories }: Props) {
     resolver: zodResolver(productEditSchema),
     defaultValues: {
       name: product.name,
+      sku: product.sku ?? '',
       slug: product.slug,
       description: product.description ?? '',
       shortDescription: product.shortDescription ?? '',
@@ -101,6 +104,7 @@ export function ProductForm({ product, categories }: Props) {
   } = form;
 
   const watchedName = watch('name');
+  const watchedSku = watch('sku') ?? '';
   const watchedSlug = watch('slug');
   const watchedImages = watch('images') ?? [];
   const watchedFeatured = watch('featured');
@@ -202,12 +206,33 @@ export function ProductForm({ product, categories }: Props) {
           </div>
 
           <div className="grid gap-5">
+            <input type="hidden" {...register('sku')} />
             <Field label="Nome do produto" error={errors.name?.message}>
               <input
                 {...register('name')}
                 className="h-11 w-full rounded-xl border border-white/[0.08] bg-black/60 px-4 text-sm text-white outline-none transition-all placeholder:text-zinc-600 hover:border-white/[0.12] focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/20"
                 placeholder="Ex: Camiseta Premium"
               />
+            </Field>
+
+            <Field label="SKU" error={errors.sku?.message}>
+              <div className="relative">
+                <input
+                  value={watchedSku}
+                  onChange={(event) => setValue('sku', sanitizeSku(event.target.value), { shouldValidate: true })}
+                  className="h-11 w-full rounded-xl border border-white/[0.08] bg-black/60 px-4 pr-20 font-mono text-sm uppercase text-white outline-none transition-all placeholder:text-zinc-600 hover:border-white/[0.12] focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/20"
+                  placeholder="CAF-CHA-ABC123"
+                  maxLength={30}
+                />
+                <button
+                  type="button"
+                  onClick={() => setValue('sku', generateSku(watchedName), { shouldValidate: true })}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg bg-orange-500/10 px-2 py-1 text-[10px] font-medium text-orange-400 transition-all hover:bg-orange-500/20 hover:text-orange-300"
+                >
+                  Gerar
+                </button>
+              </div>
+              <span className="text-xs text-zinc-600">Apenas letras maiúsculas, números e hífens.</span>
             </Field>
 
             <Field label="Slug" error={errors.slug?.message}>

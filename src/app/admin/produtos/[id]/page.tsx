@@ -70,10 +70,18 @@ export default async function ProductViewPage({ params }: Props) {
           {/* Status */}
           <div className="rounded-2xl border border-white/[0.08] bg-zinc-950/80 p-6 shadow-lg">
             <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-zinc-500">Status</h2>
-            <div className="flex items-center justify-between">
-              <AdminBadge variant={product.status}>{product.status}</AdminBadge>
-              {product.featured ? (
-                <span className="rounded-full bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-400">Destaque</span>
+            <div className="grid gap-3">
+              <div className="flex items-center justify-between">
+                <AdminBadge variant={product.status}>{product.status}</AdminBadge>
+                {product.featured ? (
+                  <span className="rounded-full bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-400">Destaque</span>
+                ) : null}
+              </div>
+              {product.sku ? (
+                <div className="flex justify-between text-sm">
+                  <span className="text-zinc-500">SKU</span>
+                  <span className="font-mono text-zinc-300">{product.sku}</span>
+                </div>
               ) : null}
             </div>
           </div>

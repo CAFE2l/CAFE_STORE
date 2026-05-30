@@ -5,12 +5,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useState } from 'react';
-import { Heart, ShoppingCart, Sparkles, Zap } from 'lucide-react';
+import { Check, Heart, Loader2, ShoppingCart, Sparkles, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { ProductListItem } from '@/lib/products';
 import { useCartStore } from '@/store/cart';
 import { cn } from '@/lib/utils';
-import { showToast } from './Toast';
 
 type ProductCardProps = {
   product: ProductListItem;
@@ -30,12 +29,16 @@ export function ProductCard({ product, index = 0, isFavorited = false, onCartOpe
   const [loading, setLoading] = useState(false);
   const [favAnim, setFavAnim] = useState(false);
   const [clickAnim, setClickAnim] = useState(false);
+  const [addingToCart, setAddingToCart] = useState(false);
+  const [justAdded, setJustAdded] = useState(false);
+  const cartItems = useCartStore((state) => state.items);
 
   const image = product.images[0] ?? '/placeholder-product.svg';
   const inStock = product.stock > 0;
   const hasDiscount = product.oldPrice && product.oldPrice > product.price;
   const discountPercent = hasDiscount ? Math.round((1 - product.price / product.oldPrice!) * 100) : 0;
   const lowStock = inStock && product.stock < 5;
+  const isInCart = cartItems.some((item) => item.productId === product.id);
 
   async function handleToggleFavorite(e: React.MouseEvent) {
     e.preventDefault();
@@ -66,10 +69,12 @@ export function ProductCard({ product, index = 0, isFavorited = false, onCartOpe
     }
   }
 
-  function handleAddToCart(e: React.MouseEvent) {
+  async function handleAddToCart(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
-    if (!inStock) return;
+    if (!inStock || addingToCart || justAdded || isInCart) return;
+    setAddingToCart(true);
+    await new Promise((resolve) => setTimeout(resolve, 250));
     useCartStore.getState().addItem({
       id: product.id,
       productId: product.id,
@@ -79,12 +84,11 @@ export function ProductCard({ product, index = 0, isFavorited = false, onCartOpe
       image,
       quantity: 1,
     });
-    showToast({
-      message: `${product.name} adicionado como apoio simbolico.`,
-      action: { label: 'Ver carrinho', onClick: () => onCartOpen?.() },
-    });
+    setAddingToCart(false);
+    setJustAdded(true);
     setClickAnim(true);
     setTimeout(() => setClickAnim(false), 300);
+    setTimeout(() => setJustAdded(false), 2500);
   }
 
   return (
@@ -223,21 +227,39 @@ export function ProductCard({ product, index = 0, isFavorited = false, onCartOpe
 
         {/* Botão */}
         <div className="mt-auto pt-4">
-          <button
-            type="button"
-            onClick={handleAddToCart}
-            disabled={!inStock}
-            className={cn(
-              'relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl border px-4 py-3 text-sm font-bold transition-all duration-300 ease-in-out active:scale-[0.97]',
-              inStock
-                ? 'border-orange-500/30 bg-orange-500/15 text-orange-100 shadow-[0_0_22px_rgba(249,115,22,0.12)] hover:border-orange-400/60 hover:bg-orange-500/25 hover:shadow-[0_0_34px_rgba(249,115,22,0.22)]'
-                : 'cursor-default border border-zinc-800 bg-zinc-900 text-zinc-600',
-              clickAnim && 'scale-95',
-            )}
-          >
-            <ShoppingCart className={cn('h-4 w-4 transition-transform', clickAnim && 'animate-bounce')} />
-            <span>{inStock ? 'Apoiar projeto' : 'Indisponível'}</span>
-          </button>
+          {isInCart ? (
+            <Link
+              href="/cart"
+              className="relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl border border-green-500/25 bg-green-500/10 px-4 py-3 text-sm font-bold text-green-200 shadow-[0_0_22px_rgba(34,197,94,0.10)] transition-all duration-300 hover:border-green-400/50 hover:bg-green-500/15"
+            >
+              <Check className="h-4 w-4" />
+              <span>No carrinho → Ver</span>
+            </Link>
+          ) : (
+            <button
+              type="button"
+              onClick={handleAddToCart}
+              disabled={!inStock || addingToCart || justAdded}
+              className={cn(
+                'relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl border px-4 py-3 text-sm font-bold transition-all duration-300 ease-in-out active:scale-[0.97] disabled:cursor-not-allowed',
+                justAdded
+                  ? 'border-green-500/30 bg-green-500/15 text-green-100 shadow-[0_0_22px_rgba(34,197,94,0.14)]'
+                  : inStock
+                    ? 'border-orange-500/30 bg-orange-500/15 text-orange-100 shadow-[0_0_22px_rgba(249,115,22,0.12)] hover:border-orange-400/60 hover:bg-orange-500/25 hover:shadow-[0_0_34px_rgba(249,115,22,0.22)]'
+                    : 'cursor-default border border-zinc-800 bg-zinc-900 text-zinc-600',
+                clickAnim && 'scale-95',
+              )}
+            >
+              {addingToCart ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : justAdded ? (
+                <Check className="h-4 w-4" />
+              ) : (
+                <ShoppingCart className={cn('h-4 w-4 transition-transform', clickAnim && 'animate-bounce')} />
+              )}
+              <span>{addingToCart ? 'Adicionando...' : justAdded ? 'Adicionado!' : inStock ? 'Apoiar projeto' : 'Indisponível'}</span>
+            </button>
+          )}
         </div>
       </div>
     </article>

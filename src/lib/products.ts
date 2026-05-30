@@ -5,6 +5,7 @@ export type ProductListItem = {
   id: string;
   name: string;
   slug: string;
+  sku: string | null;
   description: string | null;
   price: number;
   oldPrice: number | null;
@@ -67,6 +68,7 @@ const fallbackProducts: ProductListItem[] = [
     id: 'prod-camiseta-algodao',
     name: 'Camiseta Algodao',
     slug: 'camiseta-algodao',
+    sku: 'CAF-CAM-ALG-000001',
     description:
       'Apoio simbolico com imagem ilustrativa de camiseta CAFÉ. Nao e produto fisico, nao gera envio e funciona apenas como doacao ao projeto.',
     price: 9.9,
@@ -92,6 +94,7 @@ const fallbackProducts: ProductListItem[] = [
     id: 'prod-tech-tee',
     name: 'Tech Tee Dry Pro',
     slug: 'tech-tee-dry-pro',
+    sku: 'CAF-TEC-TEE-000002',
     description:
       'Apoio simbolico com imagem ilustrativa de tech tee CAFÉ. Nao e produto fisico, nao gera envio e funciona apenas como doacao ao projeto.',
     price: 12.9,
@@ -117,6 +120,7 @@ const fallbackProducts: ProductListItem[] = [
     id: 'prod-moletom-limited',
     name: 'Moletom Limited Edition',
     slug: 'moletom-limited-edition',
+    sku: 'CAF-MOL-LIM-000003',
     description:
       'Apoio simbolico com imagem ilustrativa de moletom CAFÉ. Nao e produto fisico, nao gera envio e funciona apenas como doacao ao projeto.',
     price: 19.9,
@@ -133,6 +137,7 @@ const fallbackProducts: ProductListItem[] = [
     id: 'prod-caneca',
     name: 'Caneca Ceramica',
     slug: 'caneca-ceramica',
+    sku: 'CAF-CAN-CER-000004',
     description:
       'Apoio simbolico com imagem ilustrativa de caneca CAFÉ. Nao e produto fisico, nao gera envio e funciona apenas como doacao ao projeto.',
     price: 7.9,
@@ -159,6 +164,7 @@ const fallbackProducts: ProductListItem[] = [
     id: 'prod-chaveiro-mascote',
     name: 'Chaveiro Mascote',
     slug: 'chaveiro-mascote',
+    sku: 'CAF-CHA-MAS-000005',
     description:
       'Apoio simbolico com imagem ilustrativa de chaveiro CAFÉ. Nao e produto fisico, nao gera envio e funciona apenas como doacao ao projeto.',
     price: 4.9,
@@ -181,6 +187,7 @@ const productListSelect = {
   id: true,
   name: true,
   slug: true,
+  sku: true,
   description: true,
   price: true,
   oldPrice: true,
@@ -263,6 +270,7 @@ function toProductListItem(product: Prisma.ProductGetPayload<{ select: typeof pr
     id: product.id,
     name: product.name,
     slug: product.slug,
+    sku: product.sku,
     description: product.description,
     price: product.price.toNumber(),
     oldPrice: product.oldPrice?.toNumber() ?? null,

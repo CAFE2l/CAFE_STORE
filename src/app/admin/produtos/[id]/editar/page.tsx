@@ -64,6 +64,12 @@ export default async function EditProductPage({ params }: Props) {
         {/* Quick metadata */}
         <div className="flex flex-wrap items-center gap-4 text-xs text-zinc-600">
           <span>Slug: <span className="font-mono text-zinc-500">{product.slug}</span></span>
+          {product.sku ? (
+            <>
+              <span className="hidden sm:inline">·</span>
+              <span>SKU: <span className="font-mono text-zinc-500">{product.sku}</span></span>
+            </>
+          ) : null}
           <span className="hidden sm:inline">·</span>
           <span>Preço: <span className="font-mono text-zinc-500">R$ {Number(product.price).toFixed(2)}</span></span>
           <span className="hidden sm:inline">·</span>

@@ -2,6 +2,7 @@
 
 import { Prisma } from '@prisma/client';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { useCartStore } from '@/store/cart';
@@ -9,7 +10,7 @@ import type { ProductDetail } from '@/lib/products';
 import type { CartVariant } from '@/types';
 import { cn } from '@/lib/utils';
 import { WhatsappIcon } from '@/components/ui/WhatsappIcon';
-import { Heart, Ruler } from 'lucide-react';
+import { Check, Heart, Loader2, Ruler, ShoppingCart } from 'lucide-react';
 import { useVariantStore } from '@/lib/variantStore'
 
 type ProductPurchasePanelProps = {
@@ -46,6 +47,7 @@ function parseVariants(variants: Prisma.JsonValue): VariantOption[] {
 export function ProductPurchasePanel({ product, isFavorited = false, selectedVariants: externalVariants, onVariantsChange }: ProductPurchasePanelProps) {
   const router = useRouter();
   const addItem = useCartStore((state) => state.addItem);
+  const cartItems = useCartStore((state) => state.items);
   const variantOptions = useMemo(() => parseVariants(product.variants), [product.variants]);
   const [quantity, setQuantity] = useState(1);
   const [favorite, setFavorite] = useState(isFavorited);
@@ -76,7 +78,7 @@ export function ProductPurchasePanel({ product, isFavorited = false, selectedVar
 
   const image = product.images[0] ?? '/placeholder-product.svg';
   const inStock = product.stock > 0;
-  const sku = `CAF-${product.slug.slice(0, 3).toUpperCase()}-${product.id.slice(-6).toUpperCase()}`;
+  const sku = product.sku ?? `CAF-${product.slug.slice(0, 3).toUpperCase()}-${product.id.slice(-6).toUpperCase()}`;
   const hasDiscount = product.oldPrice && product.oldPrice > product.price;
   const discountPercent = hasDiscount ? Math.round((1 - product.price / product.oldPrice!) * 100) : 0;
   const pixPrice = product.price * 0.95;
@@ -92,39 +94,47 @@ export function ProductPurchasePanel({ product, isFavorited = false, selectedVar
     setFavorite(isFavorited);
   }, [isFavorited]);
 
-  function getCartVariants(): CartVariant[] {
+  const cartItemId = `${product.id}-${JSON.stringify(selectedVariants)}`;
+  const isCurrentInCart = cartItems.some((item) => item.id === cartItemId);
+
+  const getCartVariants = useCallback((): CartVariant[] => {
     return Object.entries(selectedVariants)
       .filter(([, value]) => value)
       .map(([name, value]) => ({ name, value }));
-  }
+  }, [selectedVariants]);
 
-  const handleAddToCart = useCallback(() => {
+  const handleAddToCart = useCallback(async () => {
     const missing = variantOptions.find((v) => !selectedVariants[v.name]);
     if (missing) {
       variantRefs.current[missing.name]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
+    if (addLoading || addedSuccess || isCurrentInCart) return;
+
     setAddLoading(true);
-    setTimeout(() => {
-      addItem({
-        id: `${product.id}-${JSON.stringify(selectedVariants)}`,
-        productId: product.id,
-        slug: product.slug,
-        name: product.name,
-        image,
-        price: product.price,
-        quantity,
-        stock: product.stock,
-        variants: getCartVariants(),
-      });
-      setAddLoading(false);
-      setAddedSuccess(true);
-      setTimeout(() => setAddedSuccess(false), 2500);
-    }, 400);
-  }, [product, selectedVariants, quantity, image, addItem, variantOptions]);
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    addItem({
+      id: cartItemId,
+      productId: product.id,
+      slug: product.slug,
+      name: product.name,
+      image,
+      price: product.price,
+      quantity,
+      stock: product.stock,
+      variants: getCartVariants(),
+    });
+    setAddLoading(false);
+    setAddedSuccess(true);
+    setTimeout(() => setAddedSuccess(false), 2500);
+  }, [addItem, addLoading, addedSuccess, cartItemId, getCartVariants, image, isCurrentInCart, product, quantity, selectedVariants, variantOptions]);
 
   function handleBuyNow() {
-    handleAddToCart();
+    if (isCurrentInCart) {
+      router.push('/checkout');
+      return;
+    }
+    void handleAddToCart();
     setTimeout(() => router.push('/checkout'), 500);
   }
 
@@ -204,7 +214,7 @@ export function ProductPurchasePanel({ product, isFavorited = false, selectedVar
       ) : null}
 
       {/* SKU */}
-      <p className="text-xs text-zinc-600">SKU: {sku}</p>
+      {sku ? <p className="text-xs text-zinc-600">SKU: {sku}</p> : null}
 
       {/* Price */}
       <div className="flex flex-col gap-1">
@@ -331,27 +341,37 @@ export function ProductPurchasePanel({ product, isFavorited = false, selectedVar
 
       {/* Actions */}
       <div className="flex flex-col gap-3">
-        <Button
-          className={cn(
-            'w-full py-4 text-base relative overflow-hidden transition-all duration-300',
-            addedSuccess && '!bg-green-600/80 !border-green-500/50',
-          )}
-          disabled={!inStock || addLoading}
-          onClick={handleAddToCart}
-        >
-          {addLoading ? (
-            <span className="flex items-center gap-2">
-              <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" /></svg>
-              Adicionando apoio...
-            </span>
-          ) : addedSuccess ? (
-            <span className="flex items-center gap-2">✓ Apoio no carrinho</span>
-          ) : inStock ? (
-            'Adicionar apoio ao carrinho'
-          ) : (
-            '✕ Indisponivel'
-          )}
-        </Button>
+        {isCurrentInCart ? (
+          <Link
+            href="/cart"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-green-500/25 bg-green-500/10 py-4 text-base font-semibold text-green-200 transition-all hover:border-green-400/40 hover:bg-green-500/15"
+          >
+            <Check className="h-4 w-4" />
+            No carrinho → Ver
+          </Link>
+        ) : (
+          <Button
+            className={cn(
+              'w-full py-4 text-base relative overflow-hidden transition-all duration-300',
+              addedSuccess && '!bg-green-600/80 !border-green-500/50',
+            )}
+            disabled={!inStock || addLoading || addedSuccess}
+            onClick={() => void handleAddToCart()}
+          >
+            {addLoading ? (
+              <span className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Adicionando...
+              </span>
+            ) : addedSuccess ? (
+              <span className="flex items-center gap-2"><Check className="h-4 w-4" /> Adicionado!</span>
+            ) : inStock ? (
+              <span className="flex items-center gap-2"><ShoppingCart className="h-4 w-4" /> Adicionar apoio ao carrinho</span>
+            ) : (
+              '✕ Indisponivel'
+            )}
+          </Button>
+        )}
         {inStock ? (
           <Button variant="secondary" className="w-full py-4 text-base no-underline" onClick={handleBuyNow}>
             Apoiar agora

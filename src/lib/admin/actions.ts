@@ -4,9 +4,11 @@ import { FeedbackPriority, FeedbackStatus, ProductStatus } from '@prisma/client'
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
+import { generateSku, sanitizeSku } from '@/lib/sku';
 
 const productSchema = z.object({
   name: z.string().min(3, 'Informe ao menos 3 caracteres.'),
+  sku: z.string().regex(/^[A-Z0-9-]*$/, 'SKU inválido.').max(30).optional(),
   slug: z.string().min(3).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Use um slug URL-safe.'),
   description: z.string().optional(),
   price: z.coerce.number().positive('Informe um preço válido.'),
@@ -44,9 +46,12 @@ export async function createProductAction(input: unknown): Promise<ActionState> 
   }
 
   try {
+    const sku = sanitizeSku(parsed.data.sku) || generateSku(parsed.data.name);
+
     await prisma.product.create({
       data: {
         ...parsed.data,
+        sku,
         price: parsed.data.price,
         featured: Boolean(parsed.data.featured),
         images: [],

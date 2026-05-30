@@ -7,7 +7,6 @@ import { ProductGrid } from '@/components/store/ProductGrid';
 import { ProductFilters } from '@/components/store/ProductFilters';
 import { CartDrawer } from '@/components/store/CartDrawer';
 import { useCartStore } from '@/store/cart';
-import { ToastContainer } from '@/components/store/Toast';
 import type { ProductListItem } from '@/lib/products';
 
 type ProductsPageClientProps = {
@@ -70,7 +69,6 @@ export function ProductsPageClient({ categories, products, favoriteIds, total, t
 
   return (
     <main className="min-h-screen bg-[#000] px-6 pb-16 pt-20">
-      <ToastContainer />
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
 
       <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">

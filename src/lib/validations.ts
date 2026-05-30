@@ -131,6 +131,7 @@ export type WishlistToggleInput = z.infer<typeof wishlistToggleSchema>;
 
 export const adminProductSchema = z.object({
   name: z.string().min(2, 'Nome obrigatorio.'),
+  sku: z.string().regex(/^[A-Z0-9-]*$/, 'SKU invalido.').max(30).optional(),
   slug: z.string().min(2, 'Slug obrigatorio.'),
   description: z.string().optional(),
   price: z.number().positive('Preco invalido.'),

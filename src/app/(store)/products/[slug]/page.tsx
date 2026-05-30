@@ -40,7 +40,7 @@ function getProductMedia(product: NonNullable<Awaited<ReturnType<typeof getProdu
 }
 
 function getSku(product: NonNullable<Awaited<ReturnType<typeof getProductBySlug>>>) {
-  return `CAF-${product.slug.slice(0, 3).toUpperCase()}-${product.id.slice(-6).toUpperCase()}`;
+  return product.sku ?? `CAF-${product.slug.slice(0, 3).toUpperCase()}-${product.id.slice(-6).toUpperCase()}`;
 }
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {

@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import type { ProjectBriefing, BriefingStatus } from '@prisma/client';
-import { Search, Eye, Check, X, Archive, PhoneCall, Handshake } from 'lucide-react';
+import { Search, Eye, Check, X, Archive, PhoneCall, Handshake, Inbox, List } from 'lucide-react';
 import { updateBriefingStatusAction } from '@/lib/admin/actions';
 import { dateTime } from '@/lib/admin/formatters';
 import { cn } from '@/lib/utils';
@@ -32,7 +32,7 @@ const statusClasses: Record<string, string> = {
 
 type Props = {
   briefings: BriefingItem[];
-  filters: { q: string; status: string };
+  filters: { q: string; status: string; briefingStatus: string };
 };
 
 export function BriefingsTable({ briefings, filters }: Props) {
@@ -53,6 +53,20 @@ export function BriefingsTable({ briefings, filters }: Props) {
     });
   }
 
+  const statusTabs = [
+    { label: 'Ativos', value: 'active', icon: Inbox },
+    { label: 'Arquivados', value: 'archived', icon: Archive },
+    { label: 'Todos', value: 'all', icon: List },
+  ];
+
+  function tabHref(value: string) {
+    const params = new URLSearchParams();
+    if (filters.q) params.set('q', filters.q);
+    if (filters.briefingStatus !== 'all') params.set('briefingStatus', filters.briefingStatus);
+    params.set('status', value);
+    return `/admin/briefings?${params.toString()}`;
+  }
+
   return (
     <div className="grid gap-5">
       {toast ? (
@@ -64,7 +78,28 @@ export function BriefingsTable({ briefings, filters }: Props) {
         </div>
       ) : null}
 
+      <div className="flex flex-wrap gap-2">
+        {statusTabs.map((tab) => {
+          const Icon = tab.icon;
+          const active = filters.status === tab.value;
+          return (
+            <a
+              key={tab.value}
+              href={tabHref(tab.value)}
+              className={cn(
+                'flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-medium transition-all duration-200',
+                active ? 'bg-white/[0.10] text-white shadow-sm' : 'text-white/40 hover:text-white/70',
+              )}
+            >
+              <Icon className="h-4 w-4" />
+              {tab.label}
+            </a>
+          );
+        })}
+      </div>
+
       <form className="flex flex-col gap-3 rounded-xl border border-white/10 bg-black/25 p-3 backdrop-blur md:flex-row">
+        <input type="hidden" name="status" value={filters.status} />
         <label className="relative flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
           <input
@@ -75,8 +110,8 @@ export function BriefingsTable({ briefings, filters }: Props) {
           />
         </label>
         <select
-          name="status"
-          defaultValue={filters.status}
+          name="briefingStatus"
+          defaultValue={filters.briefingStatus}
           className="h-11 rounded-lg border border-white/10 bg-zinc-950 px-3 text-sm text-white outline-none focus:border-orange-400/60"
         >
           <option value="all">Todos os status</option>
@@ -100,7 +135,12 @@ export function BriefingsTable({ briefings, filters }: Props) {
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <h2 className="font-semibold text-white">{briefing.name}</h2>
-                    <span className={cn('inline-flex rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase', statusClasses[briefing.status])}>
+                    <span className={cn(
+                      'inline-flex rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase',
+                      briefing.status === 'ARCHIVED'
+                        ? 'border-zinc-500/30 bg-white/[0.06] text-zinc-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]'
+                        : statusClasses[briefing.status],
+                    )}>
                       {statusLabel[briefing.status]}
                     </span>
                   </div>
@@ -154,7 +194,10 @@ export function BriefingsTable({ briefings, filters }: Props) {
                   {briefing.status !== 'ARCHIVED' && briefing.status !== 'REJECTED' ? (
                     <IconButton label="Arquivar" onClick={() => changeStatus(briefing, 'ARCHIVED')}><Archive className="h-4 w-4" /></IconButton>
                   ) : null}
-                  {briefing.status === 'REJECTED' || briefing.status === 'ARCHIVED' ? (
+                  {briefing.status === 'ARCHIVED' ? (
+                    <IconButton label="Restaurar briefing" accent onClick={() => changeStatus(briefing, 'PENDING')}><Check className="h-4 w-4" /></IconButton>
+                  ) : null}
+                  {briefing.status === 'REJECTED' ? (
                     <IconButton label="Reabrir" onClick={() => changeStatus(briefing, 'PENDING')}><Check className="h-4 w-4" /></IconButton>
                   ) : null}
                 </div>
@@ -176,7 +219,7 @@ export function BriefingsTable({ briefings, filters }: Props) {
   );
 }
 
-function IconButton({ children, label, danger, onClick }: { children: React.ReactNode; label: string; danger?: boolean; onClick: () => void }) {
+function IconButton({ children, label, danger, accent, onClick }: { children: React.ReactNode; label: string; danger?: boolean; accent?: boolean; onClick: () => void }) {
   return (
     <button
       type="button"
@@ -185,6 +228,7 @@ function IconButton({ children, label, danger, onClick }: { children: React.Reac
       onClick={onClick}
       className={cn(
         'grid h-9 w-9 place-items-center rounded-lg border border-white/10 text-zinc-300 transition hover:bg-white/5',
+        accent && 'bg-white/[0.05] text-white/40 hover:border-orange-500/30 hover:bg-orange-500/20 hover:text-orange-400',
         danger && 'hover:bg-red-500/10 hover:text-red-200',
       )}
     >

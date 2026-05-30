@@ -2,6 +2,7 @@
 
 import { signOut } from 'next-auth/react';
 import Link from 'next/link';
+import type { Role } from '@prisma/client';
 import { ProfileDropdown } from '@/components/ProfileDropdown';
 
 type AuthMenuProps = {
@@ -10,6 +11,7 @@ type AuthMenuProps = {
         name?: string | null;
         email?: string | null;
         image?: string | null;
+        role?: Role | null;
       }
     | undefined;
 };
@@ -31,6 +33,7 @@ export function AuthMenu({ user }: AuthMenuProps) {
       userName={user.name ?? user.email ?? 'Usuário'}
       userEmail={user.email ?? undefined}
       avatarUrl={user.image ?? undefined}
+      userRole={user.role ?? undefined}
       onLogout={() => {
         void signOut({ callbackUrl: '/' });
       }}

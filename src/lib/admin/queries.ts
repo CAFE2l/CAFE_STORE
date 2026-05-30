@@ -1,4 +1,4 @@
-import { FeedbackPriority, FeedbackStatus, OrderStatus, ProductStatus, Role, BriefingStatus } from '@prisma/client';
+import { FeedbackPriority, FeedbackStatus, OrderStatus, ProductStatus, Role, BriefingStatus, type Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 
 const PAGE_SIZE = 10;
@@ -270,16 +270,41 @@ export async function getUsersPage(searchParams?: Record<string, string | string
         id: true,
         name: true,
         email: true,
+        image: true,
         role: true,
         phone: true,
         createdAt: true,
+        orders: {
+          orderBy: { createdAt: 'desc' },
+          take: 5,
+          select: { id: true, status: true, total: true, createdAt: true },
+        },
+        reviews: {
+          orderBy: { createdAt: 'desc' },
+          take: 3,
+          select: {
+            id: true,
+            rating: true,
+            comment: true,
+            createdAt: true,
+            product: { select: { name: true } },
+          },
+        },
         _count: { select: { orders: true, reviews: true } },
       },
     }),
     prisma.user.count({ where }),
   ]);
 
-  return { items, page, pageSize: PAGE_SIZE, total };
+  return {
+    items: items.map((user) => ({
+      ...user,
+      orders: user.orders.map((order) => ({ ...order, total: money(order.total) })),
+    })),
+    page,
+    pageSize: PAGE_SIZE,
+    total,
+  };
 }
 
 export async function getCategoriesPage() {
@@ -367,11 +392,24 @@ export async function getBannersPage() {
 
 export async function getBriefingsPage(searchParams?: Record<string, string | string[] | undefined>) {
   const q = String(searchParams?.q ?? '').trim();
-  const status = String(searchParams?.status ?? 'all');
+  const archiveStatus = String(searchParams?.status ?? 'active');
+  const briefingStatus = String(searchParams?.briefingStatus ?? 'all');
   const page = Math.max(Number(searchParams?.page ?? 1), 1);
 
+  const statusFilters: Prisma.ProjectBriefingWhereInput[] = [];
+
+  if (archiveStatus === 'archived') {
+    statusFilters.push({ status: BriefingStatus.ARCHIVED });
+  } else if (archiveStatus === 'active') {
+    statusFilters.push({ status: { not: BriefingStatus.ARCHIVED } });
+  }
+
+  if (briefingStatus !== 'all') {
+    statusFilters.push({ status: briefingStatus as BriefingStatus });
+  }
+
   const where = {
-    ...(status !== 'all' ? { status: status as BriefingStatus } : {}),
+    ...(statusFilters.length ? { AND: statusFilters } : {}),
     ...(q
       ? {
           OR: [

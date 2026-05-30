@@ -3,6 +3,11 @@ import { z } from 'zod';
 
 export const productEditSchema = z.object({
   name: z.string().min(2, 'O nome precisa ter pelo menos 2 caracteres.'),
+  sku: z
+    .string()
+    .regex(/^[A-Z0-9-]*$/, 'Use apenas letras maiúsculas, números e hífens.')
+    .max(30, 'SKU deve ter no máximo 30 caracteres.')
+    .optional(),
   slug: z
     .string()
     .min(2, 'O slug é obrigatório.')

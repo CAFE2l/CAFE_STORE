@@ -2,9 +2,9 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Bookmark, Check, CreditCard, LogIn, Minus, Plus, ShieldCheck, Sparkles, Trash2, UserX, Zap } from 'lucide-react';
+import { useState } from 'react';
+import { Check, CreditCard, LogIn, Minus, Plus, ShieldCheck, Sparkles, Trash2, UserX, Zap } from 'lucide-react';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { useCartStore } from '@/store/cart';
 import type { CartItem } from '@/types';
@@ -51,7 +51,7 @@ function getStockWarning(item: CartItem) {
   return item.stock === 1 ? 'so 1 resta!' : `so ${item.stock} restam!`;
 }
 
-function QuantityControl({
+function QuantitySelector({
   max,
   onChange,
   value,
@@ -64,51 +64,39 @@ function QuantityControl({
   const canIncrease = !max || value < max;
 
   return (
-    <div className="inline-flex items-center rounded-full bg-white/[0.06] p-1">
-      <button
+    <div className="inline-flex items-center gap-1 rounded-xl border border-white/[0.08] bg-white/[0.03] p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+      <motion.button
         type="button"
-        className="grid size-8 place-items-center rounded-full border border-white/10 text-white/70 transition duration-150 hover:border-orange-500 hover:bg-orange-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:border-white/10 disabled:hover:bg-transparent"
+        whileTap={{ scale: 0.9 }}
+        className="flex h-7 w-7 items-center justify-center rounded-lg text-white/50 transition-all duration-150 hover:bg-white/[0.08] hover:text-white disabled:cursor-not-allowed disabled:opacity-25"
         disabled={!canDecrease}
         onClick={() => onChange(value - 1)}
         aria-label="Diminuir quantidade"
       >
         <Minus className="size-3.5" />
-      </button>
-      <span className="min-w-8 text-center text-sm font-bold text-white">{value}</span>
-      <button
+      </motion.button>
+      <span className="min-w-8 text-center text-sm font-semibold tabular-nums text-white">{value}</span>
+      <motion.button
         type="button"
-        className="grid size-8 place-items-center rounded-full border border-white/10 text-white/70 transition duration-150 hover:border-orange-500 hover:bg-orange-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:border-white/10 disabled:hover:bg-transparent"
+        whileTap={{ scale: 0.9 }}
+        className="flex h-7 w-7 items-center justify-center rounded-lg text-white/50 transition-all duration-150 hover:bg-white/[0.08] hover:text-white disabled:cursor-not-allowed disabled:opacity-25"
         disabled={!canIncrease}
         onClick={() => onChange(value + 1)}
         aria-label="Aumentar quantidade"
       >
         <Plus className="size-3.5" />
-      </button>
+      </motion.button>
     </div>
   );
 }
 
 export function CartPageClient() {
   const { items, removeItem, total, updateQty } = useCartStore();
-  const [savedForLater, setSavedForLater] = useState<CartItem[]>([]);
   const [confirmed, setConfirmed] = useState(false);
   const taxes = total * taxRate;
   const finalTotal = Math.max(0, total + taxes);
 
-  function handleSaveForLater(item: CartItem) {
-    setSavedForLater((current) => {
-      if (current.some((savedItem) => savedItem.id === item.id)) return current;
-      return [...current, item];
-    });
-    removeItem(item.id);
-  }
-
-  function handleMoveBackToCart(item: CartItem) {
-    useCartStore.getState().addItem(item);
-    setSavedForLater((current) => current.filter((savedItem) => savedItem.id !== item.id));
-  }
-
-  if (items.length === 0 && savedForLater.length === 0) {
+  if (items.length === 0) {
     return (
       <EmptyState
         title="Seu carrinho esta vazio"
@@ -132,13 +120,13 @@ export function CartPageClient() {
                   key={item.id}
                   variants={cardMotion}
                   transition={{ duration: 0.28, ease: 'easeOut' }}
-                  className="grid gap-5 rounded-2xl border border-white/[0.08] bg-white/[0.04] p-5 shadow-[0_4px_24px_rgba(0,0,0,0.4)] backdrop-blur-[10px] transition-colors duration-200 hover:border-orange-500/30 sm:grid-cols-[96px_minmax(0,1fr)] xl:grid-cols-[96px_minmax(0,1fr)_160px]"
+                  className="relative grid gap-5 rounded-2xl border border-white/[0.08] bg-white/[0.04] p-5 pb-16 shadow-[0_4px_24px_rgba(0,0,0,0.4)] backdrop-blur-[10px] transition-colors duration-200 hover:border-orange-500/30 sm:grid-cols-[96px_minmax(0,1fr)] xl:grid-cols-[96px_minmax(0,1fr)_160px]"
                 >
                   <Link href={`/products/${item.slug}`} className="relative size-24 min-h-20 min-w-20 overflow-hidden rounded-xl bg-zinc-900 sm:size-24">
                     <Image src={item.image} alt={item.name} fill sizes="96px" className="object-cover transition duration-300 hover:scale-105" />
                   </Link>
 
-                  <div className="grid min-w-0 content-start gap-3">
+                  <div className="grid min-w-0 content-start gap-3 pr-10">
                     <div className="flex flex-wrap gap-2">
                       {index === 0 ? (
                         <span className="rounded-full bg-orange-500 px-2.5 py-[3px] text-[11px] font-semibold leading-none text-white">
@@ -167,50 +155,37 @@ export function CartPageClient() {
                       <span>27 avaliações</span>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-3 pt-1">
-                      <button
-                        type="button"
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 px-3 py-1 text-xs font-medium text-white/65 transition hover:border-orange-500 hover:text-orange-400"
-                        onClick={() => handleSaveForLater(item)}
-                      >
-                        <Bookmark className="size-3.5" />
-                        Salvar pra depois
-                      </button>
-                      <button
-                        type="button"
-                        className="inline-flex items-center gap-1.5 text-xs font-medium text-red-400/70 transition hover:text-red-400"
-                        onClick={() => removeItem(item.id)}
-                      >
-                        <Trash2 className="size-3.5" />
-                        Remover
-                      </button>
-                    </div>
                   </div>
 
                   <div className="flex flex-wrap items-center justify-between gap-4 xl:flex-col xl:items-end">
                     <div className="text-left xl:text-right">
                       <p className="text-xs text-white/45">Unitário</p>
-                      <p className="text-sm font-medium text-white/75">{currencyFormatter.format(item.price)}</p>
+                      <p className="text-sm font-medium text-white/75">
+                        {currencyFormatter.format(item.price)} × {item.quantity}
+                      </p>
                       <p className="mt-2 text-xs text-white/45">Total</p>
-                      <p className="text-lg font-bold text-orange-500">{currencyFormatter.format(lineTotal)}</p>
+                      <p className="text-lg font-bold text-orange-500">= {currencyFormatter.format(lineTotal)}</p>
                     </div>
-                    <QuantityControl
+                    <QuantitySelector
                       value={item.quantity}
                       max={item.stock}
                       onChange={(quantity) => updateQty(item.id, quantity)}
                     />
                   </div>
+
+                  <button
+                    type="button"
+                    className="absolute bottom-4 right-4 flex items-center gap-1.5 rounded-lg border border-transparent px-2.5 py-1.5 text-xs text-white/30 transition-all duration-200 hover:border-red-500/20 hover:bg-red-500/10 hover:text-red-400"
+                    onClick={() => removeItem(item.id)}
+                  >
+                    <Trash2 className="size-3.5" />
+                    Remover
+                  </button>
                 </motion.article>
               );
             })}
           </motion.div>
-        ) : (
-          <EmptyState
-            title="Carrinho sem itens ativos"
-            subtitle="Voce ainda tem produtos salvos para depois."
-            action={{ href: '/products', label: 'Continuar comprando' }}
-          />
-        )}
+        ) : null}
 
         <section className="rounded-2xl border border-orange-500/20 bg-orange-500/10 p-5 shadow-[0_0_28px_rgba(249,115,22,0.06)]">
           <h2 className="font-display text-xl font-semibold text-white">Apoio simbolico, sem entrega fisica</h2>
@@ -219,31 +194,6 @@ export function CartPageClient() {
             voce esta fazendo uma doacao de apoio ao projeto CAFÉ STORE.
           </p>
         </section>
-
-        {savedForLater.length > 0 ? (
-          <section className="grid gap-4">
-            <h2 className="font-display text-2xl font-semibold text-white">Salvos pra depois</h2>
-            <div className="grid gap-4">
-              {savedForLater.map((item) => (
-                <motion.article
-                  key={item.id}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="flex items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4 shadow-[0_4px_24px_rgba(0,0,0,0.35)] backdrop-blur-[10px]"
-                >
-                  <Image src={item.image} alt={item.name} width={72} height={72} className="size-[72px] rounded-xl object-cover" />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-white">{item.name}</p>
-                    <p className="text-xs text-white/50">{currencyFormatter.format(item.price)}</p>
-                  </div>
-                  <button type="button" className="rounded-xl border border-orange-500/30 px-4 py-2 text-sm font-semibold text-orange-400 transition hover:bg-orange-500/10" onClick={() => handleMoveBackToCart(item)}>
-                    Voltar
-                  </button>
-                </motion.article>
-              ))}
-            </div>
-          </section>
-        ) : null}
 
         <section className="grid gap-4">
           <div>

@@ -4,11 +4,11 @@ import { auth } from '@/lib/auth';
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: { slug: string } },
 ) {
   try {
     const questions = await prisma.productQuestion.findMany({
-      where: { productId: params.id },
+      where: { productId: params.slug },
       orderBy: { createdAt: 'desc' },
       select: {
         id: true,
@@ -31,7 +31,7 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: { slug: string } },
 ) {
   try {
     const session = await auth();
@@ -53,7 +53,7 @@ export async function POST(
     }
 
     const product = await prisma.product.findUnique({
-      where: { id: params.id },
+      where: { id: params.slug },
       select: { id: true },
     });
 
@@ -66,7 +66,7 @@ export async function POST(
 
     const created = await prisma.productQuestion.create({
       data: {
-        productId: params.id,
+        productId: params.slug,
         userId: session.user.id,
         authorName: session.user.name ?? 'Anônimo',
         question: question.trim(),

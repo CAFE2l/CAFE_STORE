@@ -7,9 +7,11 @@ import { PackagePlus, X } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { createProductAction } from '@/lib/admin/actions';
+import { generateSku, sanitizeSku } from '@/lib/sku';
 
 const schema = z.object({
   name: z.string().min(3),
+  sku: z.string().regex(/^[A-Z0-9-]*$/).max(30).optional(),
   slug: z.string().min(3),
   description: z.string().optional(),
   price: z.number().positive(),
@@ -29,6 +31,7 @@ export function ProductCreateDialog({ categories }: { categories: Category[] }) 
     resolver: zodResolver(schema),
     defaultValues: {
       name: '',
+      sku: '',
       slug: '',
       description: '',
       price: 0,
@@ -70,8 +73,28 @@ export function ProductCreateDialog({ categories }: { categories: Category[] }) 
               </button>
             </div>
             <form onSubmit={form.handleSubmit(submit)} className="grid gap-4 p-5 md:grid-cols-2">
+              <input type="hidden" {...form.register('sku')} />
               <Field label="Nome" error={form.formState.errors.name?.message}>
                 <input {...form.register('name')} className="admin-input" />
+              </Field>
+              <Field label="SKU" error={form.formState.errors.sku?.message}>
+                <div className="relative">
+                  <input
+                    value={form.watch('sku') ?? ''}
+                    onChange={(event) => form.setValue('sku', sanitizeSku(event.target.value), { shouldValidate: true })}
+                    className="admin-input pr-20 font-mono uppercase"
+                    placeholder="CAF-CHA-ABC123"
+                    maxLength={30}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => form.setValue('sku', generateSku(form.watch('name')), { shouldValidate: true })}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg bg-orange-500/10 px-2 py-1 text-[10px] font-medium text-orange-400 transition-all hover:bg-orange-500/20 hover:text-orange-300"
+                  >
+                    Gerar
+                  </button>
+                </div>
+                <span className="text-xs text-zinc-600">Gerado automaticamente, mas editável.</span>
               </Field>
               <Field label="Slug" error={form.formState.errors.slug?.message}>
                 <input {...form.register('slug')} className="admin-input" placeholder="camiseta-personalizada" />

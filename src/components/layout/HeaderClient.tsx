@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
+import type { Role } from '@prisma/client';
 import { AuthMenu } from '@/components/layout/AuthMenu';
 import { CartCount } from '@/components/layout/CartCount';
 import { MobileNav } from '@/components/layout/MobileNav';
@@ -19,6 +20,7 @@ type HeaderClientProps = {
     name?: string | null;
     email?: string | null;
     image?: string | null;
+    role?: Role | null;
   } | undefined;
 };
 
