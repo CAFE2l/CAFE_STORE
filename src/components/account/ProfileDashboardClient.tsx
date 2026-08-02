@@ -759,11 +759,12 @@ export function ProfileDashboardClient({ addresses, orders, user, wishlist, acti
         )}
 
         {/* Enderecos + Segurança */}
-        <section className="grid items-start gap-5 lg:grid-cols-[minmax(0,5fr)_minmax(0,4fr)]">
-          <div className="glass-card min-w-0 p-5">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="min-w-0">
-                <h2 className="font-display text-xl font-semibold text-white">Enderecos</h2>
+        <section className="grid gap-6 lg:grid-cols-12">
+          <div className="lg:col-span-7">
+            <div className="glass-card p-5">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <h2 className="font-display text-xl font-semibold text-white">Enderecos</h2>
                 <p className="mt-1 text-xs text-zinc-600">{addressList.length}/3 endereços salvos</p>
               </div>
               {!showAddressForm ? (
@@ -953,11 +954,12 @@ export function ProfileDashboardClient({ addresses, orders, user, wishlist, acti
               </div>
             ) : null}
 
-            <div className="mt-5 grid gap-3">
+            <div className="mt-5 grid gap-4">
               {addressList.length > 0 ? (
                 addressList.map((address) => (
-                  <article key={address.id} className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/30">
-                    <div className="flex flex-wrap items-center justify-between gap-2 px-4 pt-4">
+                  <article key={address.id} className="grid gap-4 rounded-xl border border-zinc-800 bg-zinc-900/30 p-4">
+                    {/* Cabeçalho do Card */}
+                    <div className="flex items-start justify-between gap-3">
                       <div className="flex min-w-0 flex-wrap items-center gap-2">
                         <p className="truncate font-semibold text-white">{address.label || 'Outro'}</p>
                         {address.isDefault ? (
@@ -966,33 +968,52 @@ export function ProfileDashboardClient({ addresses, orders, user, wishlist, acti
                           </span>
                         ) : null}
                       </div>
+                      <MapPin className="size-5 flex-shrink-0 text-brand" />
                     </div>
-                    <div className="mt-2 min-w-0 px-4 text-sm leading-relaxed text-zinc-400">
+
+                    {/* Endereço Texto */}
+                    <div className="space-y-1 text-sm leading-relaxed text-zinc-400">
                       <p>{address.street}, {address.number}{address.complement ? ` - ${address.complement}` : ''}</p>
                       <p>{address.neighborhood} · {address.city}/{address.state}</p>
-                      <p className="mt-0.5 font-mono text-xs text-zinc-500">CEP {address.zip}</p>
+                      <p className="font-mono text-xs text-zinc-500">CEP {address.zip}</p>
                     </div>
-                    <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-white/[0.06] px-3 py-2.5">
+
+                    {/* Botões de Ação */}
+                    <div className="flex flex-wrap items-center gap-2 border-t border-white/[0.06] pt-3">
                       {!address.isDefault ? (
-                        <button className="inline-flex h-8 items-center rounded-lg px-2.5 text-xs font-medium text-zinc-300 transition hover:bg-white/5 hover:text-brand" type="button" onClick={() => void handleSetDefaultAddress(address)}>
+                        <button 
+                          className="inline-flex h-9 items-center rounded-lg px-3 text-xs font-medium text-zinc-300 transition hover:bg-white/5 hover:text-brand" 
+                          type="button" 
+                          onClick={() => void handleSetDefaultAddress(address)}
+                        >
                           Definir como padrão
                         </button>
                       ) : null}
-                      <button className="inline-flex h-8 items-center rounded-lg px-2.5 text-xs font-medium text-brand transition hover:bg-brand/10" type="button" onClick={() => handleEditAddress(address)}>
+                      <button 
+                        className="inline-flex h-9 items-center rounded-lg px-3 text-xs font-medium text-brand transition hover:bg-brand/10" 
+                        type="button" 
+                        onClick={() => handleEditAddress(address)}
+                      >
                         Editar
                       </button>
-                      <button className="inline-flex h-8 items-center rounded-lg px-2.5 text-xs font-medium text-red-400 transition hover:bg-red-500/10" type="button" onClick={() => handleDeleteAddress(address.id)}>
+                      <button 
+                        className="inline-flex h-9 items-center rounded-lg px-3 text-xs font-medium text-red-400 transition hover:bg-red-500/10" 
+                        type="button" 
+                        onClick={() => handleDeleteAddress(address.id)}
+                      >
                         Deletar
                       </button>
                     </div>
                   </article>
                 ))
               ) : (
-                <article className="rounded-xl border border-dashed border-zinc-800 bg-zinc-900/30 p-4 text-sm text-zinc-500">
+                <article className="rounded-xl border border-dashed border-zinc-800 bg-zinc-900/30 p-6 text-center text-sm text-zinc-500">
                   <p className="font-medium text-zinc-400">Nenhum endereco cadastrado</p>
                   <p className="mt-1">Adicione um endereco para agilizar o checkout.</p>
                 </article>
               )}
+              
+              {/* Botão Adicionar Endereço */}
               {!showAddressForm && addressList.length > 0 && addressList.length < 3 ? (
                 <button
                   className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-brand/30 bg-brand/5 px-4 py-3 text-sm font-semibold text-brand transition hover:bg-brand/10"
@@ -1007,38 +1028,60 @@ export function ProfileDashboardClient({ addresses, orders, user, wishlist, acti
                 </button>
               ) : null}
             </div>
+            </div>
           </div>
 
-          <div className="glass-card min-w-0 p-5">
-            <h2 className="font-display text-xl font-semibold text-white">Segurança</h2>
-            <p className="mt-1 text-xs text-zinc-600">Altere sua senha periodicamente para manter a conta segura.</p>
-            <div className="mt-5 grid gap-4">
-              <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-500">Senha atual</label>
-                <input className="h-11 w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 text-sm text-white placeholder:text-zinc-600 focus:border-brand/60 focus:outline-none" type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
-              </div>
-              <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-500">Nova senha</label>
-                <input className="h-11 w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 text-sm text-white placeholder:text-zinc-600 focus:border-brand/60 focus:outline-none" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
-              </div>
-              <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-500">Confirmar nova senha</label>
-                <input className="h-11 w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 text-sm text-white placeholder:text-zinc-600 focus:border-brand/60 focus:outline-none" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
-              </div>
-              <div className="flex flex-wrap items-center gap-3 pt-1">
-                <Button disabled={passwordSaving} onClick={handleChangePassword}>
-                  {passwordSaving ? (
-                    <span className="flex items-center gap-2">
-                      <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" /></svg>
-                      Alterando...
+          <div className="lg:col-span-5">
+            <div className="glass-card p-5">
+              <h2 className="font-display text-xl font-semibold text-white">Segurança</h2>
+              <p className="mt-1 text-xs text-zinc-600">Altere sua senha periodicamente para manter a conta segura.</p>
+              
+              <div className="mt-5 space-y-4">
+                <div className="space-y-2">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-500">Senha atual</label>
+                  <input 
+                    className="h-11 w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 text-sm text-white placeholder:text-zinc-600 focus:border-brand/60 focus:outline-none" 
+                    type="password" 
+                    value={currentPassword} 
+                    onChange={(e) => setCurrentPassword(e.target.value)} 
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-500">Nova senha</label>
+                  <input 
+                    className="h-11 w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 text-sm text-white placeholder:text-zinc-600 focus:border-brand/60 focus:outline-none" 
+                    type="password" 
+                    value={newPassword} 
+                    onChange={(e) => setNewPassword(e.target.value)} 
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-500">Confirmar nova senha</label>
+                  <input 
+                    className="h-11 w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 text-sm text-white placeholder:text-zinc-600 focus:border-brand/60 focus:outline-none" 
+                    type="password" 
+                    value={confirmPassword} 
+                    onChange={(e) => setConfirmPassword(e.target.value)} 
+                  />
+                </div>
+                
+                <div className="flex flex-wrap items-center gap-3 pt-2">
+                  <Button disabled={passwordSaving} onClick={handleChangePassword}>
+                    {passwordSaving ? (
+                      <span className="flex items-center gap-2">
+                        <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" /></svg>
+                        Alterando...
+                      </span>
+                    ) : 'Trocar senha'}
+                  </Button>
+                  {passwordMessage ? (
+                    <span className={passwordMessage.includes('sucesso') ? 'text-sm text-green-400' : 'text-sm text-red-400'}>
+                      {passwordMessage}
                     </span>
-                  ) : 'Trocar senha'}
-                </Button>
-                {passwordMessage ? (
-                  <span className={passwordMessage.includes('sucesso') ? 'text-sm text-green-400' : 'text-sm text-red-400'}>
-                    {passwordMessage}
-                  </span>
-                ) : null}
+                  ) : null}
+                </div>
               </div>
             </div>
           </div>
