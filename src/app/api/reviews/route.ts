@@ -56,6 +56,8 @@ export async function POST(request: Request) {
       productId: parsedBody.data.productId,
       rating: parsedBody.data.rating,
       comment: parsedBody.data.comment,
+      images: parsedBody.data.images ?? [],
+      videoUrl: parsedBody.data.videoUrl,
       verifiedPurchase: Boolean(verifiedPurchase),
       approved: false,
     },

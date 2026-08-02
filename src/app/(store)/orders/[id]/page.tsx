@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { OrderTimeline } from '@/components/account/OrderTimeline';
 import { StatusBadge } from '@/components/account/StatusBadge';
+import { OrderFeedback } from '@/components/account/OrderFeedback';
 import { auth } from '@/lib/auth';
 import { getUserOrderById } from '@/lib/account';
 import nextDynamic from 'next/dynamic'
@@ -141,6 +142,8 @@ export default async function OrderPage({ params }: OrderPageProps) {
           </div>
         </aside>
       </section>
+
+      <OrderFeedback orderId={order.id} />
     </main>
   );
 }

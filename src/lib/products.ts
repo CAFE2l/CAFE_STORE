@@ -28,6 +28,8 @@ export type ProductDetail = ProductListItem & {
     id: string;
     rating: number;
     comment: string | null;
+    images: string[];
+    videoUrl: string | null;
     verifiedPurchase: boolean;
     createdAt: Date;
     user: {
@@ -405,6 +407,8 @@ export async function getProductBySlug(slug: string): Promise<ProductDetail | nu
             id: true,
             rating: true,
             comment: true,
+            images: true,
+            videoUrl: true,
             verifiedPurchase: true,
             createdAt: true,
             user: {
