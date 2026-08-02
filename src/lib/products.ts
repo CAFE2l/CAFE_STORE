@@ -126,7 +126,15 @@ const fallbackProducts: ProductListItem[] = [
     price: 19.9,
     oldPrice: 39.9,
     stock: 18,
-    images: ['/images/produtos/moletons/banner.png', '/images/produtos/moletons/design.png'],
+    images: [
+      '/images/produtos/moletons/preta/banner.png',
+      '/images/produtos/moletons/preta/design.png',
+      '/images/produtos/moletons/preta/frente.png',
+      '/images/produtos/moletons/preta/tras.png',
+      '/images/produtos/moletons/branca/banner.png',
+      '/images/produtos/moletons/branca/design.png',
+      '/images/produtos/moletons/branca/frente.png',
+    ],
     status: ProductStatus.ACTIVE,
     featured: true,
     category: fallbackCategories[2],
@@ -367,7 +375,7 @@ export async function getFeaturedProducts(limit = 8) {
 const fallbackProductVariants: Record<string, Prisma.JsonValue> = {
   'prod-camiseta-algodao': JSON.parse('[{"name":"Tamanho","values":["P","M","G","GG","XG"]},{"name":"Cor","values":["Preta","Branca"]}]'),
   'prod-tech-tee': JSON.parse('[{"name":"Tamanho","values":["P","M","G","GG","XG"]},{"name":"Cor","values":["Preta","Branca"]}]'),
-  'prod-moletom-limited': JSON.parse('[{"name":"Tamanho","values":["P","M","G","GG","XG"]},{"name":"Cor","values":["Preta"]}]'),
+  'prod-moletom-limited': JSON.parse('[{"name":"Tamanho","values":["P","M","G","GG","XG"]},{"name":"Cor","values":["Preta","Branca"]}]'),
   'prod-caneca': JSON.parse('[{"name":"Capacidade","values":["325ml"]},{"name":"Cor","values":["Preta","Branca"]}]'),
   'prod-chaveiro-mascote': JSON.parse('[{"name":"Modelo","values":["Frente colorida + verso preto"]}]'),
 };

@@ -35,7 +35,7 @@ const recommendations = [
   {
     name: 'Moletom Limited Edition Cafe Store',
     href: '/products/moletom-limited-edition-cafe-store',
-    image: '/images/produtos/moletons/banner.png',
+    image: '/images/produtos/moletons/preta/banner.png',
     price: 19.9,
     label: 'Apoio maior',
   },

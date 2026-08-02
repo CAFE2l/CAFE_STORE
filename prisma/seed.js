@@ -70,10 +70,18 @@ const products = [
     stock: 18,
     categorySlug: 'moletons',
     featured: true,
-    images: ['/images/produtos/moletons/banner.png', '/images/produtos/moletons/design.png'],
+    images: [
+      '/images/produtos/moletons/preta/banner.png',
+      '/images/produtos/moletons/preta/design.png',
+      '/images/produtos/moletons/preta/frente.png',
+      '/images/produtos/moletons/preta/tras.png',
+      '/images/produtos/moletons/branca/banner.png',
+      '/images/produtos/moletons/branca/design.png',
+      '/images/produtos/moletons/branca/frente.png',
+    ],
     variants: [
       { name: 'Tamanho', values: ['P', 'M', 'G', 'GG', 'XG'] },
-      { name: 'Cor', values: ['Preta'] },
+      { name: 'Cor', values: ['Preta', 'Branca'] },
     ],
   },
   {
