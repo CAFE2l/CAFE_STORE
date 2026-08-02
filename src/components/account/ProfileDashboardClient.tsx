@@ -759,10 +759,13 @@ export function ProfileDashboardClient({ addresses, orders, user, wishlist, acti
         )}
 
         {/* Enderecos + Segurança */}
-        <section className="grid gap-5 lg:grid-cols-2">
-          <div className="glass-card p-5">
-            <div className="flex items-center justify-between gap-3">
-              <h2 className="font-display text-xl font-semibold text-white">Enderecos</h2>
+        <section className="grid items-start gap-5 lg:grid-cols-[minmax(0,5fr)_minmax(0,4fr)]">
+          <div className="glass-card min-w-0 p-5">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="min-w-0">
+                <h2 className="font-display text-xl font-semibold text-white">Enderecos</h2>
+                <p className="mt-1 text-xs text-zinc-600">{addressList.length}/3 endereços salvos</p>
+              </div>
               {!showAddressForm ? (
                 <button
                   className="rounded-xl border border-brand/30 px-3 py-1.5 text-xs font-semibold text-brand transition hover:bg-brand/10 disabled:cursor-not-allowed disabled:opacity-50"
@@ -778,10 +781,9 @@ export function ProfileDashboardClient({ addresses, orders, user, wishlist, acti
                 </button>
               ) : null}
             </div>
-            <p className="mt-1 text-xs text-zinc-600">{addressList.length}/3 endereços salvos</p>
 
             {showAddressForm ? (
-              <div className="mt-4 grid gap-4 rounded-xl border border-zinc-700/50 bg-zinc-900/80 p-4">
+              <div className="mt-5 grid gap-4 rounded-xl border border-zinc-700/50 bg-zinc-900/80 p-4">
                 <div className="max-w-[180px]">
                   <label className="mb-1.5 block text-xs font-medium text-zinc-500">Tipo</label>
                   <select
@@ -951,44 +953,49 @@ export function ProfileDashboardClient({ addresses, orders, user, wishlist, acti
               </div>
             ) : null}
 
-            <div className="mt-4 grid gap-3">
+            <div className="mt-5 grid gap-3">
               {addressList.length > 0 ? (
                 addressList.map((address) => (
-                  <article key={address.id} className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-4 text-sm text-zinc-400">
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <p className="font-semibold text-white">{address.label || 'Outro'}</p>
-                          {address.isDefault ? (
-                            <span className="rounded-full border border-brand/30 bg-brand/10 px-2 py-0.5 text-[11px] font-semibold text-brand">
-                              Padrão
-                            </span>
-                          ) : null}
-                        </div>
-                        <p className="mt-1">{address.street}, {address.number} - {address.neighborhood}</p>
-                        <p>{address.city}/{address.state} - {address.zip}</p>
-                      </div>
-                      <div className="flex shrink-0 flex-wrap gap-2">
-                        {!address.isDefault ? (
-                          <button className="text-xs font-medium text-zinc-300 transition hover:text-brand" type="button" onClick={() => void handleSetDefaultAddress(address)}>
-                            Definir como padrão
-                          </button>
+                  <article key={address.id} className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/30">
+                    <div className="flex flex-wrap items-center justify-between gap-2 px-4 pt-4">
+                      <div className="flex min-w-0 flex-wrap items-center gap-2">
+                        <p className="truncate font-semibold text-white">{address.label || 'Outro'}</p>
+                        {address.isDefault ? (
+                          <span className="rounded-full border border-brand/30 bg-brand/10 px-2 py-0.5 text-[11px] font-semibold text-brand">
+                            Padrão
+                          </span>
                         ) : null}
-                        <button className="text-xs font-medium text-brand transition hover:brightness-110" type="button" onClick={() => handleEditAddress(address)}>Editar</button>
-                        <button className="text-xs font-medium text-red-400 transition hover:brightness-110" type="button" onClick={() => handleDeleteAddress(address.id)}>Deletar</button>
                       </div>
+                    </div>
+                    <div className="mt-2 min-w-0 px-4 text-sm leading-relaxed text-zinc-400">
+                      <p>{address.street}, {address.number}{address.complement ? ` - ${address.complement}` : ''}</p>
+                      <p>{address.neighborhood} · {address.city}/{address.state}</p>
+                      <p className="mt-0.5 font-mono text-xs text-zinc-500">CEP {address.zip}</p>
+                    </div>
+                    <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-white/[0.06] px-3 py-2.5">
+                      {!address.isDefault ? (
+                        <button className="inline-flex h-8 items-center rounded-lg px-2.5 text-xs font-medium text-zinc-300 transition hover:bg-white/5 hover:text-brand" type="button" onClick={() => void handleSetDefaultAddress(address)}>
+                          Definir como padrão
+                        </button>
+                      ) : null}
+                      <button className="inline-flex h-8 items-center rounded-lg px-2.5 text-xs font-medium text-brand transition hover:bg-brand/10" type="button" onClick={() => handleEditAddress(address)}>
+                        Editar
+                      </button>
+                      <button className="inline-flex h-8 items-center rounded-lg px-2.5 text-xs font-medium text-red-400 transition hover:bg-red-500/10" type="button" onClick={() => handleDeleteAddress(address.id)}>
+                        Deletar
+                      </button>
                     </div>
                   </article>
                 ))
               ) : (
-                <article className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-4 text-sm text-zinc-500">
+                <article className="rounded-xl border border-dashed border-zinc-800 bg-zinc-900/30 p-4 text-sm text-zinc-500">
                   <p className="font-medium text-zinc-400">Nenhum endereco cadastrado</p>
                   <p className="mt-1">Adicione um endereco para agilizar o checkout.</p>
                 </article>
               )}
               {!showAddressForm && addressList.length > 0 && addressList.length < 3 ? (
                 <button
-                  className="rounded-xl border border-dashed border-brand/30 bg-brand/5 px-4 py-3 text-sm font-semibold text-brand transition hover:bg-brand/10"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-brand/30 bg-brand/5 px-4 py-3 text-sm font-semibold text-brand transition hover:bg-brand/10"
                   type="button"
                   onClick={() => {
                     setShowAddressForm(true);
@@ -1002,22 +1009,23 @@ export function ProfileDashboardClient({ addresses, orders, user, wishlist, acti
             </div>
           </div>
 
-          <div className="glass-card p-5">
+          <div className="glass-card min-w-0 p-5">
             <h2 className="font-display text-xl font-semibold text-white">Segurança</h2>
-            <div className="mt-4 grid gap-3">
+            <p className="mt-1 text-xs text-zinc-600">Altere sua senha periodicamente para manter a conta segura.</p>
+            <div className="mt-5 grid gap-4">
               <div>
                 <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-500">Senha atual</label>
-                <input className="w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:border-brand/60 focus:outline-none" type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
+                <input className="h-11 w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 text-sm text-white placeholder:text-zinc-600 focus:border-brand/60 focus:outline-none" type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
               </div>
               <div>
                 <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-500">Nova senha</label>
-                <input className="w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:border-brand/60 focus:outline-none" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+                <input className="h-11 w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 text-sm text-white placeholder:text-zinc-600 focus:border-brand/60 focus:outline-none" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
               </div>
               <div>
                 <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-500">Confirmar nova senha</label>
-                <input className="w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:border-brand/60 focus:outline-none" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+                <input className="h-11 w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 text-sm text-white placeholder:text-zinc-600 focus:border-brand/60 focus:outline-none" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3 pt-1">
                 <Button disabled={passwordSaving} onClick={handleChangePassword}>
                   {passwordSaving ? (
                     <span className="flex items-center gap-2">

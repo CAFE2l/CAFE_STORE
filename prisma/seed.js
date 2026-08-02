@@ -72,12 +72,11 @@ const products = [
     featured: true,
     images: [
       '/images/produtos/moletons/preta/banner.png',
-      '/images/produtos/moletons/preta/design.png',
       '/images/produtos/moletons/preta/frente.png',
       '/images/produtos/moletons/preta/tras.png',
       '/images/produtos/moletons/branca/banner.png',
-      '/images/produtos/moletons/branca/design.png',
-      '/images/produtos/moletons/branca/frente.png',
+      '/images/produtos/moletons/branca/frente.jpg',
+      '/images/produtos/moletons/branca/tras.jpeg',
     ],
     variants: [
       { name: 'Tamanho', values: ['P', 'M', 'G', 'GG', 'XG'] },
