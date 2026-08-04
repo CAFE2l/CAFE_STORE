@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect } from 'react';
 import { X, Trash2, Minus, Plus, ShoppingBag } from 'lucide-react';
-import { useCartStore } from '@/store/cart';
+import { getCartTotal, useCartStore } from '@/store/cart';
 import { cn } from '@/lib/utils';
 
 type CartDrawerProps = {
@@ -14,7 +14,7 @@ type CartDrawerProps = {
 
 export function CartDrawer({ open, onClose }: CartDrawerProps) {
   const items = useCartStore((s) => s.items);
-  const total = useCartStore((s) => s.total);
+  const total = useCartStore((s) => getCartTotal(s.items));
   const updateQty = useCartStore((s) => s.updateQty);
   const removeItem = useCartStore((s) => s.removeItem);
 

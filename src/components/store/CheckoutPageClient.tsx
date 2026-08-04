@@ -8,7 +8,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { AlertCircle, Check, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { useCartStore } from '@/store/cart';
+import { getCartTotal, useCartStore } from '@/store/cart';
 import { fetchAddressByCep } from '@/lib/cep';
 import { cn } from '@/lib/utils';
 import { PhoneField } from '@/components/ui/PhoneField';
@@ -117,7 +117,8 @@ function PremiumInput({
 
 export function CheckoutPageClient() {
   const router = useRouter();
-  const { clearCart, items, total } = useCartStore();
+  const { clearCart, items } = useCartStore();
+  const total = getCartTotal(items);
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<CheckoutForm>(initialForm);
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof CheckoutForm, string>>>({});

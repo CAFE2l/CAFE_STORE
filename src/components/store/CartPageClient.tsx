@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { Check, CreditCard, LogIn, Minus, Plus, ShieldCheck, Sparkles, Trash2, UserX, Zap } from 'lucide-react';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { useCartStore } from '@/store/cart';
+import { getCartTotal, useCartStore } from '@/store/cart';
 import type { CartItem } from '@/types';
 import { cn } from '@/lib/utils';
 
@@ -91,7 +91,8 @@ function QuantitySelector({
 }
 
 export function CartPageClient() {
-  const { items, removeItem, total, updateQty } = useCartStore();
+  const { items, removeItem, updateQty } = useCartStore();
+  const total = getCartTotal(items);
   const [confirmed, setConfirmed] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   const taxes = total * taxRate;

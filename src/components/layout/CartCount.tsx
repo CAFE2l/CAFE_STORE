@@ -3,11 +3,11 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { ShoppingBag } from 'lucide-react';
-import { useCartStore } from '@/store/cart';
+import { getCartCount, useCartStore } from '@/store/cart';
 import { cn } from '@/lib/utils';
 
 export function CartCount() {
-  const count = useCartStore((state) => state.count);
+  const count = useCartStore((state) => getCartCount(state.items));
   const lastAddedAt = useCartStore((state) => state.lastAddedAt);
   const [mounted, setMounted] = useState(false);
   const [bump, setBump] = useState(false);

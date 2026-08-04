@@ -6,7 +6,7 @@ import { useCallback, useEffect, useState, Suspense } from 'react';
 import { ProductGrid } from '@/components/store/ProductGrid';
 import { ProductFilters } from '@/components/store/ProductFilters';
 import { CartDrawer } from '@/components/store/CartDrawer';
-import { useCartStore } from '@/store/cart';
+import { getCartCount, useCartStore } from '@/store/cart';
 import type { ProductListItem } from '@/lib/products';
 
 type ProductsPageClientProps = {
@@ -54,7 +54,7 @@ function buildUrl(base: string, params: Record<string, string | undefined>) {
 export function ProductsPageClient({ categories, products, favoriteIds, total, totalPages, page, params }: ProductsPageClientProps) {
   const [cartOpen, setCartOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const count = useCartStore((s) => s.count);
+  const count = useCartStore((s) => getCartCount(s.items));
   const router = useRouter();
   const pathname = usePathname() ?? '/products';
   const searchParams = useSearchParams();

@@ -11,9 +11,8 @@ type CartToastItem = {
 };
 
 type CartState = {
+  /** The sole client-side source of cart contents. */
   items: CartItem[];
-  total: number;
-  count: number;
   cartToastItem: CartToastItem | null;
   lastAddedAt: number;
   revision: number;
@@ -24,44 +23,76 @@ type CartState = {
   updateQty: (id: string, quantity: number) => void;
   clearCart: () => void;
   syncWithBackend: () => Promise<void>;
-  fetchFromBackend: (merge?: boolean) => Promise<void>;
+  fetchFromBackend: () => Promise<void>;
 };
 
-function calculateTotals(items: CartItem[]) {
-  return {
-    total: items.reduce((sum, item) => sum + item.price * item.quantity, 0),
-    count: items.reduce((sum, item) => sum + item.quantity, 0),
-  };
+export const CART_STORAGE_KEY = 'cafe-store-cart-v2';
+const LEGACY_CART_STORAGE_KEY = 'cafe-store-cart';
+
+type PersistedCartState = Pick<CartState, 'items'>;
+
+export function getCartCount(items: CartItem[]) {
+  return items.reduce((sum, item) => sum + item.quantity, 0);
 }
 
-const cartStorageName = 'cafe-store-cart';
+export function getCartTotal(items: CartItem[]) {
+  return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+}
 
-type PersistedCartState = Pick<CartState, 'items' | 'total' | 'count'>;
+function sanitizeItems(value: unknown): CartItem[] {
+  if (!Array.isArray(value)) return [];
 
-const safeCartStorage: PersistStorage<PersistedCartState> = {
+  const seen = new Set<string>();
+  return value.flatMap((candidate) => {
+    if (
+      typeof candidate !== 'object' || candidate === null ||
+      typeof (candidate as CartItem).id !== 'string' ||
+      typeof (candidate as CartItem).productId !== 'string' ||
+      typeof (candidate as CartItem).slug !== 'string' ||
+      typeof (candidate as CartItem).name !== 'string' ||
+      typeof (candidate as CartItem).image !== 'string' ||
+      !Number.isFinite((candidate as CartItem).price) ||
+      !Number.isFinite((candidate as CartItem).quantity)
+    ) return [];
+
+    const item = candidate as CartItem;
+    if (item.price < 0 || item.quantity < 1 || seen.has(item.id)) return [];
+    seen.add(item.id);
+
+    return [{ ...item, quantity: Math.floor(item.quantity) }];
+  });
+}
+
+const cartStorage: PersistStorage<PersistedCartState> = {
   getItem: (name) => {
     if (typeof window === 'undefined') return null;
-
     try {
+      // Deliberately do not migrate the legacy cache: it was the source of
+      // ghost entries. A v2 cart starts only with data added to this store.
+      window.localStorage.removeItem(LEGACY_CART_STORAGE_KEY);
       const raw = window.localStorage.getItem(name);
       if (!raw) return null;
-      return JSON.parse(raw) as StorageValue<PersistedCartState>;
+      const parsed = JSON.parse(raw) as StorageValue<PersistedCartState>;
+      return { ...parsed, state: { items: sanitizeItems(parsed.state?.items) } };
     } catch {
-      try {
-        window.localStorage.removeItem(cartStorageName);
-      } catch {
-        // localStorage may be unavailable in private or restricted contexts.
-      }
       return null;
     }
   },
   setItem: (name, value) => {
     if (typeof window === 'undefined') return;
-    window.localStorage.setItem(name, JSON.stringify(value));
+    try {
+      window.localStorage.setItem(name, JSON.stringify(value));
+    } catch {
+      // The in-memory cart remains usable if browser storage is unavailable.
+    }
   },
   removeItem: (name) => {
     if (typeof window === 'undefined') return;
-    window.localStorage.removeItem(name);
+    try {
+      window.localStorage.removeItem(name);
+    } catch {
+      // ignore unavailable browser storage
+    }
   },
 };
 
@@ -69,35 +100,22 @@ export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
       items: [],
-      total: 0,
-      count: 0,
       cartToastItem: null,
       lastAddedAt: 0,
       revision: 0,
       addItem: (item) => {
         set((state) => {
-          const existingItem = state.items.find((cartItem) => cartItem.id === item.id);
-          const items = existingItem
-            ? state.items.map((cartItem) =>
-                cartItem.id === item.id
-                  ? {
-                      ...cartItem,
-                      quantity: cartItem.quantity + item.quantity,
-                    }
-                  : cartItem,
-              )
+          const items = state.items.some((current) => current.id === item.id)
+            ? state.items.map((current) => current.id === item.id
+              ? { ...current, quantity: current.quantity + item.quantity }
+              : current)
             : [...state.items, item];
 
           return {
             items,
-            cartToastItem: {
-              name: item.name,
-              imageUrl: item.image,
-              price: item.price,
-            },
-            lastAddedAt: Date.now(),
             revision: state.revision + 1,
-            ...calculateTotals(items),
+            lastAddedAt: Date.now(),
+            cartToastItem: { name: item.name, imageUrl: item.image, price: item.price },
           };
         });
         void get().syncWithBackend();
@@ -105,24 +123,23 @@ export const useCartStore = create<CartState>()(
       showCartToast: (item) => set({ cartToastItem: item, lastAddedAt: Date.now() }),
       clearCartToast: () => set({ cartToastItem: null }),
       removeItem: (id) => {
-        set((state) => {
-          const items = state.items.filter((item) => item.id !== id);
-          return { items, revision: state.revision + 1, ...calculateTotals(items) };
-        });
+        set((state) => ({
+          items: state.items.filter((item) => item.id !== id),
+          revision: state.revision + 1,
+        }));
         void get().syncWithBackend();
       },
       updateQty: (id, quantity) => {
-        set((state) => {
-          const nextQuantity = Math.max(1, quantity);
-          const items = state.items.map((item) =>
-            item.id === id ? { ...item, quantity: nextQuantity } : item,
-          );
-          return { items, revision: state.revision + 1, ...calculateTotals(items) };
-        });
+        set((state) => ({
+          items: state.items.map((item) => item.id === id
+            ? { ...item, quantity: Math.max(1, Math.floor(quantity)) }
+            : item),
+          revision: state.revision + 1,
+        }));
         void get().syncWithBackend();
       },
       clearCart: () => {
-        set((state) => ({ items: [], total: 0, count: 0, revision: state.revision + 1 }));
+        set((state) => ({ items: [], revision: state.revision + 1 }));
         void get().syncWithBackend();
       },
       syncWithBackend: async () => {
@@ -135,69 +152,37 @@ export const useCartStore = create<CartState>()(
             body: JSON.stringify({ items }),
           });
           if (!response.ok || get().revision !== revision) return;
-          const data = await response.json();
-          const canonicalItems = (data.data?.items ?? []) as CartItem[];
-          set({ items: canonicalItems, ...calculateTotals(canonicalItems) });
+
+          const body = await response.json();
+          const canonicalItems = sanitizeItems(body.data?.items);
+          set({ items: canonicalItems });
         } catch {
-          // silent fail
+          // Guests intentionally retain their local v2 cart until they sign in.
         }
       },
-      fetchFromBackend: async (merge = true) => {
+      fetchFromBackend: async () => {
         const revision = get().revision;
         try {
-          const res = await fetch('/api/cart');
-          if (!res.ok) return;
-          const data = await res.json();
-          const serverItems = (data.data?.items ?? []) as CartItem[];
+          const response = await fetch('/api/cart');
+          if (!response.ok) return;
+          const body = await response.json();
+          const serverItems = sanitizeItems(body.data?.items);
 
-          // A user action while this request was in flight wins over its stale
-          // response. This is what prevents a removed item from coming back.
+          // Never let an in-flight GET resurrect an item removed locally.
           if (get().revision !== revision) {
             void get().syncWithBackend();
             return;
           }
-
-          if (!merge) {
-            set({ items: serverItems, ...calculateTotals(serverItems) });
-            return;
-          }
-
-          if (serverItems.length === 0) {
-            return;
-          }
-
-          const localItems = get().items;
-          const merged = [...serverItems];
-
-          for (const local of localItems) {
-            const existing = merged.find((m) => m.id === local.id);
-            if (existing) {
-              existing.quantity = Math.max(existing.quantity, local.quantity);
-            } else {
-              merged.push(local);
-            }
-          }
-
-          set({ items: merged, ...calculateTotals(merged) });
-          get().syncWithBackend();
+          set({ items: serverItems });
         } catch {
-          // silent fail
+          // Keep the persisted local cart when offline.
         }
       },
     }),
     {
-      name: cartStorageName,
-      storage: safeCartStorage,
-      partialize: (state) => ({
-        items: state.items,
-        total: state.total,
-        count: state.count,
-      }),
-      onRehydrateStorage: () => (_state, error) => {
-        if (error && typeof window !== 'undefined') {
-          window.localStorage.removeItem(cartStorageName);
-        }
-      },
+      name: CART_STORAGE_KEY,
+      storage: cartStorage,
+      partialize: (state) => ({ items: state.items }),
     },
   ),
 );

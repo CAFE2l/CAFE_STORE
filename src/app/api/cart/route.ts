@@ -4,6 +4,17 @@ import { ProductStatus } from '@prisma/client';
 import type { CartItem, CartVariant } from '@/types';
 
 type StoredCartItem = Partial<CartItem>;
+const CART_VERSION = 2;
+
+function readCurrentCart(value: unknown): unknown[] {
+  if (
+    typeof value !== 'object' || value === null ||
+    (value as { version?: unknown }).version !== CART_VERSION ||
+    !Array.isArray((value as { items?: unknown }).items)
+  ) return [];
+
+  return (value as { items: unknown[] }).items;
+}
 
 function validVariants(variants: unknown): CartVariant[] | undefined {
   if (!Array.isArray(variants)) return undefined;
@@ -68,7 +79,9 @@ export async function GET() {
   }
 
   if (!process.env.DATABASE_URL) {
-    return Response.json({ success: true, data: { items: [] } });
+    // Do not pretend an unavailable persistence layer is an empty cart: doing
+    // so would overwrite a valid local cart during client synchronization.
+    return Response.json({ success: false, error: 'Banco nao configurado.' }, { status: 503 });
   }
 
   const user = await prisma.user.findUnique({
@@ -76,12 +89,13 @@ export async function GET() {
     select: { cart: true },
   });
 
-  const rawCart = user?.cart as { items?: unknown[] } | null;
-  const items = await canonicalizeCartItems(rawCart?.items ?? []);
+  const rawCart = user?.cart;
+  const items = await canonicalizeCartItems(readCurrentCart(rawCart));
 
-  // Also repair legacy cart JSON, so a corrected price/removal survives reloads.
-  if (JSON.stringify(rawCart?.items ?? []) !== JSON.stringify(items)) {
-    await prisma.user.update({ where: { id: session.user.id }, data: { cart: { items } } });
+  // Legacy records had no version and could contain injected demo entries.
+  // Reset them instead of merging them into the new cart architecture.
+  if (JSON.stringify(rawCart) !== JSON.stringify({ version: CART_VERSION, items })) {
+    await prisma.user.update({ where: { id: session.user.id }, data: { cart: { version: CART_VERSION, items } } });
   }
 
   return Response.json({
@@ -112,7 +126,7 @@ export async function POST(request: Request) {
 
   await prisma.user.update({
     where: { id: session.user.id },
-    data: { cart: { items: canonicalItems } },
+    data: { cart: { version: CART_VERSION, items: canonicalItems } },
   });
 
   return Response.json({ success: true, data: { items: canonicalItems } });
