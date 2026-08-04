@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { compare, hash } from 'bcryptjs';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { strongPasswordSchema } from '@/lib/validations';
 
 export async function PUT(request: Request) {
   const session = await auth();
@@ -9,14 +10,18 @@ export async function PUT(request: Request) {
     return NextResponse.json({ success: false, error: 'Nao autorizado.' }, { status: 401 });
   }
 
-  const body = (await request.json()) as { currentPassword: string; newPassword: string };
+  const body = (await request.json()) as { currentPassword?: string; newPassword?: string };
 
   if (!body.currentPassword || !body.newPassword) {
     return NextResponse.json({ success: false, error: 'Preencha todos os campos.' }, { status: 400 });
   }
 
-  if (body.newPassword.length < 6) {
-    return NextResponse.json({ success: false, error: 'A nova senha deve ter no minimo 6 caracteres.' }, { status: 400 });
+  const parsed = strongPasswordSchema.safeParse(body.newPassword);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { success: false, error: parsed.error.issues[0]?.message ?? 'A nova senha nao atende aos requisitos.' },
+      { status: 400 },
+    );
   }
 
   const user = await prisma.user.findUnique({
@@ -30,7 +35,7 @@ export async function PUT(request: Request) {
 
   const isValid = await compare(body.currentPassword, user.password);
   if (!isValid) {
-    return NextResponse.json({ success: false, error: 'Senha atual incorreta.' }, { status: 400 });
+    return NextResponse.json({ success: false, field: 'currentPassword', error: 'Senha atual incorreta.' }, { status: 400 });
   }
 
   const hashedPassword = await hash(body.newPassword, 12);

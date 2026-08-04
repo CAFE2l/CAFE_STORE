@@ -50,7 +50,7 @@ export function ProductCard({ product, index = 0, isFavorited = false, onCartOpe
     setLoading(true);
     const method = isFav ? 'DELETE' : 'POST';
     try {
-      const res = await fetch('/api/favorites', {
+      const res = await fetch('/api/wishlist', {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ productId: product.id }),
@@ -83,6 +83,7 @@ export function ProductCard({ product, index = 0, isFavorited = false, onCartOpe
       price: product.price,
       image,
       quantity: 1,
+      stock: product.stock,
     });
     setAddingToCart(false);
     setJustAdded(true);

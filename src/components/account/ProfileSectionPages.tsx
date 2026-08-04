@@ -1067,8 +1067,8 @@ export function SecurityPageClient() {
     setMessage('');
     setSuccessState(false);
 
-    const res = await fetch('/api/user/change-password', {
-      method: 'POST',
+    const res = await fetch('/api/account/password', {
+      method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ currentPassword, newPassword }),
     });

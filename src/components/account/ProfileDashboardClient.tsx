@@ -351,8 +351,8 @@ export function ProfileDashboardClient({ addresses, orders, user, wishlist, acti
       return;
     }
 
-    if (newPassword.length < 6) {
-      setPasswordMessage('A nova senha deve ter no minimo 6 caracteres.');
+    if (!/^.{8,}$/.test(newPassword) || !/[A-Z]/.test(newPassword) || !/\d/.test(newPassword) || !/[^A-Za-z0-9]/.test(newPassword)) {
+      setPasswordMessage('A nova senha deve ter 8 caracteres, maiuscula, numero e especial.');
       return;
     }
 

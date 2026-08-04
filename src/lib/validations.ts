@@ -25,7 +25,7 @@ function isValidCpf(value: string) {
   return firstDigit === Number(cpf[9]) && secondDigit === Number(cpf[10]);
 }
 
-const strongPasswordSchema = z
+export const strongPasswordSchema = z
   .string()
   .min(8, 'A senha precisa ter pelo menos 8 caracteres.')
   .regex(/[A-Z]/, 'A senha precisa ter pelo menos uma letra maiuscula.')

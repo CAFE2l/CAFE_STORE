@@ -126,7 +126,10 @@ export function CheckoutPageClient() {
   const [loading, setLoading] = useState(false);
   const [cepLoading, setCepLoading] = useState(false);
   const [hydrated, setHydrated] = useState(false);
-  const finalTotal = useMemo(() => (items.length > 0 ? total + shipping : 0), [items.length, total]);
+  const [couponState, setCouponState] = useState<{ status: 'idle' | 'applied' | 'error'; discount: number; code?: string; error?: string }>({ status: 'idle', discount: 0 });
+  const [couponLoading, setCouponLoading] = useState(false);
+  const couponDiscount = couponState.status === 'applied' ? couponState.discount : 0;
+  const finalTotal = useMemo(() => (items.length > 0 ? total + shipping - couponDiscount : 0), [items.length, total, couponDiscount]);
 
   const { control, formState: { errors: phoneErrors }, setValue: setPhoneValue, trigger: triggerPhone } = useForm<{ phone: string }>({
     defaultValues: { phone: '' },
@@ -189,6 +192,42 @@ export function CheckoutPageClient() {
   function goNext() {
     if (!validateStep()) return;
     setStep((current) => Math.min(4, current + 1));
+  }
+
+  async function handleApplyCoupon() {
+    const code = form.couponCode.trim().toUpperCase();
+    if (!code) return;
+    setCouponLoading(true);
+    setCouponState({ status: 'idle', discount: 0 });
+    try {
+      const res = await fetch('/api/coupons/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code }),
+      });
+      const json = (await res.json()) as { success: boolean; data?: { code: string; discount: number; type: string; minAmount?: number | null }; error?: string };
+      if (!res.ok || !json.data) {
+        setCouponState({ status: 'error', discount: 0, error: json.error ?? 'Cupom inválido.' });
+        return;
+      }
+      if (json.data.minAmount && total < json.data.minAmount) {
+        setCouponState({ status: 'error', discount: 0, error: `Valor mínimo de R$ ${json.data.minAmount.toFixed(2)} para este cupom.` });
+        return;
+      }
+      const discount = json.data.type === 'PERCENTAGE'
+        ? Math.round(total * (json.data.discount / 100) * 100) / 100
+        : Math.min(json.data.discount, total);
+      setCouponState({ status: 'applied', discount, code: json.data.code });
+    } catch {
+      setCouponState({ status: 'error', discount: 0, error: 'Erro ao validar o cupom.' });
+    } finally {
+      setCouponLoading(false);
+    }
+  }
+
+  function handleRemoveCoupon() {
+    setCouponState({ status: 'idle', discount: 0 });
+    updateForm('couponCode', '');
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -605,13 +644,51 @@ export function CheckoutPageClient() {
               value={form.couponCode}
               onChange={(e) => updateForm('couponCode', e.target.value.toUpperCase())}
             />
-            <button
-              type="button"
-              className="rounded-xl border border-orange-500/30 bg-orange-500/10 px-3 text-xs font-semibold text-orange-400 transition hover:bg-orange-500/20"
-            >
-              Aplicar
-            </button>
+            {couponState.status === 'applied' ? (
+              <button
+                type="button"
+                onClick={handleRemoveCoupon}
+                className="rounded-xl border border-green-500/30 bg-green-500/10 px-3 text-xs font-semibold text-green-400 transition hover:bg-green-500/20"
+              >
+                Remover
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => void handleApplyCoupon()}
+                disabled={couponLoading || !form.couponCode.trim()}
+                className="rounded-xl border border-orange-500/30 bg-orange-500/10 px-3 text-xs font-semibold text-orange-400 transition hover:bg-orange-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {couponLoading ? '...' : 'Aplicar'}
+              </button>
+            )}
           </div>
+          <AnimatePresence initial={false}>
+            {couponState.status === 'applied' && (
+              <motion.p
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.15 }}
+                className="flex items-center gap-1 overflow-hidden text-xs text-green-400"
+              >
+                <Check className="size-3 shrink-0" />
+                Cupom {couponState.code} aplicado!
+              </motion.p>
+            )}
+            {couponState.status === 'error' && (
+              <motion.p
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.15 }}
+                className="flex items-center gap-1 overflow-hidden text-xs text-red-400"
+              >
+                <AlertCircle className="size-3 shrink-0" />
+                {couponState.error}
+              </motion.p>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Totals */}
@@ -620,6 +697,12 @@ export function CheckoutPageClient() {
             <dt>Subtotal</dt>
             <dd>{currencyFormatter.format(total)}</dd>
           </div>
+          {couponState.status === 'applied' && (
+            <div className="flex justify-between text-green-400">
+              <dt>Desconto ({couponState.code})</dt>
+              <dd>-{currencyFormatter.format(couponState.discount)}</dd>
+            </div>
+          )}
           <div className="flex justify-between text-white/50">
             <dt>Entrega</dt>
             <dd>Não se aplica</dd>

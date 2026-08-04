@@ -6,6 +6,7 @@ import { ProductGrid } from '@/components/store/ProductGrid';
 import { ProductPageWrapper } from '@/components/store/ProductPageWrapper';
 import { ProductTabs } from '@/components/store/ProductTabs';
 import { RecentlyViewed } from '@/components/store/RecentlyViewed';
+import { ProductInfoFooter } from '@/components/store/ProductInfoFooter';
 import { FloatingWhatsApp } from '@/components/ui/FloatingWhatsApp';
 import ProductGalleryClient from '@/components/store/ProductGalleryClient';
 import ErrorBoundaryClient from '@/components/ui/ErrorBoundaryClient';
@@ -235,22 +236,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </div>
         </section>
 
-        {/* Trust signals */}
-        <div className="mx-auto mt-10 max-w-7xl animate-fade-up" style={{ animationDelay: '200ms' }}>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            {[
-              { icon: <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0110 0v4" /></svg>, title: 'Pagamento seguro', desc: 'Pix, cartao, Mercado Pago e PayPal.' },
-              { icon: <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0016.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 002 8.5c0 2.3 1.5 4.05 3 5.5l7 7z" /></svg>, title: 'Doacao simbolica', desc: 'O valor apoia o projeto CAFÉ STORE.' },
-              { icon: <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>, title: 'Sem envio fisico', desc: 'As imagens sao ilustrativas e nao ha entrega.' },
-            ].map((item) => (
-              <div key={item.title} className="flex flex-col gap-1.5 rounded-xl border border-zinc-800 bg-surface-2/50 p-5 text-brand transition-all duration-300 hover:border-brand/20 hover:bg-surface-2">
-                <span className="mb-1">{item.icon}</span>
-                <span className="text-sm font-semibold text-white">{item.title}</span>
-                <span className="text-xs leading-relaxed text-zinc-500">{item.desc}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+
 
         {/* Tabs */}
         <ProductTabs
@@ -273,6 +259,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
             </div>
           </section>
         ) : null}
+
+        <ProductInfoFooter />
       </div>
 
       <RecentlyViewed />
