@@ -30,6 +30,7 @@ const nextConfig = {
     deviceSizes: [375, 640, 768, 1024, 1280, 1536],
     imageSizes: [64, 96, 128, 256, 384],
   },
+  distDir: '.next-prod',
   headers: async () => [
     {
       source: '/(.*)',
