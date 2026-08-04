@@ -1,6 +1,7 @@
 .env
 .env.local
 .next/
+.next-prod/
 node_modules/
 public/client_secret_*.json
 
