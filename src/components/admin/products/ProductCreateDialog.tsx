@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ProductStatus, type Category } from '@prisma/client';
-import { PackagePlus, X } from 'lucide-react';
+import { Loader2, PackagePlus, X } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { createProductAction } from '@/lib/admin/actions';
@@ -27,6 +27,9 @@ export function ProductCreateDialog({ categories }: { categories: Category[] }) 
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const [imageUrl, setImageUrl] = useState('');
+  const [images, setImages] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
   const form = useForm<ProductForm>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -45,13 +48,40 @@ export function ProductCreateDialog({ categories }: { categories: Category[] }) 
   function submit(values: ProductForm) {
     setMessage(null);
     startTransition(async () => {
-      const result = await createProductAction(values);
+      const result = await createProductAction({ ...values, images });
       setMessage(result.message);
       if (result.ok) {
         form.reset();
+        setImages([]);
+        setImageUrl('');
         setOpen(false);
       }
     });
+  }
+
+  function addImage() {
+    const trimmed = imageUrl.trim();
+    if (!trimmed || images.includes(trimmed)) return;
+    setImages((prev) => [...prev, trimmed]);
+    setImageUrl('');
+  }
+
+  async function uploadImage(file: File | null) {
+    if (!file) return;
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/admin/upload?folder=products', { method: 'POST', body: formData });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        setMessage(json.error ?? 'Falha no upload.');
+        return;
+      }
+      setImages((prev) => [...prev, json.data.url]);
+    } finally {
+      setUploading(false);
+    }
   }
 
   return (
@@ -125,6 +155,33 @@ export function ProductCreateDialog({ categories }: { categories: Category[] }) 
                 <input type="checkbox" {...form.register('featured')} className="rounded border-white/20 bg-black text-orange-500" />
                 Destacar produto
               </label>
+              <Field label="Imagens">
+                <div className="flex gap-2">
+                  <input
+                    value={imageUrl}
+                    onChange={(e) => setImageUrl(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addImage(); } }}
+                    className="admin-input flex-1"
+                    placeholder="https://..."
+                  />
+                  <button type="button" onClick={addImage} className="h-10 rounded-lg border border-white/10 px-3 text-sm text-zinc-300 hover:bg-white/5">+</button>
+                  <label className="flex h-10 cursor-pointer items-center gap-1.5 rounded-lg border border-white/10 px-3 text-sm text-zinc-300 hover:bg-white/5">
+                    {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+                    Upload
+                    <input type="file" accept="image/*" className="hidden" disabled={uploading} onChange={(e) => void uploadImage(e.target.files?.[0] ?? null)} />
+                  </label>
+                </div>
+                {images.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {images.map((url, i) => (
+                      <div key={i} className="relative">
+                        <img src={url} alt={`img-${i}`} className="h-14 w-14 rounded-lg object-cover" />
+                        <button type="button" onClick={() => setImages((prev) => prev.filter((_, idx) => idx !== i))} className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] text-white">×</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </Field>
               {message ? <p className="text-sm text-orange-200 md:col-span-2">{message}</p> : null}
               <div className="flex justify-end gap-2 md:col-span-2">
                 <button type="button" onClick={() => setOpen(false)} className="h-10 rounded-lg border border-white/10 px-4 text-sm text-zinc-300 hover:bg-white/5">

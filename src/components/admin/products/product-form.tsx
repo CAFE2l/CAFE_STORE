@@ -71,6 +71,7 @@ function slugify(value: string) {
 export function ProductForm({ product, categories }: Props) {
   const router = useRouter();
   const [imageUrl, setImageUrl] = useState('');
+  const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [result, setResult] = useState<ActionState | null>(null);
   const autogenSlug = useRef(true);
@@ -147,6 +148,24 @@ export function ProductForm({ product, categories }: Props) {
     },
     [product.id, router],
   );
+
+  async function uploadImage(file: File | null) {
+    if (!file) return;
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/admin/upload?folder=products', { method: 'POST', body: formData });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        setResult({ ok: false, message: json.error ?? 'Falha no upload.' });
+        return;
+      }
+      setValue('images', [...watchedImages, json.data.url], { shouldValidate: false });
+    } finally {
+      setUploading(false);
+    }
+  }
 
   function addImage() {
     const trimmed = imageUrl.trim();
@@ -297,6 +316,11 @@ export function ProductForm({ product, categories }: Props) {
               <ImagePlus className="h-4 w-4" />
               Adicionar
             </button>
+            <label className="flex h-11 shrink-0 cursor-pointer items-center gap-2 rounded-xl border border-white/[0.08] bg-black/60 px-4 text-sm font-medium text-zinc-300 transition-all hover:border-white/[0.15] hover:text-white">
+              {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImagePlus className="h-4 w-4" />}
+              Upload
+              <input type="file" accept="image/*" className="hidden" disabled={uploading} onChange={(e) => void uploadImage(e.target.files?.[0] ?? null)} />
+            </label>
           </div>
 
           <AnimatePresence mode="popLayout">

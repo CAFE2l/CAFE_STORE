@@ -1,11 +1,16 @@
 'use client'
 
 import React from 'react'
+import { logger } from '@/lib/logger'
 
 type ErrorBoundaryState = { hasError: boolean; error?: Error }
 
-export class ErrorBoundaryClient extends React.Component<React.PropsWithChildren<{}>, ErrorBoundaryState> {
-  constructor(props: React.PropsWithChildren<{}>) {
+type ErrorBoundaryClientProps = React.PropsWithChildren<{
+  context?: Record<string, unknown>
+}>
+
+export class ErrorBoundaryClient extends React.Component<ErrorBoundaryClientProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryClientProps) {
     super(props)
     this.state = { hasError: false }
   }
@@ -16,8 +21,11 @@ export class ErrorBoundaryClient extends React.Component<React.PropsWithChildren
 
   componentDidCatch(error: Error, info: any) {
     // Log for debugging; keeps minimal output in production
-    // eslint-disable-next-line no-console
-    console.error('ErrorBoundary caught:', error, info)
+    logger.error('ErrorBoundaryClient', 'Component render failed', {
+      ...(this.props.context ?? {}),
+      error: logger.serializeError(error),
+      componentStack: info?.componentStack ?? undefined,
+    })
   }
 
   render() {

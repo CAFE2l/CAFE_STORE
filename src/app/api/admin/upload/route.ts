@@ -11,13 +11,13 @@ function configureCloudinary() {
   });
 }
 
-function uploadToCloudinary(buffer: Buffer, filename: string) {
+function uploadToCloudinary(buffer: Buffer, filename: string, folder: string) {
   configureCloudinary();
 
   return new Promise<string>((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
       {
-        folder: 'cafe-store/banners',
+        folder,
         public_id: filename.replace(/\.[^.]+$/, ''),
         resource_type: 'image',
         overwrite: false,
@@ -44,6 +44,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: false, error: 'Cloudinary ainda nao configurado. Cole uma URL externa.' }, { status: 503 });
   }
 
+  const { searchParams } = new URL(req.url);
+  const folder = searchParams.get('folder') === 'products' ? 'cafe-store/products' : 'cafe-store/banners';
+
   const form = await req.formData();
   const file = form.get('file');
   if (!(file instanceof File) || !file.type.startsWith('image/')) {
@@ -51,7 +54,7 @@ export async function POST(req: Request) {
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
-  const url = await uploadToCloudinary(buffer, `${Date.now()}-${file.name}`);
+  const url = await uploadToCloudinary(buffer, `${Date.now()}-${file.name}`, folder);
 
   return NextResponse.json({ success: true, data: { url }, url });
 }

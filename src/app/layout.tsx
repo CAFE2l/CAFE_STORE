@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, Playfair_Display } from "next/font/google";
 import Script from "next/script";
 import type { ReactNode } from "react";
+import GlobalErrorLogger from "@/components/ui/GlobalErrorLogger";
 import "react-phone-number-input/style.css";
 import "./globals.css";
 
@@ -46,6 +47,7 @@ export default function RootLayout({
     >
       <body>
         {children}
+        <GlobalErrorLogger />
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
           strategy="afterInteractive"

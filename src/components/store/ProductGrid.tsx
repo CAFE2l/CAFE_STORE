@@ -32,7 +32,7 @@ export function ProductGrid({ products, favoriteIds = [], onCartOpen }: ProductG
   }
 
   return (
-    <div className="grid auto-rows-fr grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-6">
+    <div className="grid auto-rows-fr grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-7 lg:grid-cols-3 lg:gap-8 xl:grid-cols-4 xl:gap-8">
       {products.map((product, index) => (
         <ProductCard key={product.id} product={product} index={index} isFavorited={favoriteIds.includes(product.id)} onCartOpen={onCartOpen} />
       ))}

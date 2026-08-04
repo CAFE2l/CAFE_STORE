@@ -16,6 +16,7 @@ const productSchema = z.object({
   categoryId: z.string().min(1, 'Selecione uma categoria.'),
   status: z.nativeEnum(ProductStatus),
   featured: z.coerce.boolean().optional(),
+  images: z.array(z.string()).optional(),
 });
 
 const categorySchema = z.object({
@@ -54,7 +55,7 @@ export async function createProductAction(input: unknown): Promise<ActionState> 
         sku,
         price: parsed.data.price,
         featured: Boolean(parsed.data.featured),
-        images: [],
+        images: parsed.data.images ?? [],
       },
     });
     refreshAdmin();

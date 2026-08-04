@@ -13,6 +13,7 @@ import { PriceBlock } from '@/components/ui/PriceBlock';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { getProductBySlug, getRelatedProducts } from '@/lib/products';
+import { logger } from '@/lib/logger';
 
 type ProductPageProps = {
   params: {
@@ -76,7 +77,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
     if (!product) notFound();
   } catch (err) {
     // If fetching fails for any reason, show the not-found page (which displays the 404 image)
-    console.error('Error fetching product:', err);
+    logger.error('products/[slug]', 'Failed to load product', {
+      slug: params.slug,
+      error: logger.serializeError(err),
+    });
     notFound();
   }
 
@@ -191,7 +195,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
             <div className="h-px bg-zinc-800" />
 
             {/* Wrap client product UI with ErrorBoundaryClient to capture render errors */}
-            <ErrorBoundaryClient>
+            <ErrorBoundaryClient
+              context={{
+                scope: 'products/[slug]',
+                slug: params.slug,
+                productId: product.id,
+              }}
+            >
               <ProductPageWrapper product={product} isFavorited={Boolean(wishlistFavorite || legacyFavorite)} />
             </ErrorBoundaryClient>
           </div>
