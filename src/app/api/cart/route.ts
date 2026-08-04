@@ -40,7 +40,7 @@ async function canonicalizeCartItems(rawItems: unknown[]): Promise<CartItem[]> {
     (item): item is StoredCartItem =>
       typeof item === 'object' && item !== null && typeof (item as StoredCartItem).productId === 'string',
   );
-  const productIds = [...new Set(candidates.map((item) => item.productId!))];
+  const productIds = Array.from(new Set(candidates.map((item) => item.productId!)));
 
   if (!productIds.length) return [];
 
