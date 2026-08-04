@@ -19,8 +19,8 @@ const taxRate = 0;
 
 const recommendations = [
   {
-    name: 'Caneca Preta Cafe Store',
-    href: '/products/caneca-preta-cafe-store',
+    name: 'Caneca Cafe Store',
+    href: '/products/caneca-cafe-store',
     image: '/images/produtos/caneca/preta/banner.png',
     price: 7.9,
     label: 'Apoio simbolico',

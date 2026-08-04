@@ -39,13 +39,15 @@ type PersistedCartState = Pick<CartState, 'items' | 'total' | 'count'>;
 
 const safeCartStorage: PersistStorage<PersistedCartState> = {
   getItem: (name) => {
+    if (typeof window === 'undefined') return null;
+
     try {
-      const raw = localStorage.getItem(name);
+      const raw = window.localStorage.getItem(name);
       if (!raw) return null;
       return JSON.parse(raw) as StorageValue<PersistedCartState>;
     } catch {
       try {
-        localStorage.removeItem(cartStorageName);
+        window.localStorage.removeItem(cartStorageName);
       } catch {
         // localStorage may be unavailable in private or restricted contexts.
       }
@@ -53,10 +55,12 @@ const safeCartStorage: PersistStorage<PersistedCartState> = {
     }
   },
   setItem: (name, value) => {
-    localStorage.setItem(name, JSON.stringify(value));
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem(name, JSON.stringify(value));
   },
   removeItem: (name) => {
-    localStorage.removeItem(name);
+    if (typeof window === 'undefined') return;
+    window.localStorage.removeItem(name);
   },
 };
 
@@ -98,28 +102,21 @@ export const useCartStore = create<CartState>()(
       removeItem: (id) =>
         set((state) => {
           const items = state.items.filter((item) => item.id !== id);
-
-          return {
-            items,
-            ...calculateTotals(items),
-          };
+          const next = { items, ...calculateTotals(items) };
+          // Persist removal to the server so it doesn't reappear on reload
+          setTimeout(() => get().syncWithBackend(), 0);
+          return next;
         }),
       updateQty: (id, quantity) =>
         set((state) => {
           const nextQuantity = Math.max(1, quantity);
           const items = state.items.map((item) =>
-            item.id === id
-              ? {
-                  ...item,
-                  quantity: nextQuantity,
-                }
-              : item,
+            item.id === id ? { ...item, quantity: nextQuantity } : item,
           );
-
-          return {
-            items,
-            ...calculateTotals(items),
-          };
+          const next = { items, ...calculateTotals(items) };
+          // Persist quantity change to the server
+          setTimeout(() => get().syncWithBackend(), 0);
+          return next;
         }),
       clearCart: () => {
         set({ items: [], total: 0, count: 0 });
@@ -178,8 +175,8 @@ export const useCartStore = create<CartState>()(
         count: state.count,
       }),
       onRehydrateStorage: () => (_state, error) => {
-        if (error) {
-          localStorage.removeItem(cartStorageName);
+        if (error && typeof window !== 'undefined') {
+          window.localStorage.removeItem(cartStorageName);
         }
       },
     },

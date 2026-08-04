@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useState, useTransition } from 'react';
+import { useState, useTransition, type ReactNode } from 'react';
 import { Eye, Shield, Trash2, X } from 'lucide-react';
 import type { Role } from '@prisma/client';
 import { EmptyPanel, Pagination } from '@/components/admin/ui/AdminTable';

@@ -69,7 +69,7 @@ const fallbackProducts: ProductListItem[] = [
   {
     id: 'prod-camiseta-algodao',
     name: 'Camiseta Algodao',
-    slug: 'camiseta-algodao',
+    slug: 'camiseta-algodao-cafe-store',
     sku: 'CAF-CAM-ALG-000001',
     description:
       'Apoio simbolico com imagem ilustrativa de camiseta CAFÉ. Nao e produto fisico, nao gera envio e funciona apenas como doacao ao projeto.',
@@ -95,7 +95,7 @@ const fallbackProducts: ProductListItem[] = [
   {
     id: 'prod-tech-tee',
     name: 'Tech Tee Dry Pro',
-    slug: 'tech-tee-dry-pro',
+    slug: 'tech-tee-dry-pro-cafe-store',
     sku: 'CAF-TEC-TEE-000002',
     description:
       'Apoio simbolico com imagem ilustrativa de tech tee CAFÉ. Nao e produto fisico, nao gera envio e funciona apenas como doacao ao projeto.',
@@ -121,7 +121,7 @@ const fallbackProducts: ProductListItem[] = [
   {
     id: 'prod-moletom-limited',
     name: 'Moletom Limited Edition',
-    slug: 'moletom-limited-edition',
+    slug: 'moletom-limited-edition-cafe-store',
     sku: 'CAF-MOL-LIM-000003',
     description:
       'Apoio simbolico com imagem ilustrativa de moletom CAFÉ. Nao e produto fisico, nao gera envio e funciona apenas como doacao ao projeto.',
@@ -145,7 +145,7 @@ const fallbackProducts: ProductListItem[] = [
   {
     id: 'prod-caneca',
     name: 'Caneca Ceramica',
-    slug: 'caneca-ceramica',
+    slug: 'caneca-cafe-store',
     sku: 'CAF-CAN-CER-000004',
     description:
       'Apoio simbolico com imagem ilustrativa de caneca CAFÉ. Nao e produto fisico, nao gera envio e funciona apenas como doacao ao projeto.',
@@ -172,7 +172,7 @@ const fallbackProducts: ProductListItem[] = [
   {
     id: 'prod-chaveiro-mascote',
     name: 'Chaveiro Mascote',
-    slug: 'chaveiro-mascote',
+    slug: 'chaveiro-mascote-cafe-store',
     sku: 'CAF-CHA-MAS-000005',
     description:
       'Apoio simbolico com imagem ilustrativa de chaveiro CAFÉ. Nao e produto fisico, nao gera envio e funciona apenas como doacao ao projeto.',
@@ -220,6 +220,21 @@ const productListSelect = {
     },
   },
 } satisfies Prisma.ProductSelect;
+
+const productReviewSelect = {
+  id: true,
+  rating: true,
+  comment: true,
+  videoUrl: true,
+  verifiedPurchase: true,
+  createdAt: true,
+  user: {
+    select: {
+      name: true,
+      image: true,
+    },
+  },
+} satisfies Prisma.ReviewSelect;
 
 const emptyProducts: PaginatedProducts = {
   products: [],
@@ -403,21 +418,7 @@ export async function getProductBySlug(slug: string): Promise<ProductDetail | nu
           orderBy: {
             createdAt: 'desc',
           },
-          select: {
-            id: true,
-            rating: true,
-            comment: true,
-            images: true,
-            videoUrl: true,
-            verifiedPurchase: true,
-            createdAt: true,
-            user: {
-              select: {
-                name: true,
-                image: true,
-              },
-            },
-          },
+          select: productReviewSelect,
         },
       },
     })
@@ -437,7 +438,10 @@ export async function getProductBySlug(slug: string): Promise<ProductDetail | nu
   return {
     ...toProductListItem(product),
     variants: product.variants,
-    reviews: product.reviews,
+    reviews: product.reviews.map((review) => ({
+      ...review,
+      images: [],
+    })),
   };
 }
 

@@ -7,6 +7,8 @@ const nextConfig = {
       { pathname: '/images/**' },
       { pathname: '/uploads/**' },
       { pathname: '/placeholder-product.svg' },
+      { pathname: '/favicon.png' },
+      { pathname: '/favicon.ico' },
     ],
     remotePatterns: [
       {
