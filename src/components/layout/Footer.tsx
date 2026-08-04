@@ -154,6 +154,9 @@ function SocialIconButton({
 export function Footer() {
   const footerRef = useRef<HTMLElement>(null);
   const [visible, setVisible] = useState(false);
+  const [isOnline, setIsOnline] = useState(false);
+  const [year, setYear] = useState<number | null>(null);
+
   useEffect(() => {
     const el = footerRef.current;
     if (!el) return;
@@ -168,10 +171,13 @@ export function Footer() {
     return () => observer.disconnect();
   }, []);
 
-  const now = new Date();
-  const hour = now.getHours();
-  const day = now.getDay();
-  const isOnline = day >= 1 && day <= 5 && hour >= 9 && hour < 18;
+  useEffect(() => {
+    const now = new Date();
+    const hour = now.getHours();
+    const day = now.getDay();
+    setIsOnline(day >= 1 && day <= 5 && hour >= 9 && hour < 18);
+    setYear(now.getFullYear());
+  }, []);
 
   return (
     <footer
@@ -366,7 +372,7 @@ export function Footer() {
         }}
       >
         <p className="whitespace-nowrap text-xs text-[#666666]">
-          &copy; {new Date().getFullYear()} CAFÉ STORE &mdash; Todos os direitos
+          &copy; {year ?? ''} CAFÉ STORE &mdash; Todos os direitos
           reservados.
         </p>
 

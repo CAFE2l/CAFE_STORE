@@ -44,6 +44,12 @@ const tabs = [
 
 type TabId = (typeof tabs)[number]['id'];
 
+// Values rendered on both the server and client must be deterministic. A
+// random value here causes React hydration to fail on product pages.
+function helpfulCount(reviewId: string) {
+  return Array.from(reviewId).reduce((total, character) => (total * 31 + character.charCodeAt(0)) % 15, 0);
+}
+
 function getDefaultSpecs(category?: string) {
   if (category === 'Camisetas') {
     return {
@@ -490,7 +496,7 @@ export function ProductTabs({ category, description, productName, reviews = [], 
                       ) : null}
 
                       <div className="mt-3 flex items-center gap-4 text-xs text-zinc-600">
-                        <button type="button" className="transition hover:text-zinc-400">👍 Útil ({Math.floor(Math.random() * 15)})</button>
+                        <button type="button" className="transition hover:text-zinc-400">👍 Útil ({helpfulCount(review.id)})</button>
                       </div>
                     </article>
                   ))}
