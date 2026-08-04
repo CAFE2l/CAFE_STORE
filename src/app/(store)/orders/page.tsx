@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
-import { OrdersPageClient } from '@/components/account/ProfileSectionPages';
+import { OrdersPageClient } from '@/components/account/OrdersPageClient';
 import { auth } from '@/lib/auth';
 
 export const metadata: Metadata = {

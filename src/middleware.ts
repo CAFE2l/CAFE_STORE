@@ -1,7 +1,7 @@
 import { getToken } from 'next-auth/jwt';
 import { NextResponse, type NextRequest } from 'next/server';
 
-const protectedRoutes = ['/orders', '/profile', '/perfil', '/checkout'];
+const protectedRoutes = ['/orders', '/profile', '/perfil'];
 const adminRoutePrefix = '/admin';
 const authSecret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
 

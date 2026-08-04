@@ -12,16 +12,6 @@ const shipping = 0;
 export async function POST(request: Request) {
   const session = await auth();
 
-  if (!session?.user?.id) {
-    return Response.json(
-      {
-        success: false,
-        error: 'Faca login para finalizar o apoio.',
-      },
-      { status: 401 },
-    );
-  }
-
   const body: unknown = await request.json();
   const parsedBody = checkoutSchema.safeParse(body);
 
@@ -120,7 +110,7 @@ export async function POST(request: Request) {
     order = await prisma.$transaction(async (transaction) => {
     const createdOrder = await transaction.order.create({
       data: {
-        userId: session.user.id,
+        userId: session?.user?.id ?? null,
         status: OrderStatus.PENDING,
         total,
         paymentMethod: input.paymentMethod,

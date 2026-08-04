@@ -134,7 +134,7 @@ export async function getDashboardData() {
       status: order.status,
       total: money(order.total),
       createdAt: order.createdAt,
-      customer: order.user.name ?? order.user.email,
+      customer: order.user?.name ?? order.user?.email ?? 'Convidado',
       itemCount: order.items.reduce((sum, item) => sum + item.quantity, 0),
     })),
     topProducts: topItems.map((item) => {

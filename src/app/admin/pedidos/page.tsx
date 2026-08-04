@@ -30,7 +30,7 @@ export default async function PedidosPage({ searchParams }: { searchParams?: Rec
               <div key={order.id} className="grid gap-3 px-5 py-4 md:grid-cols-[1fr_1.4fr_auto_auto_auto_auto] md:items-center">
                 <span className="font-mono text-sm text-zinc-300">#{order.id.slice(0, 10)}</span>
                 <div>
-                  <p className="text-sm font-medium text-white">{order.user.name ?? order.user.email}</p>
+                  <p className="text-sm font-medium text-white">{order.user?.name ?? order.user?.email ?? 'Convidado'}</p>
                   <p className="text-xs text-zinc-500">{dateTime.format(order.createdAt)}</p>
                 </div>
                 <AdminBadge variant={order.status}>{order.status}</AdminBadge>
