@@ -3,6 +3,9 @@ const nextConfig = {
   reactStrictMode: true,
   compress: true,
   images: {
+    // Public assets are served directly. This avoids deployment-specific 400s
+    // from the Next image optimizer while retaining all existing <Image> uses.
+    unoptimized: true,
     localPatterns: [
       { pathname: '/images/**' },
       { pathname: '/uploads/**' },

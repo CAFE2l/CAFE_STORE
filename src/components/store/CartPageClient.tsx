@@ -91,14 +91,14 @@ function QuantitySelector({
 }
 
 export function CartPageClient() {
-  const { items, removeItem, updateQty } = useCartStore();
+  const { items, removeItem, updateQty, isHydrated } = useCartStore();
   const total = getCartTotal(items);
   const [confirmed, setConfirmed] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   const taxes = total * taxRate;
   const finalTotal = Math.max(0, total + taxes);
 
-  useEffect(() => setHydrated(true), []);
+  useEffect(() => setHydrated(isHydrated), [isHydrated]);
 
   if (!hydrated) {
     return (

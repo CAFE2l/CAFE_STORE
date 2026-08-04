@@ -16,6 +16,7 @@ type CartState = {
   cartToastItem: CartToastItem | null;
   lastAddedAt: number;
   revision: number;
+  isHydrated: boolean;
   addItem: (item: CartItem) => void;
   showCartToast: (item: CartToastItem) => void;
   clearCartToast: () => void;
@@ -103,6 +104,7 @@ export const useCartStore = create<CartState>()(
       cartToastItem: null,
       lastAddedAt: 0,
       revision: 0,
+      isHydrated: false,
       addItem: (item) => {
         set((state) => {
           const items = state.items.some((current) => current.id === item.id)
@@ -182,7 +184,14 @@ export const useCartStore = create<CartState>()(
     {
       name: CART_STORAGE_KEY,
       storage: cartStorage,
+      // Hydrating synchronously makes the first browser render differ from
+      // the server render whenever localStorage has cart items. Providers
+      // explicitly rehydrates after mount instead.
+      skipHydration: true,
       partialize: (state) => ({ items: state.items }),
+      onRehydrateStorage: () => () => {
+        useCartStore.setState({ isHydrated: true });
+      },
     },
   ),
 );
