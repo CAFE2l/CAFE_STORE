@@ -19,21 +19,21 @@ const taxRate = 0;
 
 const recommendations = [
   {
-    name: 'Caneca Cafe Store',
+    name: 'Caneca Café Store',
     href: '/products/caneca-cafe-store',
     image: '/images/produtos/caneca/preta/banner.png',
     price: 7.9,
     label: 'Apoio simbolico',
   },
   {
-    name: 'Chaveiro Mascote Cafe Store',
+    name: 'Chaveiro Mascote Café Store',
     href: '/products/chaveiro-mascote-cafe-store',
     image: '/images/produtos/chaveiro/design.png',
     price: 4.9,
     label: 'Doacao rapida',
   },
   {
-    name: 'Moletom Limited Edition Cafe Store',
+    name: 'Moletom Edição Limitada Café Store',
     href: '/products/moletom-limited-edition-cafe-store',
     image: '/images/produtos/moletons/preta/banner.png',
     price: 19.9,

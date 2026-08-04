@@ -41,27 +41,34 @@ export async function POST(request: Request) {
   const verifiedPurchase = await prisma.orderItem.findFirst({
     where: {
       productId: parsedBody.data.productId,
-      order: {
-        userId: session.user.id,
-      },
+      order: { userId: session.user.id },
     },
-    select: {
-      id: true,
-    },
+    select: { id: true },
   });
 
-  const review = await prisma.review.create({
-    data: {
-      userId: session.user.id,
-      productId: parsedBody.data.productId,
-      rating: parsedBody.data.rating,
-      comment: parsedBody.data.comment,
-      images: parsedBody.data.images ?? [],
-      videoUrl: parsedBody.data.videoUrl,
-      verifiedPurchase: Boolean(verifiedPurchase),
-      approved: false,
-    },
-  });
+  // Filter out any blob: URLs that were never uploaded — only persist http(s) URLs
+  const persistedImages = (parsedBody.data.images ?? []).filter((url) =>
+    url.startsWith('http://') || url.startsWith('https://'),
+  );
+
+  let review;
+  try {
+    review = await prisma.review.create({
+      data: {
+        userId: session.user.id,
+        productId: parsedBody.data.productId,
+        rating: parsedBody.data.rating,
+        comment: parsedBody.data.comment,
+        images: persistedImages,
+        videoUrl: parsedBody.data.videoUrl ?? null,
+        verifiedPurchase: Boolean(verifiedPurchase),
+        approved: false,
+      },
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Erro ao salvar avaliacao.';
+    return Response.json({ success: false, error: message }, { status: 500 });
+  }
 
   return Response.json(
     {

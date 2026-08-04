@@ -52,18 +52,9 @@ export async function POST(
       );
     }
 
-    const product = await prisma.product.findUnique({
-      where: { id: params.slug },
-      select: { id: true },
-    });
-
-    if (!product) {
-      return NextResponse.json(
-        { success: false, error: 'Produto não encontrado.' },
-        { status: 404 },
-      );
-    }
-
+    // The catalogue falls back to hardcoded "symbolic support" products whose
+    // ids (e.g. `prod-moletom-limited`) are not rows in the database, so do not
+    // gate the create on a DB product lookup.
     const created = await prisma.productQuestion.create({
       data: {
         productId: params.slug,

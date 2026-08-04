@@ -11,7 +11,7 @@ const categories = [
 
 const products = [
   {
-    name: 'Camiseta Algodao Cafe Store',
+    name: 'Camisa Normal Café Store',
     slug: 'camiseta-algodao-cafe-store',
     description:
       'Apoio simbolico com imagem ilustrativa de camiseta CAFÉ. Nao e produto fisico, nao gera envio e funciona apenas como doacao ao projeto.',
@@ -36,7 +36,7 @@ const products = [
     ],
   },
   {
-    name: 'Tech Tee Dry Pro Cafe Store',
+    name: 'Camisa Poliéster Café Store',
     slug: 'tech-tee-dry-pro-cafe-store',
     description:
       'Apoio simbolico com imagem ilustrativa de tech tee CAFÉ. Nao e produto fisico, nao gera envio e funciona apenas como doacao ao projeto.',
@@ -61,7 +61,7 @@ const products = [
     ],
   },
   {
-    name: 'Moletom Limited Edition Cafe Store',
+    name: 'Moletom Edição Limitada Café Store',
     slug: 'moletom-limited-edition-cafe-store',
     description:
       'Apoio simbolico com imagem ilustrativa de moletom CAFÉ. Nao e produto fisico, nao gera envio e funciona apenas como doacao ao projeto.',
@@ -84,7 +84,7 @@ const products = [
     ],
   },
   {
-    name: 'Caneca Cafe Store',
+    name: 'Caneca Café Store',
     slug: 'caneca-cafe-store',
     description:
       'Apoio simbolico com imagem ilustrativa de caneca CAFÉ. Nao e produto fisico, nao gera envio e funciona apenas como doacao ao projeto.',
@@ -110,7 +110,7 @@ const products = [
     ],
   },
   {
-    name: 'Chaveiro Mascote Cafe Store',
+    name: 'Chaveiro Mascote Café Store',
     slug: 'chaveiro-mascote-cafe-store',
     description:
       'Apoio simbolico com imagem ilustrativa de chaveiro CAFÉ. Nao e produto fisico, nao gera envio e funciona apenas como doacao ao projeto.',

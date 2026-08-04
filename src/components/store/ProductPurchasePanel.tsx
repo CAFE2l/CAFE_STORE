@@ -11,7 +11,8 @@ import type { CartVariant } from '@/types';
 import { cn } from '@/lib/utils';
 import { WhatsappIcon } from '@/components/ui/WhatsappIcon';
 import { Check, Heart, Loader2, Ruler, ShoppingCart } from 'lucide-react';
-import { useVariantStore } from '@/lib/variantStore'
+import { useVariantStore } from '@/lib/variantStore';
+import { SizeGuideModal } from '@/components/store/SizeGuideModal';
 
 type ProductPurchasePanelProps = {
   product: ProductDetail;
@@ -60,6 +61,7 @@ export function ProductPurchasePanel({ product, isFavorited = false, selectedVar
   const [addedSuccess, setAddedSuccess] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [pageUrl, setPageUrl] = useState('');
+  const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
   const [internalVariants, setInternalVariants] = useState<Record<string, string>>(() =>
     Object.fromEntries(variantOptions.map((v) => [v.name, v.values[0] ?? ''])),
   );
@@ -282,8 +284,12 @@ export function ProductPurchasePanel({ product, isFavorited = false, selectedVar
             >
               <legend className="flex items-center gap-2 text-sm font-medium text-zinc-400">
                 {variant.name}
-                {variant.name === 'Tamanho' || variant.name === 'Cor' ? (
-                  <button type="button" className="inline-flex items-center gap-1 text-xs text-zinc-600 underline underline-offset-2 transition hover:text-brand" onClick={(e) => { e.preventDefault(); alert('Guia de tamanhos disponivel em breve.'); }}>
+                {variant.name === 'Tamanho' ? (
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1 text-xs text-zinc-600 underline underline-offset-2 transition hover:text-brand"
+                    onClick={() => setSizeGuideOpen(true)}
+                  >
                     <Ruler className="h-3 w-3" /> Guia de tamanhos
                   </button>
                 ) : null}
@@ -488,6 +494,7 @@ export function ProductPurchasePanel({ product, isFavorited = false, selectedVar
         </a>
       </div>
 
+      <SizeGuideModal open={sizeGuideOpen} onClose={() => setSizeGuideOpen(false)} />
     </div>
   );
 }

@@ -120,8 +120,8 @@ export const reviewCreateSchema = z.object({
   productId: z.string().min(1, 'Produto invalido.'),
   rating: z.number().int().min(1).max(5),
   comment: z.string().max(1000, 'Comentario muito longo.').optional(),
-  images: z.array(z.string().url('Imagem invalida.')).max(4, 'No maximo 4 imagens.').optional(),
-  videoUrl: z.string().url('Video invalido.').optional(),
+  images: z.array(z.string().min(1)).max(4, 'No maximo 4 imagens.').optional(),
+  videoUrl: z.string().url('Video invalido.').optional().or(z.literal('')).transform(v => v === '' ? undefined : v),
 });
 
 export const wishlistToggleSchema = z.object({

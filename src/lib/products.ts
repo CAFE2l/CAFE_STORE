@@ -68,7 +68,7 @@ const fallbackCategories = [
 const fallbackProducts: ProductListItem[] = [
   {
     id: 'prod-camiseta-algodao',
-    name: 'Camiseta Algodao',
+    name: 'Camisa Normal Café Store',
     slug: 'camiseta-algodao-cafe-store',
     sku: 'CAF-CAM-ALG-000001',
     description:
@@ -94,7 +94,7 @@ const fallbackProducts: ProductListItem[] = [
   },
   {
     id: 'prod-tech-tee',
-    name: 'Tech Tee Dry Pro',
+    name: 'Camisa Poliéster Café Store',
     slug: 'tech-tee-dry-pro-cafe-store',
     sku: 'CAF-TEC-TEE-000002',
     description:
@@ -120,7 +120,7 @@ const fallbackProducts: ProductListItem[] = [
   },
   {
     id: 'prod-moletom-limited',
-    name: 'Moletom Limited Edition',
+    name: 'Moletom Edição Limitada Café Store',
     slug: 'moletom-limited-edition-cafe-store',
     sku: 'CAF-MOL-LIM-000003',
     description:
@@ -144,7 +144,7 @@ const fallbackProducts: ProductListItem[] = [
   },
   {
     id: 'prod-caneca',
-    name: 'Caneca Ceramica',
+    name: 'Caneca Café Store',
     slug: 'caneca-cafe-store',
     sku: 'CAF-CAN-CER-000004',
     description:
@@ -171,7 +171,7 @@ const fallbackProducts: ProductListItem[] = [
   },
   {
     id: 'prod-chaveiro-mascote',
-    name: 'Chaveiro Mascote',
+    name: 'Chaveiro Mascote Café Store',
     slug: 'chaveiro-mascote-cafe-store',
     sku: 'CAF-CHA-MAS-000005',
     description:
