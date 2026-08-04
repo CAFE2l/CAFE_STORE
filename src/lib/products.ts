@@ -98,7 +98,7 @@ const fallbackProducts: ProductListItem[] = [
     slug: 'tech-tee-dry-pro-cafe-store',
     sku: 'CAF-TEC-TEE-000002',
     description:
-      'Apoio simbolico com imagem ilustrativa de tech tee CAFÉ. Nao e produto fisico, nao gera envio e funciona apenas como doacao ao projeto.',
+      'Apoio simbolico com imagem ilustrativa de camisa poliester CAFÉ. Nao e produto fisico, nao gera envio e funciona apenas como doacao ao projeto.',
     price: 12.9,
     oldPrice: 24.9,
     stock: 28,

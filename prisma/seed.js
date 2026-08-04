@@ -39,7 +39,7 @@ const products = [
     name: 'Camisa Poliéster Café Store',
     slug: 'tech-tee-dry-pro-cafe-store',
     description:
-      'Apoio simbolico com imagem ilustrativa de tech tee CAFÉ. Nao e produto fisico, nao gera envio e funciona apenas como doacao ao projeto.',
+      'Apoio simbolico com imagem ilustrativa de camisa poliester CAFÉ. Nao e produto fisico, nao gera envio e funciona apenas como doacao ao projeto.',
     price: 12.9,
     oldPrice: 24.9,
     stock: 54,
