@@ -759,314 +759,314 @@ export function ProfileDashboardClient({ addresses, orders, user, wishlist, acti
         )}
 
         {/* Enderecos + Segurança */}
-        <section className="grid gap-6 lg:grid-cols-12">
-          <div className="lg:col-span-7">
-            <div className="glass-card p-5">
-              <div className="flex flex-wrap items-center justify-between gap-3">
+        <section className="grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.75fr)]">
+          <div className="min-w-0">
+            <div className="glass-card flex h-full flex-col p-5 sm:p-6">
+              <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <h2 className="font-display text-xl font-semibold text-white">Enderecos</h2>
-                <p className="mt-1 text-xs text-zinc-600">{addressList.length}/3 endereços salvos</p>
-              </div>
-              {!showAddressForm ? (
-                <button
-                  className="rounded-xl border border-brand/30 px-3 py-1.5 text-xs font-semibold text-brand transition hover:bg-brand/10 disabled:cursor-not-allowed disabled:opacity-50"
-                  type="button"
-                  disabled={addressList.length >= 3}
-                  onClick={() => {
-                    setShowAddressForm(true);
-                    setEditingAddressId(null);
-                    clearAddressForm();
-                  }}
-                >
-                  + Adicionar endereço
-                </button>
-              ) : null}
-            </div>
-
-            {showAddressForm ? (
-              <div className="mt-5 grid gap-4 rounded-xl border border-zinc-700/50 bg-zinc-900/80 p-4">
-                <div className="max-w-[180px]">
-                  <label className="mb-1.5 block text-xs font-medium text-zinc-500">Tipo</label>
-                  <select
-                    className="h-11 w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-3 text-sm text-white outline-none focus:border-brand/60"
-                    value={addressForm.label}
-                    onChange={(event) => setAddressForm((current) => ({ ...current, label: event.target.value }))}
-                    aria-label="Tipo do endereço"
+                  <h2 className="font-display text-xl font-semibold text-white">Endereços</h2>
+                  <p className="mt-1 text-xs text-zinc-600">{addressList.length}/3 endereços salvos</p>
+                </div>
+                {!showAddressForm ? (
+                  <button
+                    className="rounded-xl border border-brand/30 px-3 py-1.5 text-xs font-semibold text-brand transition hover:bg-brand/10 disabled:cursor-not-allowed disabled:opacity-50"
+                    type="button"
+                    disabled={addressList.length >= 3}
+                    onClick={() => {
+                      setShowAddressForm(true);
+                      setEditingAddressId(null);
+                      clearAddressForm();
+                    }}
                   >
-                    <option value="">Outro</option>
-                    <option value="Casa">Casa</option>
-                    <option value="Trabalho">Trabalho</option>
-                  </select>
-                </div>
-
-                <div className="grid gap-3 md:grid-cols-[180px_minmax(0,1fr)]">
-                  <div>
-                    <label className="mb-1.5 block text-xs font-medium text-zinc-500">CEP <span className="text-red-400">*</span></label>
-                    <div className="relative w-full md:w-[180px]">
-                      <input
-                        className={cn(
-                          'h-11 w-full rounded-xl border bg-zinc-800/50 px-4 pr-10 text-sm text-white placeholder:text-zinc-600 transition-colors focus:outline-none',
-                          cepStatus === 'error' ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 focus:border-brand/60',
-                          cepStatus === 'loading' && 'cursor-not-allowed opacity-70',
-                        )}
-                        placeholder="00000-000"
-                        value={maskCep(addressForm.zip)}
-                        disabled={cepStatus === 'loading'}
-                        aria-label="CEP"
-                        aria-busy={cepStatus === 'loading'}
-                        onChange={(event) => handleCepChange(event.target.value)}
-                        onPaste={(event) => {
-                          event.preventDefault();
-                          handleCepChange(event.clipboardData.getData('text'));
-                        }}
-                      />
-                      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
-                        {cepStatus === 'loading' ? <Loader2 className="size-4 animate-spin text-brand" /> : null}
-                        {cepStatus === 'success' ? <Check className="size-4 text-green-400" /> : null}
-                        {cepStatus === 'error' ? <X className="size-4 text-red-400" /> : null}
-                      </span>
-                    </div>
-                    <p className="mt-1 min-h-4 text-xs text-red-400" aria-live="polite">{cepError}</p>
-                  </div>
-
-                  <div>
-                    <label className="mb-1.5 block text-xs font-medium text-zinc-500">Rua (Logradouro) <span className="text-red-400">*</span></label>
-                    <div className="relative">
-                      <input
-                        className={cn(
-                          'h-11 w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 pr-10 text-sm text-white placeholder:text-zinc-600 transition focus:border-brand/60 focus:outline-none',
-                          autoFilledFields.has('street') && 'animate-fade-in bg-brand/10',
-                        )}
-                        placeholder="Nome da rua"
-                        value={addressForm.street}
-                        aria-label="Rua ou logradouro"
-                        onChange={(event) => setAddressForm((current) => ({ ...current, street: event.target.value }))}
-                      />
-                      {autoFilledFields.has('street') ? <Pencil className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-brand/70" /> : null}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid gap-3 md:grid-cols-[120px_minmax(0,1fr)]">
-                  <div>
-                    <label className="mb-1.5 block text-xs font-medium text-zinc-500">Número <span className="text-red-400">*</span></label>
-                    <input
-                      id="numero-input"
-                      ref={numberInputRef}
-                      className="h-11 w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 text-sm text-white placeholder:text-zinc-600 focus:border-brand/60 focus:outline-none"
-                      placeholder="123"
-                      value={addressForm.number}
-                      aria-label="Número"
-                      onChange={(event) => setAddressForm((current) => ({ ...current, number: event.target.value }))}
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-1.5 block text-xs font-medium text-zinc-500">Complemento</label>
-                    <div className="relative">
-                      <input
-                        className={cn(
-                          'h-11 w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 pr-10 text-sm text-white placeholder:text-zinc-600 transition focus:border-brand/60 focus:outline-none',
-                          autoFilledFields.has('complement') && addressForm.complement && 'animate-fade-in bg-brand/10',
-                        )}
-                        placeholder="Apto 42, Bloco B"
-                        value={addressForm.complement}
-                        aria-label="Complemento"
-                        onChange={(event) => setAddressForm((current) => ({ ...current, complement: event.target.value }))}
-                      />
-                      {autoFilledFields.has('complement') && addressForm.complement ? <Pencil className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-brand/70" /> : null}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_80px]">
-                  <div>
-                    <label className="mb-1.5 block text-xs font-medium text-zinc-500">Bairro <span className="text-red-400">*</span></label>
-                    <div className="relative">
-                      <input
-                        className={cn(
-                          'h-11 w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 pr-10 text-sm text-white placeholder:text-zinc-600 transition focus:border-brand/60 focus:outline-none',
-                          autoFilledFields.has('neighborhood') && 'animate-fade-in bg-brand/10',
-                        )}
-                        placeholder="Bairro"
-                        value={addressForm.neighborhood}
-                        aria-label="Bairro"
-                        onChange={(event) => setAddressForm((current) => ({ ...current, neighborhood: event.target.value }))}
-                      />
-                      {autoFilledFields.has('neighborhood') ? <Pencil className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-brand/70" /> : null}
-                    </div>
-                  </div>
-                  <div>
-                    <label className="mb-1.5 block text-xs font-medium text-zinc-500">Cidade <span className="text-red-400">*</span></label>
-                    <div className="relative">
-                      <input
-                        className={cn(
-                          'h-11 w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 pr-10 text-sm text-white placeholder:text-zinc-600 transition focus:border-brand/60 focus:outline-none',
-                          autoFilledFields.has('city') && 'animate-fade-in bg-brand/10',
-                        )}
-                        placeholder="Cidade"
-                        value={addressForm.city}
-                        aria-label="Cidade"
-                        onChange={(event) => setAddressForm((current) => ({ ...current, city: event.target.value }))}
-                      />
-                      {autoFilledFields.has('city') ? <Pencil className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-brand/70" /> : null}
-                    </div>
-                  </div>
-                  <div>
-                    <label className="mb-1.5 block text-xs font-medium text-zinc-500">UF <span className="text-red-400">*</span></label>
-                    <input
-                      className={cn(
-                        'h-11 w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-3 text-center text-sm uppercase text-white placeholder:text-zinc-600 transition focus:border-brand/60 focus:outline-none read-only:cursor-default',
-                        autoFilledFields.has('state') && 'animate-fade-in bg-brand/10',
-                      )}
-                      placeholder="UF"
-                      maxLength={2}
-                      readOnly={autoFilledFields.has('state') && Boolean(addressForm.state)}
-                      value={addressForm.state}
-                      aria-label="Estado UF"
-                      onChange={(event) => setAddressForm((current) => ({ ...current, state: event.target.value.toUpperCase() }))}
-                    />
-                  </div>
-                </div>
-                <label className="flex items-center gap-2 text-sm text-zinc-400">
-                  <input
-                    type="checkbox"
-                    checked={addressForm.isDefault}
-                    aria-label="Definir endereço como padrão"
-                    onChange={(e) => setAddressForm((p) => ({ ...p, isDefault: e.target.checked }))}
-                  />
-                  Endereco padrao
-                </label>
-                <button type="button" className="w-fit text-xs font-medium text-zinc-500 transition hover:text-zinc-300" onClick={clearAddressForm}>
-                  Limpar endereço
-                </button>
-                {addressError ? <p className="text-sm text-red-400">{addressError}</p> : null}
-                <div className="flex gap-2">
-                  <Button disabled={addressSaving || addressLimitReached} onClick={handleSaveAddress}>
-                    {addressSaving ? (
-                      <span className="flex items-center gap-2">
-                        <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" /></svg>
-                        Salvando...
-                      </span>
-                    ) : editingAddressId ? 'Atualizar' : 'Adicionar'}
-                  </Button>
-                  <Button variant="ghost" onClick={resetForm}>Cancelar</Button>
-                </div>
+                    + Adicionar endereço
+                  </button>
+                ) : null}
               </div>
-            ) : null}
 
-            <div className="mt-5 grid gap-4">
-              {addressList.length > 0 ? (
-                addressList.map((address) => (
-                  <article key={address.id} className="grid gap-4 rounded-xl border border-zinc-800 bg-zinc-900/30 p-4">
-                    {/* Cabeçalho do Card */}
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex min-w-0 flex-wrap items-center gap-2">
-                        <p className="truncate font-semibold text-white">{address.label || 'Outro'}</p>
-                        {address.isDefault ? (
-                          <span className="rounded-full border border-brand/30 bg-brand/10 px-2 py-0.5 text-[11px] font-semibold text-brand">
-                            Padrão
-                          </span>
-                        ) : null}
+              {showAddressForm ? (
+                <div className="mt-5 grid gap-4 rounded-2xl border border-zinc-700/60 bg-zinc-900/80 p-4 sm:p-5">
+                  <div className="max-w-[180px]">
+                    <label className="mb-1.5 block text-xs font-medium text-zinc-500">Tipo</label>
+                    <select
+                      className="h-11 w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-3 text-sm text-white outline-none focus:border-brand/60"
+                      value={addressForm.label}
+                      onChange={(event) => setAddressForm((current) => ({ ...current, label: event.target.value }))}
+                      aria-label="Tipo do endereço"
+                    >
+                      <option value="">Outro</option>
+                      <option value="Casa">Casa</option>
+                      <option value="Trabalho">Trabalho</option>
+                    </select>
+                  </div>
+
+                  <div className="grid gap-3 md:grid-cols-[180px_minmax(0,1fr)]">
+                    <div>
+                      <label className="mb-1.5 block text-xs font-medium text-zinc-500">CEP <span className="text-red-400">*</span></label>
+                      <div className="relative w-full md:w-[180px]">
+                        <input
+                          className={cn(
+                            'h-11 w-full rounded-xl border bg-zinc-800/50 px-4 pr-10 text-sm text-white placeholder:text-zinc-600 transition-colors focus:outline-none',
+                            cepStatus === 'error' ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 focus:border-brand/60',
+                            cepStatus === 'loading' && 'cursor-not-allowed opacity-70',
+                          )}
+                          placeholder="00000-000"
+                          value={maskCep(addressForm.zip)}
+                          disabled={cepStatus === 'loading'}
+                          aria-label="CEP"
+                          aria-busy={cepStatus === 'loading'}
+                          onChange={(event) => handleCepChange(event.target.value)}
+                          onPaste={(event) => {
+                            event.preventDefault();
+                            handleCepChange(event.clipboardData.getData('text'));
+                          }}
+                        />
+                        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
+                          {cepStatus === 'loading' ? <Loader2 className="size-4 animate-spin text-brand" /> : null}
+                          {cepStatus === 'success' ? <Check className="size-4 text-green-400" /> : null}
+                          {cepStatus === 'error' ? <X className="size-4 text-red-400" /> : null}
+                        </span>
                       </div>
-                      <MapPin className="size-5 flex-shrink-0 text-brand" />
+                      <p className="mt-1 min-h-4 text-xs text-red-400" aria-live="polite">{cepError}</p>
                     </div>
 
-                    {/* Endereço Texto */}
-                    <div className="space-y-1 text-sm leading-relaxed text-zinc-400">
-                      <p>{address.street}, {address.number}{address.complement ? ` - ${address.complement}` : ''}</p>
-                      <p>{address.neighborhood} · {address.city}/{address.state}</p>
-                      <p className="font-mono text-xs text-zinc-500">CEP {address.zip}</p>
+                    <div>
+                      <label className="mb-1.5 block text-xs font-medium text-zinc-500">Rua (Logradouro) <span className="text-red-400">*</span></label>
+                      <div className="relative">
+                        <input
+                          className={cn(
+                            'h-11 w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 pr-10 text-sm text-white placeholder:text-zinc-600 transition focus:border-brand/60 focus:outline-none',
+                            autoFilledFields.has('street') && 'animate-fade-in bg-brand/10',
+                          )}
+                          placeholder="Nome da rua"
+                          value={addressForm.street}
+                          aria-label="Rua ou logradouro"
+                          onChange={(event) => setAddressForm((current) => ({ ...current, street: event.target.value }))}
+                        />
+                        {autoFilledFields.has('street') ? <Pencil className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-brand/70" /> : null}
+                      </div>
                     </div>
+                  </div>
 
-                    {/* Botões de Ação */}
-                    <div className="flex flex-wrap items-center gap-2 border-t border-white/[0.06] pt-3">
-                      {!address.isDefault ? (
-                        <button 
-                          className="inline-flex h-9 items-center rounded-lg px-3 text-xs font-medium text-zinc-300 transition hover:bg-white/5 hover:text-brand" 
-                          type="button" 
-                          onClick={() => void handleSetDefaultAddress(address)}
-                        >
-                          Definir como padrão
-                        </button>
-                      ) : null}
-                      <button 
-                        className="inline-flex h-9 items-center rounded-lg px-3 text-xs font-medium text-brand transition hover:bg-brand/10" 
-                        type="button" 
-                        onClick={() => handleEditAddress(address)}
-                      >
-                        Editar
-                      </button>
-                      <button 
-                        className="inline-flex h-9 items-center rounded-lg px-3 text-xs font-medium text-red-400 transition hover:bg-red-500/10" 
-                        type="button" 
-                        onClick={() => handleDeleteAddress(address.id)}
-                      >
-                        Deletar
-                      </button>
+                  <div className="grid gap-3 md:grid-cols-[120px_minmax(0,1fr)]">
+                    <div>
+                      <label className="mb-1.5 block text-xs font-medium text-zinc-500">Número <span className="text-red-400">*</span></label>
+                      <input
+                        id="numero-input"
+                        ref={numberInputRef}
+                        className="h-11 w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 text-sm text-white placeholder:text-zinc-600 focus:border-brand/60 focus:outline-none"
+                        placeholder="123"
+                        value={addressForm.number}
+                        aria-label="Número"
+                        onChange={(event) => setAddressForm((current) => ({ ...current, number: event.target.value }))}
+                      />
                     </div>
-                  </article>
-                ))
-              ) : (
-                <article className="rounded-xl border border-dashed border-zinc-800 bg-zinc-900/30 p-6 text-center text-sm text-zinc-500">
-                  <p className="font-medium text-zinc-400">Nenhum endereco cadastrado</p>
-                  <p className="mt-1">Adicione um endereco para agilizar o checkout.</p>
-                </article>
-              )}
-              
-              {/* Botão Adicionar Endereço */}
-              {!showAddressForm && addressList.length > 0 && addressList.length < 3 ? (
-                <button
-                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-brand/30 bg-brand/5 px-4 py-3 text-sm font-semibold text-brand transition hover:bg-brand/10"
-                  type="button"
-                  onClick={() => {
-                    setShowAddressForm(true);
-                    setEditingAddressId(null);
-                    clearAddressForm();
-                  }}
-                >
-                  + Adicionar endereço
-                </button>
+                    <div>
+                      <label className="mb-1.5 block text-xs font-medium text-zinc-500">Complemento</label>
+                      <div className="relative">
+                        <input
+                          className={cn(
+                            'h-11 w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 pr-10 text-sm text-white placeholder:text-zinc-600 transition focus:border-brand/60 focus:outline-none',
+                            autoFilledFields.has('complement') && addressForm.complement && 'animate-fade-in bg-brand/10',
+                          )}
+                          placeholder="Apto 42, Bloco B"
+                          value={addressForm.complement}
+                          aria-label="Complemento"
+                          onChange={(event) => setAddressForm((current) => ({ ...current, complement: event.target.value }))}
+                        />
+                        {autoFilledFields.has('complement') && addressForm.complement ? <Pencil className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-brand/70" /> : null}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_80px]">
+                    <div>
+                      <label className="mb-1.5 block text-xs font-medium text-zinc-500">Bairro <span className="text-red-400">*</span></label>
+                      <div className="relative">
+                        <input
+                          className={cn(
+                            'h-11 w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 pr-10 text-sm text-white placeholder:text-zinc-600 transition focus:border-brand/60 focus:outline-none',
+                            autoFilledFields.has('neighborhood') && 'animate-fade-in bg-brand/10',
+                          )}
+                          placeholder="Bairro"
+                          value={addressForm.neighborhood}
+                          aria-label="Bairro"
+                          onChange={(event) => setAddressForm((current) => ({ ...current, neighborhood: event.target.value }))}
+                        />
+                        {autoFilledFields.has('neighborhood') ? <Pencil className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-brand/70" /> : null}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="mb-1.5 block text-xs font-medium text-zinc-500">Cidade <span className="text-red-400">*</span></label>
+                      <div className="relative">
+                        <input
+                          className={cn(
+                            'h-11 w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 pr-10 text-sm text-white placeholder:text-zinc-600 transition focus:border-brand/60 focus:outline-none',
+                            autoFilledFields.has('city') && 'animate-fade-in bg-brand/10',
+                          )}
+                          placeholder="Cidade"
+                          value={addressForm.city}
+                          aria-label="Cidade"
+                          onChange={(event) => setAddressForm((current) => ({ ...current, city: event.target.value }))}
+                        />
+                        {autoFilledFields.has('city') ? <Pencil className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-brand/70" /> : null}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="mb-1.5 block text-xs font-medium text-zinc-500">UF <span className="text-red-400">*</span></label>
+                      <input
+                        className={cn(
+                          'h-11 w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-3 text-center text-sm uppercase text-white placeholder:text-zinc-600 transition focus:border-brand/60 focus:outline-none read-only:cursor-default',
+                          autoFilledFields.has('state') && 'animate-fade-in bg-brand/10',
+                        )}
+                        placeholder="UF"
+                        maxLength={2}
+                        readOnly={autoFilledFields.has('state') && Boolean(addressForm.state)}
+                        value={addressForm.state}
+                        aria-label="Estado UF"
+                        onChange={(event) => setAddressForm((current) => ({ ...current, state: event.target.value.toUpperCase() }))}
+                      />
+                    </div>
+                  </div>
+
+                  <label className="flex items-center gap-2 text-sm text-zinc-400">
+                    <input
+                      type="checkbox"
+                      checked={addressForm.isDefault}
+                      aria-label="Definir endereço como padrão"
+                      onChange={(e) => setAddressForm((p) => ({ ...p, isDefault: e.target.checked }))}
+                    />
+                    Endereco padrao
+                  </label>
+
+                  <button type="button" className="w-fit text-xs font-medium text-zinc-500 transition hover:text-zinc-300" onClick={clearAddressForm}>
+                    Limpar endereço
+                  </button>
+
+                  {addressError ? <p className="text-sm text-red-400">{addressError}</p> : null}
+
+                  <div className="flex flex-wrap gap-2">
+                    <Button disabled={addressSaving || addressLimitReached} onClick={handleSaveAddress}>
+                      {addressSaving ? (
+                        <span className="flex items-center gap-2">
+                          <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" /></svg>
+                          Salvando...
+                        </span>
+                      ) : editingAddressId ? 'Atualizar' : 'Adicionar'}
+                    </Button>
+                    <Button variant="ghost" onClick={resetForm}>Cancelar</Button>
+                  </div>
+                </div>
               ) : null}
-            </div>
+
+              <div className="mt-5 flex flex-1 flex-col gap-4">
+                {addressList.length > 0 ? (
+                  addressList.map((address) => (
+                    <article key={address.id} className="flex flex-col gap-4 rounded-2xl border border-zinc-800/80 bg-zinc-900/50 p-4 sm:p-5">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex min-w-0 flex-wrap items-center gap-2">
+                          <p className="truncate font-semibold text-white">{address.label || 'Outro'}</p>
+                          {address.isDefault ? (
+                            <span className="rounded-full border border-brand/30 bg-brand/10 px-2 py-0.5 text-[11px] font-semibold text-brand">
+                              Padrão
+                            </span>
+                          ) : null}
+                        </div>
+                        <MapPin className="size-5 shrink-0 text-brand" />
+                      </div>
+
+                      <div className="space-y-1 text-sm leading-relaxed text-zinc-400">
+                        <p>{address.street}, {address.number}{address.complement ? ` - ${address.complement}` : ''}</p>
+                        <p>{address.neighborhood} · {address.city}/{address.state}</p>
+                        <p className="font-mono text-xs text-zinc-500">CEP {address.zip}</p>
+                      </div>
+
+                      <div className="mt-auto flex flex-wrap items-center gap-2 border-t border-white/[0.06] pt-3">
+                        {!address.isDefault ? (
+                          <button
+                            className="inline-flex h-9 items-center rounded-lg px-3 text-xs font-medium text-zinc-300 transition hover:bg-white/5 hover:text-brand"
+                            type="button"
+                            onClick={() => void handleSetDefaultAddress(address)}
+                          >
+                            Definir como padrão
+                          </button>
+                        ) : null}
+                        <button
+                          className="inline-flex h-9 items-center rounded-lg px-3 text-xs font-medium text-brand transition hover:bg-brand/10"
+                          type="button"
+                          onClick={() => handleEditAddress(address)}
+                        >
+                          Editar
+                        </button>
+                        <button
+                          className="inline-flex h-9 items-center rounded-lg px-3 text-xs font-medium text-red-400 transition hover:bg-red-500/10"
+                          type="button"
+                          onClick={() => handleDeleteAddress(address.id)}
+                        >
+                          Deletar
+                        </button>
+                      </div>
+                    </article>
+                  ))
+                ) : (
+                  <article className="rounded-2xl border border-dashed border-zinc-800 bg-zinc-900/30 p-6 text-center text-sm text-zinc-500">
+                    <p className="font-medium text-zinc-400">Nenhum endereço cadastrado</p>
+                    <p className="mt-1">Adicione um endereço para agilizar o checkout.</p>
+                  </article>
+                )}
+
+                {!showAddressForm && addressList.length > 0 && addressList.length < 3 ? (
+                  <button
+                    className="mt-auto flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-brand/30 bg-brand/5 px-4 py-3 text-sm font-semibold text-brand transition hover:bg-brand/10"
+                    type="button"
+                    onClick={() => {
+                      setShowAddressForm(true);
+                      setEditingAddressId(null);
+                      clearAddressForm();
+                    }}
+                  >
+                    + Adicionar endereço
+                  </button>
+                ) : null}
+              </div>
             </div>
           </div>
 
-          <div className="lg:col-span-5">
-            <div className="glass-card p-5">
+          <div className="min-w-0">
+            <div className="glass-card h-full p-5 sm:p-6">
               <h2 className="font-display text-xl font-semibold text-white">Segurança</h2>
               <p className="mt-1 text-xs text-zinc-600">Altere sua senha periodicamente para manter a conta segura.</p>
-              
-              <div className="mt-5 space-y-4">
+
+              <div className="mt-5 flex flex-col gap-4">
                 <div className="space-y-2">
                   <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-500">Senha atual</label>
-                  <input 
-                    className="h-11 w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 text-sm text-white placeholder:text-zinc-600 focus:border-brand/60 focus:outline-none" 
-                    type="password" 
-                    value={currentPassword} 
-                    onChange={(e) => setCurrentPassword(e.target.value)} 
+                  <input
+                    className="h-11 w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 text-sm text-white placeholder:text-zinc-600 focus:border-brand/60 focus:outline-none"
+                    type="password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-500">Nova senha</label>
-                  <input 
-                    className="h-11 w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 text-sm text-white placeholder:text-zinc-600 focus:border-brand/60 focus:outline-none" 
-                    type="password" 
-                    value={newPassword} 
-                    onChange={(e) => setNewPassword(e.target.value)} 
+                  <input
+                    className="h-11 w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 text-sm text-white placeholder:text-zinc-600 focus:border-brand/60 focus:outline-none"
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-500">Confirmar nova senha</label>
-                  <input 
-                    className="h-11 w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 text-sm text-white placeholder:text-zinc-600 focus:border-brand/60 focus:outline-none" 
-                    type="password" 
-                    value={confirmPassword} 
-                    onChange={(e) => setConfirmPassword(e.target.value)} 
+                  <input
+                    className="h-11 w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 text-sm text-white placeholder:text-zinc-600 focus:border-brand/60 focus:outline-none"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
                   />
                 </div>
-                
+
                 <div className="flex flex-wrap items-center gap-3 pt-2">
                   <Button disabled={passwordSaving} onClick={handleChangePassword}>
                     {passwordSaving ? (

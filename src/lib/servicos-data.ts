@@ -128,12 +128,12 @@ export const projects: Project[] = [
     href: "https://stream-pix-ashy.vercel.app/",
   },
   {
-    name: "Overlay de Lista de Tarefas para OBS",
-    image: "/images/banners/portfolio.png",
-    tags: ["Cloudinary", "Vue.js", "Firebase"],
-    desc: "Dashboard operacional com autenticação, gráficos, relatórios e gerenciamento de usuários.",
-    metric: "Fluxo interno automatizado",
-    href: "https://to-do-list-three-eta-84.vercel.app/",
+    name: "LinkWave - Links para Criadores",
+    image: "/images/banners/banner1.png",
+    tags: ["NEXT.JS 15", "TYPESCRIPT", "SUPABASE", "TAILWIND"],
+    desc: "A plataforma de link na bio mais personalizável. Centralize todos os seus links, personalize sua marca e acompanhe métricas em tempo real.",
+    metric: "Perfil público + analytics de cliques em tempo real",
+    href: "https://linkwave-last.vercel.app",
   },
   {
     name: "Landing Page de Conversão",

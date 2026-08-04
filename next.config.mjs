@@ -3,6 +3,11 @@ const nextConfig = {
   reactStrictMode: true,
   compress: true,
   images: {
+    localPatterns: [
+      { pathname: '/images/**' },
+      { pathname: '/uploads/**' },
+      { pathname: '/placeholder-product.svg' },
+    ],
     remotePatterns: [
       {
         protocol: 'https',

@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { Pencil, Trash2, ExternalLink } from 'lucide-react';
-import { deleteProductAction, toggleProductStatusAction } from '@/lib/admin/actions';
 import Link from 'next/link';
+import { ExternalLink, Pencil, Power, Trash2 } from 'lucide-react';
+import { deleteProductAction, toggleProductStatusAction } from '@/lib/admin/actions';
+import { ActionGroup } from '@/components/admin/ui/ActionGroup';
+import type { Action } from '@/components/admin/ui/ActionGroup';
 import { Toast } from '@/components/ui/Toast';
 
 type Props = {
@@ -16,120 +18,100 @@ export default function ProductActions({ product }: Props) {
   const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [currentStatus, setCurrentStatus] = useState(product.status);
 
-  function showToast(type: 'success' | 'error', message: string) {
-    setToast({ type, message });
-  }
-
   function removeRowWithAnimation() {
     const el = document.getElementById(`product-${product.id}`);
     if (!el) return;
-    el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 300, easing: 'ease' }).onfinish = () => el.remove();
+    el.animate([{ opacity: 1, transform: 'translateX(0)' }, { opacity: 0, transform: 'translateX(-8px)' }], {
+      duration: 250,
+      easing: 'ease',
+    }).onfinish = () => el.remove();
   }
 
-  async function confirmDelete() {
+  function confirmDelete() {
     startTransition(async () => {
-      try {
-        const result = await deleteProductAction(product.id);
-        if (result.ok) {
-          showToast('success', 'Produto deletado com sucesso');
-          setConfirmOpen(false);
-          removeRowWithAnimation();
-        } else {
-          showToast('error', result.message || 'Erro ao deletar. Tente novamente.');
-        }
-      } catch {
-        showToast('error', 'Erro ao deletar. Tente novamente.');
+      const result = await deleteProductAction(product.id);
+      if (result.ok) {
+        setConfirmOpen(false);
+        removeRowWithAnimation();
+      } else {
+        setToast({ type: 'error', message: result.message });
       }
     });
   }
 
-  async function toggleStatus() {
+  function toggleStatus() {
     startTransition(async () => {
-      try {
-        const result = await toggleProductStatusAction(product.id);
-        if (result.ok) {
-          setCurrentStatus((s) => (s === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'));
-        }
-        showToast(result.ok ? 'success' : 'error', result.message);
-      } catch {
-        showToast('error', 'Erro ao alterar status.');
-      }
+      const result = await toggleProductStatusAction(product.id);
+      if (result.ok) setCurrentStatus((s) => (s === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'));
+      setToast({ type: result.ok ? 'success' : 'error', message: result.message });
     });
   }
+
+  const isActive = currentStatus === 'ACTIVE';
+
+  const actions: Action[] = [
+    {
+      type: 'link',
+      href: `/admin/produtos/${product.id}/editar`,
+      label: 'Editar produto',
+      icon: <Pencil className="h-3.5 w-3.5" />,
+      variant: 'blue',
+    },
+    {
+      type: 'link',
+      href: `/admin/produtos/${product.id}`,
+      label: 'Ver detalhes',
+      icon: <ExternalLink className="h-3.5 w-3.5" />,
+      variant: 'neutral',
+    },
+  ];
+
+  const moreActions = [
+    {
+      type: 'dropdown-item' as const,
+      label: isActive ? 'Desativar' : 'Ativar',
+      icon: <Power className="h-3.5 w-3.5" />,
+      variant: 'orange' as const,
+      onClick: toggleStatus,
+      loading,
+    },
+    {
+      type: 'dropdown-item' as const,
+      label: 'Excluir produto',
+      icon: <Trash2 className="h-3.5 w-3.5" />,
+      variant: 'red' as const,
+      onClick: () => setConfirmOpen(true),
+    },
+  ];
 
   return (
-    <div className="flex items-center gap-2">
-      {toast ? (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-        />
-      ) : null}
+    <>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
-      <Link
-        href={`/admin/produtos/${product.id}/editar`}
-        title="Editar produto"
-        aria-label="Editar produto"
-        className="grid h-8 w-8 place-items-center rounded-md border border-white/8 bg-white/[0.06] text-zinc-300 transition hover:bg-[rgba(249,115,22,0.15)] hover:text-orange-400"
-      >
-        <Pencil className="h-4 w-4" />
-      </Link>
+      <ActionGroup actions={actions} moreActions={moreActions} size="sm" />
 
-      <Link
-        href={`/admin/produtos/${product.id}`}
-        title="Detalhes do produto"
-        aria-label="Detalhes do produto"
-        className="grid h-8 w-8 place-items-center rounded-md border border-white/8 bg-white/[0.06] text-zinc-300 transition hover:bg-white/10 hover:text-white"
-      >
-        <ExternalLink className="h-4 w-4" />
-      </Link>
-
-      <button
-        type="button"
-        title="Deletar produto"
-        aria-label="Deletar produto"
-        onClick={() => setConfirmOpen(true)}
-        className="grid h-8 w-8 place-items-center rounded-md border border-white/8 bg-[rgba(239,68,68,0.08)] text-[rgba(239,68,68,0.6)] transition hover:bg-[rgba(239,68,68,0.15)] hover:text-[#ef4444]"
-      >
-        <Trash2 className="h-4 w-4" />
-      </button>
-
-      <button
-        type="button"
-        title="Clique para ativar/desativar"
-        aria-label="Alternar status"
-        onClick={toggleStatus}
-        disabled={loading}
-        className={`h-8 rounded-lg border px-3 text-xs font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
-          currentStatus === 'ACTIVE'
-            ? 'border-green-500/30 bg-green-500/10 text-green-400 hover:bg-green-500/20'
-            : 'border-zinc-500/30 bg-zinc-500/10 text-zinc-400 hover:bg-zinc-500/20'
-        }`}
-      >
-        {loading ? (
-          <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
-        ) : currentStatus === 'ACTIVE' ? '● Ativo' : '○ Inativo'}
-      </button>
-
-      {confirmOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/75 backdrop-blur-md" />
-          <div className="relative z-10 w-full max-w-sm rounded-2xl border border-[rgba(239,68,68,0.3)] bg-[#111111] p-7">
+      {confirmOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/75 backdrop-blur-md" onClick={() => setConfirmOpen(false)} />
+          <div className="relative z-10 w-full max-w-sm rounded-2xl border border-red-500/20 bg-zinc-950 p-6 shadow-2xl">
             <div className="flex items-center gap-3">
-              <div className="rounded-full bg-[rgba(239,68,68,0.12)] p-3">
-                <Trash2 className="h-6 w-6 text-[#ef4444]" />
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-red-500/20 bg-red-500/10">
+                <Trash2 className="h-5 w-5 text-red-400" />
               </div>
-              <h3 className="text-lg font-semibold text-white">Deletar produto</h3>
+              <div>
+                <h3 className="text-base font-semibold text-white">Excluir produto</h3>
+                <p className="text-sm text-zinc-500">Esta ação não pode ser desfeita.</p>
+              </div>
             </div>
-            <p className="mt-4 text-sm text-zinc-300">Tem certeza que deseja deletar <span className="font-semibold text-orange-400">&ldquo;{product.name}&rdquo;</span>?</p>
-            <p className="mt-2 text-sm text-red-400">Esta ação não pode ser desfeita. O produto será removido da loja.</p>
-
-            <div className="mt-6 flex justify-end gap-3">
+            <p className="mt-4 text-sm text-zinc-300">
+              Tem certeza que deseja excluir{' '}
+              <span className="font-semibold text-orange-400">&ldquo;{product.name}&rdquo;</span>?
+            </p>
+            <div className="mt-5 flex justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setConfirmOpen(false)}
-                className="h-10 rounded-lg border border-white/15 px-4 text-sm text-zinc-300 hover:border-white"
+                className="h-9 rounded-lg border border-white/10 px-4 text-sm text-zinc-300 transition hover:bg-white/5"
               >
                 Cancelar
               </button>
@@ -137,15 +119,15 @@ export default function ProductActions({ product }: Props) {
                 type="button"
                 onClick={confirmDelete}
                 disabled={loading}
-                className="flex items-center gap-2 rounded-lg bg-[#ef4444] px-4 py-2 text-sm font-semibold text-white shadow-[0_4px_12px_rgba(239,68,68,0.3)] hover:bg-[#dc2626] disabled:opacity-60"
+                className="flex h-9 items-center gap-2 rounded-lg bg-red-500 px-4 text-sm font-semibold text-white transition hover:bg-red-400 disabled:opacity-60"
               >
-                <Trash2 className="h-4 w-4" />
-                {loading ? 'Deletando...' : 'Sim, deletar'}
+                <Trash2 className="h-3.5 w-3.5" />
+                {loading ? 'Excluindo...' : 'Excluir'}
               </button>
             </div>
           </div>
         </div>
-      ) : null}
-    </div>
+      )}
+    </>
   );
 }

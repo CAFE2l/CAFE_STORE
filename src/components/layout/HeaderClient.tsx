@@ -48,7 +48,7 @@ export function HeaderClient({ user }: HeaderClientProps) {
 
         <Link href="/" className="group flex shrink-0 items-center gap-3 text-xl font-bold">
           <div className="relative flex size-10 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-brand/20 to-brand/5 ring-1 ring-brand/20 shadow-led-brand transition-all duration-500 group-hover:shadow-[0_0_12px_rgba(249,115,22,0.2)] group-hover:ring-brand/40 group-hover:scale-110">
-            <Image src="/favicon.png" alt="CAFÉ STORE" width={36} height={36} className="size-[36px] rounded-full object-cover drop-shadow-[0_0_4px_rgba(249,115,22,0.3)] transition-transform duration-500 group-hover:rotate-[8deg]" />
+            <Image src="/images/favicon.png" alt="CAFÉ STORE" width={36} height={36} className="size-[36px] rounded-full object-cover drop-shadow-[0_0_4px_rgba(249,115,22,0.3)] transition-transform duration-500 group-hover:rotate-[8deg]" />
           </div>
           <span className="hidden animate-glow-brand sm:inline text-gradient-fire">CAFÉ STORE</span>
           <span className="animate-glow-brand sm:hidden text-gradient-fire">CAFÉ</span>

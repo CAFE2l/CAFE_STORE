@@ -10,10 +10,10 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   const [mobileOpen, setMobileOpen] = useState(false)
 
   return (
-    <div className="min-h-screen bg-[#070707] text-white">
+    <div className="h-dvh overflow-hidden bg-[#070707] text-white">
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(249,115,22,0.16),transparent_28%),radial-gradient(circle_at_82%_4%,rgba(192,57,43,0.14),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.035),transparent_35%)]" />
-      <div className="relative flex min-h-screen">
-        <div className="hidden shrink-0 lg:block">
+      <div className="relative flex h-full min-h-0">
+        <div className="hidden h-full shrink-0 lg:block">
           <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((value) => !value)} />
         </div>
 
@@ -26,8 +26,8 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
           </div>
         ) : null}
 
-        <div className="min-w-0 flex-1">
-          <header className="sticky top-0 z-30 border-b border-white/10 bg-black/55 backdrop-blur-xl">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+          <header className="z-30 shrink-0 border-b border-white/10 bg-black/55 backdrop-blur-xl">
             <div className="flex h-16 items-center gap-3 px-4 lg:px-8">
               <button
                 className="grid h-10 w-10 place-items-center rounded-lg border border-white/10 bg-white/[0.03] lg:hidden"
@@ -52,7 +52,9 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
               </div>
             </div>
           </header>
-          <main className="mx-auto w-full max-w-7xl px-4 py-6 lg:px-8 lg:py-8">{children}</main>
+          <main className="min-h-0 flex-1 overflow-y-auto px-4 py-6 lg:px-8 lg:py-8 [scrollbar-width:thin] [scrollbar-color:rgba(249,115,22,0.45)_transparent]">
+            <div className="mx-auto h-full w-full max-w-7xl">{children}</div>
+          </main>
         </div>
       </div>
     </div>

@@ -2,11 +2,12 @@
 
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import type { ReactNode } from 'react';
 import { useState, useTransition } from 'react';
 import { Eye, Shield, Trash2, X } from 'lucide-react';
 import type { Role } from '@prisma/client';
 import { EmptyPanel, Pagination } from '@/components/admin/ui/AdminTable';
+import { ActionGroup } from '@/components/admin/ui/ActionGroup';
+import type { Action } from '@/components/admin/ui/ActionGroup';
 import { dateTime } from '@/lib/admin/formatters';
 import { cn } from '@/lib/utils';
 
@@ -99,10 +100,17 @@ export function UsersAdminClient({ data, basePath }: { data: UsersPageData; base
                 <Stat label="avaliações" value={user._count.reviews} />
               </div>
 
-              <div className="flex gap-2 xl:justify-end">
-                <ActionButton title="Ver detalhes" onClick={() => setSelected(user)}><Eye className="h-4 w-4" /></ActionButton>
-                <ActionButton title="Alterar role" accent onClick={() => setRoleTarget(user)}><Shield className="h-4 w-4" /></ActionButton>
-                <ActionButton title="Excluir usuário" danger onClick={() => deleteUser(user)}><Trash2 className="h-4 w-4" /></ActionButton>
+              <div className="flex xl:justify-end">
+                <ActionGroup
+                  size="sm"
+                  actions={[
+                    { type: 'button', label: 'Ver detalhes', icon: <Eye className="h-3.5 w-3.5" />, variant: 'neutral', onClick: () => setSelected(user) },
+                    { type: 'button', label: 'Alterar perfil', icon: <Shield className="h-3.5 w-3.5" />, variant: 'orange', onClick: () => setRoleTarget(user) },
+                  ] as Action[]}
+                  moreActions={[
+                    { type: 'dropdown-item', label: 'Excluir usuário', icon: <Trash2 className="h-3.5 w-3.5" />, variant: 'red', onClick: () => deleteUser(user) },
+                  ]}
+                />
               </div>
             </article>
           ))}
@@ -207,23 +215,6 @@ function Stat({ label, value }: { label: string; value: number }) {
       <p className="text-lg font-bold text-white">{value}</p>
       <p className="text-xs text-zinc-500">{label}</p>
     </div>
-  );
-}
-
-function ActionButton({ children, title, accent, danger, onClick }: { children: ReactNode; title: string; accent?: boolean; danger?: boolean; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      title={title}
-      onClick={onClick}
-      className={cn(
-        'flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.05] text-white/40 transition-all hover:bg-white/[0.10] hover:text-white',
-        accent && 'hover:border-orange-500/30 hover:bg-orange-500/20 hover:text-orange-400',
-        danger && 'hover:border-red-500/30 hover:bg-red-500/20 hover:text-red-400',
-      )}
-    >
-      {children}
-    </button>
   );
 }
 

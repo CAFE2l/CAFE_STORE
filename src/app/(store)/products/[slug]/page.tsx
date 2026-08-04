@@ -84,12 +84,23 @@ export default async function ProductPage({ params }: ProductPageProps) {
     notFound();
   }
 
-  const session = await auth();
-  const userId = session?.user?.id;
-  const [relatedProducts, wishlistFavorite, legacyFavorite] = await Promise.all([
-    getRelatedProducts(product),
-    userId
-      ? prisma.wishlist.findUnique({
+  let userId: string | undefined;
+  try {
+    const session = await auth();
+    userId = session?.user?.id;
+  } catch (err) {
+    logger.error('products/[slug]', 'auth() failed, rendering as guest', {
+      slug: params.slug,
+      error: logger.serializeError(err),
+    });
+  }
+
+  let wishlistFavorite: { id: string } | null = null;
+  let legacyFavorite: { id: string } | null = null;
+  if (userId) {
+    try {
+      const results = await Promise.all([
+        prisma.wishlist.findUnique({
           where: {
             userId_productId: {
               userId,
@@ -97,10 +108,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
             },
           },
           select: { id: true },
-        })
-      : Promise.resolve(null),
-    userId
-      ? prisma.favorite.findUnique({
+        }),
+        prisma.favorite.findUnique({
           where: {
             userId_productId: {
               userId,
@@ -108,9 +117,28 @@ export default async function ProductPage({ params }: ProductPageProps) {
             },
           },
           select: { id: true },
-        })
-      : Promise.resolve(null),
-  ]);
+        }),
+      ]);
+      wishlistFavorite = results[0];
+      legacyFavorite = results[1];
+    } catch (err) {
+      logger.error('products/[slug]', 'Favorite lookup failed, treating product as not favorited', {
+        slug: params.slug,
+        error: logger.serializeError(err),
+      });
+    }
+  }
+
+  let relatedProducts: Awaited<ReturnType<typeof getRelatedProducts>> = [];
+  try {
+    relatedProducts = await getRelatedProducts(product);
+  } catch (err) {
+    logger.error('products/[slug]', 'Failed to load related products', {
+      slug: params.slug,
+      error: logger.serializeError(err),
+    });
+  }
+
   const images = getProductMedia(product);
   const averageRating = product.averageRating.toFixed(1);
   const sku = getSku(product);

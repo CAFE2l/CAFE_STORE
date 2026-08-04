@@ -143,16 +143,16 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-32">
+      <div className="flex h-full min-h-0 items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-orange-500 border-t-transparent" />
       </div>
     );
   }
 
   return (
-    <div className="flex gap-6">
-      {/* ---- Sidebar ---- */}
-      <nav className="hidden w-56 shrink-0 flex-col gap-1 lg:flex">
+    <div className="flex h-full min-h-0 gap-6">
+      {/* ---- Section sidebar ---- */}
+      <nav className="hidden w-56 shrink-0 flex-col gap-1 overflow-y-auto py-1 [scrollbar-width:thin] [scrollbar-color:rgba(249,115,22,0.45)_transparent] lg:flex">
         <div className="mb-3 px-4 text-xs font-semibold uppercase tracking-widest text-zinc-600">
           Configurações
         </div>
@@ -178,8 +178,8 @@ export default function SettingsPage() {
       </nav>
 
       {/* ---- Content ---- */}
-      <div className="min-w-0 flex-1 space-y-6">
-        <div className="flex items-center justify-between">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <div className="mb-6 flex shrink-0 items-center justify-between gap-4">
           <header>
             <h1 className="text-3xl font-black tracking-tight text-white">Configurações</h1>
             <p className="mt-1 text-sm text-zinc-500">
@@ -190,7 +190,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Seletor mobile */}
-        <div className="flex gap-2 overflow-x-auto pb-2 lg:hidden">
+        <div className="mb-6 flex shrink-0 gap-2 overflow-x-auto pb-1 lg:hidden">
           {SECTIONS.map((s) => {
             const Icon = s.icon;
             const isActive = active === s.id;
@@ -211,6 +211,8 @@ export default function SettingsPage() {
             );
           })}
         </div>
+
+        <div className="min-h-0 flex-1 overflow-y-auto pb-24 [scrollbar-width:thin] [scrollbar-color:rgba(249,115,22,0.45)_transparent]">
 
         {active === 'store' && (
           <SettingsCard icon={<Store className="h-5 w-5" />} title="Loja" description="Informações gerais da sua vitrine.">
@@ -604,6 +606,7 @@ export default function SettingsPage() {
             />
           </SettingsCard>
         )}
+        </div>
       </div>
     </div>
   );

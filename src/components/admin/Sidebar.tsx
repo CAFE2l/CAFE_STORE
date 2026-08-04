@@ -27,7 +27,7 @@ export default function Sidebar({ collapsed, onToggle }: { collapsed?: boolean; 
   const path = usePathname()
 
   return (
-    <aside className={`sticky top-0 z-20 flex h-screen shrink-0 flex-col border-r border-white/10 bg-black/60 p-3 backdrop-blur-xl transition-all duration-300 ${collapsed ? 'w-[86px]' : 'w-[292px]'}`}>
+    <aside className={`z-20 flex h-full min-h-0 shrink-0 flex-col border-r border-white/10 bg-black/60 p-3 backdrop-blur-xl transition-all duration-300 ${collapsed ? 'w-[86px]' : 'w-[292px]'}`}>
       <div className="shrink-0">
         <div className="flex min-h-[62px] items-center justify-between rounded-xl border border-white/10 bg-white/[0.03] p-2.5">
           <div className="flex items-center gap-3">

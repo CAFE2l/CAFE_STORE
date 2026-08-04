@@ -639,7 +639,7 @@ export function FeedbacksClient() {
           <Link href="/" className="group flex items-center gap-3">
             <div className="relative flex size-11 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-brand/25 to-brand/5 ring-1 ring-brand/25 shadow-led-brand transition-all duration-500 group-hover:scale-105 group-hover:ring-brand/50">
               <Image
-                src="/favicon.png"
+                src="/images/favicon.png"
                 alt="CAFÉ STORE"
                 width={40}
                 height={40}
