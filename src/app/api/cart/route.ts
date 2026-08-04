@@ -104,6 +104,9 @@ export async function GET() {
   });
 }
 
+const MAX_CART_ITEMS = 50;
+const MAX_CART_PAYLOAD_BYTES = 64 * 1024; // 64 KB
+
 export async function POST(request: Request) {
   const session = await auth();
 
@@ -115,11 +118,20 @@ export async function POST(request: Request) {
     return Response.json({ success: false, error: 'Banco nao configurado.' }, { status: 503 });
   }
 
+  const contentLength = Number(request.headers.get('content-length') ?? 0);
+  if (contentLength > MAX_CART_PAYLOAD_BYTES) {
+    return Response.json({ success: false, error: 'Payload muito grande.' }, { status: 413 });
+  }
+
   const body: unknown = await request.json();
   const items = (body as { items?: unknown[] })?.items;
 
   if (!Array.isArray(items)) {
     return Response.json({ success: false, error: 'Dados invalidos.' }, { status: 400 });
+  }
+
+  if (items.length > MAX_CART_ITEMS) {
+    return Response.json({ success: false, error: 'Carrinho excede o limite de itens.' }, { status: 400 });
   }
 
   const canonicalItems = await canonicalizeCartItems(items);

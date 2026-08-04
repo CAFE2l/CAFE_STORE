@@ -3,7 +3,7 @@ import { v2 as cloudinary } from 'cloudinary';
 import { randomUUID } from 'node:crypto';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { auth } from '@/lib/auth';
+import { requireAdmin } from '@/lib/admin';
 
 export const runtime = 'nodejs';
 
@@ -68,9 +68,9 @@ async function uploadToPublicFolder(buffer: Buffer, extension: string) {
 }
 
 export async function POST(request: Request) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return NextResponse.json({ success: false, error: 'Nao autenticado.' }, { status: 401 });
+  const session = await requireAdmin();
+  if (!session) {
+    return NextResponse.json({ success: false, error: 'Acesso negado.' }, { status: 403 });
   }
 
   const formData = await request.formData();

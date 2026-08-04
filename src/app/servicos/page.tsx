@@ -289,6 +289,8 @@ export default function ServicesPage() {
             <a
               key={project.name}
               href={project.href}
+              target="_blank"
+              rel="noopener noreferrer"
               className="group flex flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.045] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-brand/35 hover:shadow-[0_0_34px_rgba(249,115,22,0.12)]"
             >
               {/* Área da imagem */}
@@ -352,7 +354,6 @@ export default function ServicesPage() {
 
           <div className="grid gap-4">
             {/* Testimonials dynamically loaded from admin highlights */}
-            {/* @ts-ignore */}
             <TestimonialsSection />
           </div>
         </div>

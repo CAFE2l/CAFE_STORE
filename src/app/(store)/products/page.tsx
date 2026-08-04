@@ -12,18 +12,18 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic';
 
 type ProductsPageProps = {
-  searchParams: Promise<{
+  searchParams: {
     category?: string;
     q?: string;
     sort?: string;
     page?: string;
-  }>;
+  };
 };
 
 const PER_PAGE = 12;
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
-  const params = await searchParams;
+  const params = searchParams;
   const page = Number(params.page) || 1;
 
   const session = await auth();
