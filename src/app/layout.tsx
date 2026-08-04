@@ -1,27 +1,9 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono, Playfair_Display } from "next/font/google";
 import Script from "next/script";
 import type { ReactNode } from "react";
 import GlobalErrorLogger from "@/components/ui/GlobalErrorLogger";
 import "react-phone-number-input/style.css";
 import "./globals.css";
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-});
-
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  variable: "--font-playfair",
-  preload: false,
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-jetbrains-mono",
-  preload: false,
-});
 
 export const metadata: Metadata = {
   title: "CAFÉ STORE",
@@ -43,7 +25,7 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`${inter.variable} ${playfair.variable} ${jetbrainsMono.variable}`}
+      className="font-sans"
     >
       <body>
         {children}

@@ -187,6 +187,8 @@ export function OrdersPageClient() {
   const [detailsOrder, setDetailsOrder] = useState<UserOrder | null>(null);
   const [deleteOrder, setDeleteOrder] = useState<UserOrder | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [cancelOrder, setCancelOrder] = useState<UserOrder | null>(null);
+  const [cancelling, setCancelling] = useState(false);
   const [toast, setToast] = useState('');
 
   const load = useCallback(async (nextCursor?: string | null) => {
@@ -228,6 +230,33 @@ export function OrdersPageClient() {
       setToast('Nao foi possivel remover o pedido agora.');
     } finally {
       setDeleting(false);
+      setTimeout(() => setToast(''), 3200);
+    }
+  }
+
+  async function confirmCancel() {
+    if (!cancelOrder) return;
+    setCancelling(true);
+    try {
+      const response = await fetch(`/api/user/orders/${cancelOrder.id}`, { method: 'PATCH' });
+      const json = await response.json().catch(() => null);
+      if (!response.ok) {
+        setToast(json?.error ?? 'Nao foi possivel cancelar o pedido.');
+        return;
+      }
+      setOrders((current) => {
+        const updated = current.map((order) =>
+          order.id === cancelOrder.id ? { ...order, status: 'cancelado' as OrderStatus } : order,
+        );
+        if (status === 'todos' || status === 'cancelado') return updated;
+        return updated.filter((order) => order.id !== cancelOrder.id);
+      });
+      setCancelOrder(null);
+      setToast('Pedido cancelado');
+    } catch {
+      setToast('Nao foi possivel cancelar o pedido agora.');
+    } finally {
+      setCancelling(false);
       setTimeout(() => setToast(''), 3200);
     }
   }
@@ -343,14 +372,43 @@ export function OrdersPageClient() {
                     <Eye className="size-4" />
                     Ver detalhes
                   </Link>
-                  <button
-                    type="button"
-                    className="inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-red-400/70 transition hover:bg-red-500/10 hover:text-red-400"
-                    onClick={() => setDeleteOrder(order)}
-                  >
-                    <Trash2 className="size-4" />
-                    Deletar
-                  </button>
+
+                  {order.status === 'cancelado' ? (
+                    <button
+                      type="button"
+                      title="Apenas pedidos cancelados podem ser removidos do historico."
+                      className="inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-red-400/70 transition hover:bg-red-500/10 hover:text-red-400"
+                      onClick={() => setDeleteOrder(order)}
+                    >
+                      <Trash2 className="size-4" />
+                      Deletar
+                    </button>
+                  ) : order.status === 'aguardando_pagamento' || order.status === 'agendado' || order.status === 'em_processamento' ? (
+                    <button
+                      type="button"
+                      className="inline-flex items-center justify-center gap-2 rounded-lg border border-brand/30 bg-brand/10 px-3 py-2 text-sm font-semibold text-brand transition hover:border-brand hover:bg-brand/15"
+                      onClick={() => setCancelOrder(order)}
+                    >
+                      <X className="size-4" />
+                      Cancelar pedido
+                    </button>
+                  ) : order.status === 'entregue' ? (
+                    <span
+                      className="inline-flex items-center justify-center gap-2 rounded-lg border border-green-500/25 bg-green-500/10 px-3 py-2 text-sm font-semibold text-green-400"
+                      title="Este pedido foi concluido e mantido no historico por seguranca."
+                    >
+                      <Check className="size-4" />
+                      Historico finalizado
+                    </span>
+                  ) : order.status === 'enviado' ? (
+                    <span
+                      className="inline-flex items-center justify-center gap-2 rounded-lg border border-sky-500/25 bg-sky-500/10 px-3 py-2 text-sm font-semibold text-sky-400"
+                      title="Nao e possivel cancelar um pedido que ja foi despachado."
+                    >
+                      <Package className="size-4" />
+                      Em transito
+                    </span>
+                  ) : null}
                 </div>
               </motion.article>
             );
@@ -453,6 +511,35 @@ export function OrdersPageClient() {
                 <button type="button" className="inline-flex items-center justify-center gap-2 rounded-xl bg-red-500 px-4 py-2 text-sm font-bold text-white transition hover:brightness-90 disabled:cursor-not-allowed disabled:opacity-60" onClick={() => void confirmDelete()} disabled={deleting}>
                   {deleting ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
                   Sim, remover
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {cancelOrder ? (
+          <motion.div className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4 backdrop-blur" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} role="dialog" aria-modal="true">
+            <motion.div className="w-full max-w-md rounded-[20px] border border-brand/25 bg-[#111111] p-6 shadow-2xl" initial={{ opacity: 0, scale: 0.95, y: 12 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 12 }}>
+              <div className="flex items-start gap-3">
+                <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-brand/10 text-brand">
+                  <X className="size-5" />
+                </span>
+                <div>
+                  <h3 className="text-lg font-bold text-white">Cancelar pedido?</h3>
+                  <p className="mt-2 text-sm leading-6 text-white/55">
+                    Deseja cancelar o pedido #{cancelOrder.numero}? Esta acao nao pode ser desfeita e o suporte sera notificado automaticamente.
+                  </p>
+                </div>
+              </div>
+              <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                <button type="button" className="rounded-xl border border-white/[0.08] px-4 py-2 text-sm font-semibold text-white/70 transition hover:bg-white/[0.06] hover:text-white" onClick={() => setCancelOrder(null)} disabled={cancelling}>
+                  Voltar
+                </button>
+                <button type="button" className="inline-flex items-center justify-center gap-2 rounded-xl bg-red-500 px-4 py-2 text-sm font-bold text-white transition hover:brightness-90 disabled:cursor-not-allowed disabled:opacity-60" onClick={() => void confirmCancel()} disabled={cancelling}>
+                  {cancelling ? <Loader2 className="size-4 animate-spin" /> : <X className="size-4" />}
+                  Sim, cancelar pedido
                 </button>
               </div>
             </motion.div>
