@@ -11,7 +11,9 @@ export function CartSync() {
 
   useEffect(() => {
     if (session?.user?.id) {
-      fetchFromBackend(true);
+      // The server is authoritative for signed-in carts. Merging here used to
+      // resurrect entries that had just been removed in another tab/session.
+      fetchFromBackend(false);
     }
   }, [session?.user?.id, fetchFromBackend]);
 

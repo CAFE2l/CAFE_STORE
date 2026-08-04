@@ -16,6 +16,7 @@ type CartState = {
   count: number;
   cartToastItem: CartToastItem | null;
   lastAddedAt: number;
+  revision: number;
   addItem: (item: CartItem) => void;
   showCartToast: (item: CartToastItem) => void;
   clearCartToast: () => void;
@@ -72,7 +73,8 @@ export const useCartStore = create<CartState>()(
       count: 0,
       cartToastItem: null,
       lastAddedAt: 0,
-      addItem: (item) =>
+      revision: 0,
+      addItem: (item) => {
         set((state) => {
           const existingItem = state.items.find((cartItem) => cartItem.id === item.id);
           const items = existingItem
@@ -94,56 +96,73 @@ export const useCartStore = create<CartState>()(
               price: item.price,
             },
             lastAddedAt: Date.now(),
+            revision: state.revision + 1,
             ...calculateTotals(items),
           };
-        }),
+        });
+        void get().syncWithBackend();
+      },
       showCartToast: (item) => set({ cartToastItem: item, lastAddedAt: Date.now() }),
       clearCartToast: () => set({ cartToastItem: null }),
-      removeItem: (id) =>
+      removeItem: (id) => {
         set((state) => {
           const items = state.items.filter((item) => item.id !== id);
-          const next = { items, ...calculateTotals(items) };
-          // Persist removal to the server so it doesn't reappear on reload
-          setTimeout(() => get().syncWithBackend(), 0);
-          return next;
-        }),
-      updateQty: (id, quantity) =>
+          return { items, revision: state.revision + 1, ...calculateTotals(items) };
+        });
+        void get().syncWithBackend();
+      },
+      updateQty: (id, quantity) => {
         set((state) => {
           const nextQuantity = Math.max(1, quantity);
           const items = state.items.map((item) =>
             item.id === id ? { ...item, quantity: nextQuantity } : item,
           );
-          const next = { items, ...calculateTotals(items) };
-          // Persist quantity change to the server
-          setTimeout(() => get().syncWithBackend(), 0);
-          return next;
-        }),
+          return { items, revision: state.revision + 1, ...calculateTotals(items) };
+        });
+        void get().syncWithBackend();
+      },
       clearCart: () => {
-        set({ items: [], total: 0, count: 0 });
-        get().syncWithBackend();
+        set((state) => ({ items: [], total: 0, count: 0, revision: state.revision + 1 }));
+        void get().syncWithBackend();
       },
       syncWithBackend: async () => {
+        const revision = get().revision;
+        const items = get().items;
         try {
-          await fetch('/api/cart', {
+          const response = await fetch('/api/cart', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ items: get().items }),
+            body: JSON.stringify({ items }),
           });
+          if (!response.ok || get().revision !== revision) return;
+          const data = await response.json();
+          const canonicalItems = (data.data?.items ?? []) as CartItem[];
+          set({ items: canonicalItems, ...calculateTotals(canonicalItems) });
         } catch {
           // silent fail
         }
       },
       fetchFromBackend: async (merge = true) => {
+        const revision = get().revision;
         try {
           const res = await fetch('/api/cart');
           if (!res.ok) return;
           const data = await res.json();
           const serverItems = (data.data?.items ?? []) as CartItem[];
 
-          if (!merge || serverItems.length === 0) {
-            if (serverItems.length > 0) {
-              set({ items: serverItems, ...calculateTotals(serverItems) });
-            }
+          // A user action while this request was in flight wins over its stale
+          // response. This is what prevents a removed item from coming back.
+          if (get().revision !== revision) {
+            void get().syncWithBackend();
+            return;
+          }
+
+          if (!merge) {
+            set({ items: serverItems, ...calculateTotals(serverItems) });
+            return;
+          }
+
+          if (serverItems.length === 0) {
             return;
           }
 
